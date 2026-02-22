@@ -52,6 +52,12 @@
 	- [x] 6단계: 10라운드 데이터 입력 (`round_spawn_counts`, `round_enemy_health_multipliers`)
 	- [x] 6-1단계: RoundManager HUD UI 연결 (`Round/Alive/Status` 라벨)
 	- [x] 6-2단계: 실패 UI 액션 추가 (`Retry`, `Quit` 버튼)
+	- [x] 6-3단계: 라운드 60초 카운트다운 자동 전환 추가
+	- [x] 6-4단계: 조기 클리어 시 다음 라운드 버튼 노출/수동 전환
+	- [x] 6-5단계: UI 디버그 표시 override export 추가 (버튼/실패 액션)
+	- [x] 6-6단계: Round UI 스크립트 책임 분리 리팩터링 (`RoundManagerUI`/`RoundTopCenterUI`/`RoundFailActionsUI`)
+	- [x] 6-7단계: Debug override 단순화 (`Debug UI Override Enabled` 제거, `Debug Show`만 사용)
+	- [x] 6-8단계: 비즈니스 로직 분리용 디버그 강제 라운드 전환 컨트롤 추가 (`DebugRoundControls`)
 	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
 - [ ] Scripts 디렉토리 구조 정리
 	- [x] 1단계: 디렉토리 생성 (`enemies`, `enemies/ui`, `spawn`, `portals`, `round`, `debug`)
