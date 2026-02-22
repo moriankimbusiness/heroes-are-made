@@ -18,8 +18,6 @@ enum State {
 @export var enemy_group_name: StringName = &"enemy"
 @export_range(1, 999, 1) var fail_alive_enemy_threshold: int = 30
 @export_range(1.0, 300.0, 1.0) var round_duration_seconds: float = 60.0
-@export var enemy_spawn_controller_path: NodePath
-@export var spawn_timer_path: NodePath
 @export var auto_begin_wave_on_ready: bool = true
 
 var state: State = State.PREPARE
@@ -28,17 +26,20 @@ var alive_enemy_count: int = 0
 var remaining_round_seconds: float = 0.0
 var is_next_round_available: bool = false
 
-@onready var _enemy_spawn_controller: Node = get_node_or_null(enemy_spawn_controller_path)
-@onready var _spawn_timer: Timer = get_node_or_null(spawn_timer_path) as Timer
+var _enemy_spawn_controller: Node
+var _spawn_timer: Timer
+var _dependencies_configured: bool = false
+
+
+func configure_dependencies(enemy_spawn_controller: Node, spawn_timer: Timer) -> void:
+	_enemy_spawn_controller = enemy_spawn_controller
+	_spawn_timer = spawn_timer
+	_dependencies_configured = _enemy_spawn_controller != null and _spawn_timer != null
 
 
 func _ready() -> void:
-	if _enemy_spawn_controller == null:
-		push_error("RoundManager: enemy_spawn_controller_path is invalid.")
-		set_process(false)
-		return
-	if _spawn_timer == null:
-		push_error("RoundManager: spawn_timer_path is invalid.")
+	if not _dependencies_configured:
+		push_error("RoundManager: dependencies are not configured by RoundSystem.")
 		set_process(false)
 		return
 
@@ -168,6 +169,10 @@ func _can_advance_next_round_early() -> bool:
 
 func _is_final_round() -> bool:
 	return current_round >= _get_total_round_count()
+
+
+func get_total_round_count() -> int:
+	return _get_total_round_count()
 
 
 func _get_total_round_count() -> int:

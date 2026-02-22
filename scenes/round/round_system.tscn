@@ -1,5 +1,6 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cfax4dxuvrhrw"]
 
+[ext_resource type="Script" uid="uid://kaaspllnen1a" path="res://scripts/round/RoundSystem.gd" id="1_4mb6e"]
 [ext_resource type="Script" uid="uid://c6ifelmqypvhs" path="res://scripts/round/RoundManager.gd" id="1_a0jg5"]
 [ext_resource type="Script" uid="uid://cjd8qjvanhafh" path="res://scripts/round/ui/RoundManagerUI.gd" id="2_40f1n"]
 [ext_resource type="Script" uid="uid://o1mhotbk1bb4" path="res://scripts/round/ui/RoundTopCenterUI.gd" id="3_k37li"]
@@ -7,11 +8,10 @@
 [ext_resource type="Script" uid="uid://docnm2r2urxcu" path="res://scripts/debug/DebugRoundControls.gd" id="5_mqtq7"]
 
 [node name="RoundSystem" type="Node" unique_id=1945532616]
+script = ExtResource("1_4mb6e")
 
 [node name="RoundManager" type="Node" parent="." unique_id=960498918]
 script = ExtResource("1_a0jg5")
-enemy_spawn_controller_path = NodePath("../../EnemySpawnController")
-spawn_timer_path = NodePath("../../SpawnTimer")
 
 [node name="RoundHUD" type="CanvasLayer" parent="." unique_id=1130613858]
 script = ExtResource("2_40f1n")

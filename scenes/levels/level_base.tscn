@@ -32,6 +32,8 @@ portal_path = NodePath("../Portal")
 spawn_timer_path = NodePath("../SpawnTimer")
 
 [node name="RoundSystem" parent="." unique_id=1945532616 instance=ExtResource("5_scmn0")]
+enemy_spawn_controller_path = NodePath("../EnemySpawnController")
+spawn_timer_path = NodePath("../SpawnTimer")
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
 position = Vector2(635, 357)

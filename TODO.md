@@ -68,12 +68,15 @@
 	- [x] 4단계: `project.godot` 시작 씬을 `res://scenes/levels/level_01.tscn`으로 전환
 	- [x] 5단계: 성능/구조 리뷰 체크 (상속 기반 공통화, UI 이벤트 기반 구조 유지)
 	- [x] 6단계: Godot CLI 검증 통과 (`--headless --path . --quit`)
-- [x] Round 노드 씬 모듈화 (RoundSystem)
-	- [x] 1단계: `scenes/round/round_system.tscn` 생성 (`RoundManager`/`RoundHUD`/`DebugRoundControls` 포함)
-	- [x] 2단계: `scenes/levels/level_base.tscn`에서 Round 관련 노드를 `RoundSystem` 인스턴스로 치환
-	- [x] 3단계: `RoundManager` 외부 참조 NodePath 재연결 (`../../EnemySpawnController`, `../../SpawnTimer`)
-	- [x] 4단계: 성능/구조 리뷰 체크 (신규 `_process`/`_physics_process` 없음, UI 이벤트 기반 유지)
-	- [x] 5단계: Godot CLI 검증 통과 (`/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`)
+	- [x] Round 노드 씬 모듈화 (RoundSystem)
+		- [x] 1단계: `scenes/round/round_system.tscn` 생성 (`RoundManager`/`RoundHUD`/`DebugRoundControls` 포함)
+		- [x] 2단계: `scenes/levels/level_base.tscn`에서 Round 관련 노드를 `RoundSystem` 인스턴스로 치환
+		- [x] 3단계: `RoundManager` 외부 참조 NodePath 재연결 (`../../EnemySpawnController`, `../../SpawnTimer`)
+		- [x] 4단계: 성능/구조 리뷰 체크 (신규 `_process`/`_physics_process` 없음, UI 이벤트 기반 유지)
+		- [x] 5단계: Godot CLI 검증 통과 (`/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`)
+		- [x] 6단계: 루트 주입 기반 리팩터링 (`../../` 제거, `RoundSystem.gd`에서 `RoundManager.configure_dependencies()` 호출)
+		- [x] 7단계: 성능/구조 리뷰 체크 (추가 프레임 루프 없음, 이벤트 기반 UI 유지, 외부 의존성은 루트 인스턴스 export로 주입)
+		- [x] 8단계: Godot CLI 검증 (`--headless --path . --quit` 통과, `--scene level_02`는 WSL `socket failed 1` 후 PowerShell fallback 통과)
 - [ ] Scripts 디렉토리 구조 정리
 	- [x] 1단계: 디렉토리 생성 (`enemies`, `enemies/ui`, `spawn`, `portals`, `round`, `debug`)
 	- [x] 2단계: 스크립트/uid 파일 이동

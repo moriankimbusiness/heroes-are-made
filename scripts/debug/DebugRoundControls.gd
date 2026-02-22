@@ -45,10 +45,8 @@ func _on_force_next_round_button_pressed() -> void:
 
 
 func _get_total_round_count() -> int:
-	var controller_path: NodePath = _round_manager.get("enemy_spawn_controller_path") as NodePath
-	var spawn_controller: Node = _round_manager.get_node_or_null(controller_path)
-	if spawn_controller != null and spawn_controller.has_method("get_configured_round_count"):
-		return maxi(1, int(spawn_controller.call("get_configured_round_count")))
+	if _round_manager.has_method("get_total_round_count"):
+		return maxi(1, int(_round_manager.call("get_total_round_count")))
 	return maxi(1, int(_round_manager.get("current_round")))
 
 
