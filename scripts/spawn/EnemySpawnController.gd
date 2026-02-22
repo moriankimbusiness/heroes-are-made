@@ -2,6 +2,7 @@ extends Node
 
 @export var enemy_scene: PackedScene
 @export var round_enemy_scenes: Array[PackedScene] = []
+@export var round_spawn_counts: Array[int] = []
 @export var round_enemy_health_multipliers: Array[float] = []
 @export var use_formula_after_table: bool = true
 @export_range(0.0, 1.0, 0.001) var formula_growth_rate: float = 0.08
@@ -92,6 +93,7 @@ func set_round(round_value: int) -> void:
 
 func begin_round_spawn() -> void:
 	_spawned_count = 0
+	max_spawn_count = _get_spawn_count_for_current_round()
 	if _spawn_timer != null:
 		_spawn_timer.start()
 
@@ -108,6 +110,21 @@ func _get_enemy_scene_for_current_round() -> PackedScene:
 		if candidate != null:
 			return candidate
 	return enemy_scene
+
+
+func _get_spawn_count_for_current_round() -> int:
+	var round_index: int = current_round - 1
+	if round_index >= 0 and round_index < round_spawn_counts.size():
+		var candidate: int = round_spawn_counts[round_index]
+		if candidate > 0:
+			return candidate
+
+	if round_spawn_counts.size() > 0:
+		var fallback: int = round_spawn_counts[round_spawn_counts.size() - 1]
+		if fallback > 0:
+			return fallback
+
+	return maxi(1, max_spawn_count)
 
 
 func _apply_round_health_multiplier(enemy: Node) -> void:

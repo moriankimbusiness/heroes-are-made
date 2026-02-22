@@ -49,7 +49,7 @@
 	- [x] 3단계: 웨이브 시작/종료 제어 (`set_round`, `begin_wave`, `stop_wave`)
 	- [x] 4단계: 시그널 추가 (`round_started`, `round_cleared`, `game_failed`, `all_rounds_cleared`)
 	- [x] 5단계: `level.tscn` 연결 (`SpawnTimer.autostart=false`, NodePath 연결)
-	- [ ] 6단계: 10라운드 데이터 입력 (`round_spawn_counts`, `round_enemy_health_multipliers`)
+	- [x] 6단계: 10라운드 데이터 입력 (`round_spawn_counts`, `round_enemy_health_multipliers`)
 	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
 - [ ] Scripts 디렉토리 구조 정리
 	- [x] 1단계: 디렉토리 생성 (`enemies`, `enemies/ui`, `spawn`, `portals`, `round`, `debug`)
