@@ -103,6 +103,22 @@ func stop_spawn() -> void:
 		_spawn_timer.stop()
 
 
+func is_round_spawn_finished() -> bool:
+	if _spawned_count < max_spawn_count:
+		return false
+	if _spawn_timer != null and not _spawn_timer.is_stopped():
+		return false
+	return true
+
+
+func get_configured_round_count() -> int:
+	var configured_round_count: int = 1
+	configured_round_count = maxi(configured_round_count, round_enemy_scenes.size())
+	configured_round_count = maxi(configured_round_count, round_spawn_counts.size())
+	configured_round_count = maxi(configured_round_count, round_enemy_health_multipliers.size())
+	return configured_round_count
+
+
 func _get_enemy_scene_for_current_round() -> PackedScene:
 	var round_index: int = current_round - 1
 	if round_index >= 0 and round_index < round_enemy_scenes.size():

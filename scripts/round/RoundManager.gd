@@ -4,6 +4,8 @@ signal round_started(round: int)
 signal round_cleared(round: int)
 signal game_failed(alive_enemy_count: int, threshold: int)
 signal all_rounds_cleared()
+signal round_timer_updated(remaining_seconds: float)
+signal next_round_available_changed(is_available: bool)
 
 enum State {
 	PREPARE,
@@ -15,6 +17,7 @@ enum State {
 
 @export var enemy_group_name: StringName = &"enemy"
 @export_range(1, 999, 1) var fail_alive_enemy_threshold: int = 30
+@export_range(1.0, 300.0, 1.0) var round_duration_seconds: float = 60.0
 @export var enemy_spawn_controller_path: NodePath
 @export var spawn_timer_path: NodePath
 @export var auto_begin_wave_on_ready: bool = true
@@ -22,6 +25,8 @@ enum State {
 var state: State = State.PREPARE
 var current_round: int = 1
 var alive_enemy_count: int = 0
+var remaining_round_seconds: float = 0.0
+var is_next_round_available: bool = false
 
 @onready var _enemy_spawn_controller: Node = get_node_or_null(enemy_spawn_controller_path)
 @onready var _spawn_timer: Timer = get_node_or_null(spawn_timer_path) as Timer
@@ -55,6 +60,21 @@ func _process(_delta: float) -> void:
 		return
 	if alive_enemy_count >= fail_alive_enemy_threshold:
 		_fail_game()
+		return
+
+	if state != State.WAVE_ACTIVE:
+		return
+
+	remaining_round_seconds = maxf(0.0, remaining_round_seconds - _delta)
+	round_timer_updated.emit(remaining_round_seconds)
+
+	var should_show_next_round: bool = _can_advance_next_round_early()
+	if should_show_next_round != is_next_round_available:
+		is_next_round_available = should_show_next_round
+		next_round_available_changed.emit(is_next_round_available)
+
+	if remaining_round_seconds <= 0.0:
+		_advance_to_next_round()
 
 
 func set_round(round_value: int) -> void:
@@ -67,6 +87,10 @@ func begin_wave() -> void:
 	if state == State.FAILED or state == State.CLEARED:
 		return
 	state = State.WAVE_ACTIVE
+	set_round(current_round)
+	remaining_round_seconds = round_duration_seconds
+	round_timer_updated.emit(remaining_round_seconds)
+	_set_next_round_available(false)
 	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_method("begin_round_spawn"):
 		_enemy_spawn_controller.call("begin_round_spawn")
 	elif _spawn_timer != null and _spawn_timer.is_stopped():
@@ -79,13 +103,37 @@ func stop_wave() -> void:
 		return
 	_stop_wave()
 	state = State.INTERMISSION
+	_set_next_round_available(false)
 	round_cleared.emit(current_round)
+
+
+func request_next_round() -> void:
+	if state != State.WAVE_ACTIVE:
+		return
+	if not is_next_round_available:
+		return
+	_advance_to_next_round()
 
 
 func _fail_game() -> void:
 	state = State.FAILED
 	_stop_wave()
+	_set_next_round_available(false)
 	game_failed.emit(alive_enemy_count, fail_alive_enemy_threshold)
+
+
+func _advance_to_next_round() -> void:
+	if _is_final_round():
+		state = State.CLEARED
+		_stop_wave()
+		_set_next_round_available(false)
+		all_rounds_cleared.emit()
+		return
+
+	_stop_wave()
+	_set_next_round_available(false)
+	current_round += 1
+	begin_wave()
 
 
 func _stop_wave() -> void:
@@ -104,3 +152,32 @@ func _count_alive_enemies() -> int:
 			continue
 		count += 1
 	return count
+
+
+func _can_advance_next_round_early() -> bool:
+	if remaining_round_seconds <= 0.0:
+		return false
+	if alive_enemy_count > 0:
+		return false
+	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_method("is_round_spawn_finished"):
+		return bool(_enemy_spawn_controller.call("is_round_spawn_finished"))
+	if _spawn_timer != null and not _spawn_timer.is_stopped():
+		return false
+	return true
+
+
+func _is_final_round() -> bool:
+	return current_round >= _get_total_round_count()
+
+
+func _get_total_round_count() -> int:
+	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_method("get_configured_round_count"):
+		return maxi(1, int(_enemy_spawn_controller.call("get_configured_round_count")))
+	return maxi(1, current_round)
+
+
+func _set_next_round_available(value: bool) -> void:
+	if is_next_round_available == value:
+		return
+	is_next_round_available = value
+	next_round_available_changed.emit(is_next_round_available)
