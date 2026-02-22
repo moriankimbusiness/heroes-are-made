@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://cy3xax8p7da1h"]
+
+[ext_resource type="Script" path="res://scripts/Portal.gd" id="1_6brqs"]
+[ext_resource type="Texture2D" uid="uid://c3pdycvpju0mb" path="res://assets/sprites/objects/portal.png" id="2_1ffj6"]
+
+[node name="Portal" type="Node2D" unique_id=665752176]
+script = ExtResource("1_6brqs")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1878975309]
+position = Vector2(0, -1)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("2_1ffj6")
+hframes = 8
+vframes = 6
+frame = 8
