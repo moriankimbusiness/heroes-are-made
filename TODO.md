@@ -61,6 +61,13 @@
 	- [x] 6-9단계: `RoundTopCenterUI` 다음 라운드 버튼 가시성 갱신 이벤트 기반 전환 (`_process` 제거)
 	- [x] 6-10단계: `DebugRoundControls.gd` Resource UID 재생성 및 `level.tscn` ext_resource 정합성 복구
 	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
+- [x] Level Round 재사용 구조화 (Base 상속)
+	- [x] 1단계: `scenes/levels/level_base.tscn` 생성 (기존 `scenes/level.tscn` 이관)
+	- [x] 2단계: `scenes/levels/level_01.tscn` 상속 씬 생성
+	- [x] 3단계: `scenes/levels/level_02.tscn` 상속 씬 생성 + 레벨별 라운드 값 오버라이드
+	- [x] 4단계: `project.godot` 시작 씬을 `res://scenes/levels/level_01.tscn`으로 전환
+	- [x] 5단계: 성능/구조 리뷰 체크 (상속 기반 공통화, UI 이벤트 기반 구조 유지)
+	- [x] 6단계: Godot CLI 검증 통과 (`--headless --path . --quit`)
 - [ ] Scripts 디렉토리 구조 정리
 	- [x] 1단계: 디렉토리 생성 (`enemies`, `enemies/ui`, `spawn`, `portals`, `round`, `debug`)
 	- [x] 2단계: 스크립트/uid 파일 이동
@@ -78,6 +85,7 @@
 	- [x] `AGENTS.md`에 Performance & Architecture Review Gate 강화 반영
 	- [x] `docs/review/godot-performance-checklist.md` 생성
 	- [x] 체크리스트 항목(프레임 루프/핫패스/에디터 권한/검증 로그) 표준화
+	- [x] `AGENTS.md`에 Godot CLI PowerShell fallback 검증 절차 추가 (`socket failed 1` 대응)
 - [ ] 주간 목표 2
 
 주간 폴더: `docs/todo/2026-02-4w/`

@@ -103,14 +103,20 @@ For every gameplay/UI/script change, run a lightweight performance/architecture 
   - `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
 - If needed, use explicit project path:
   - `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path /mnt/d/04.GameWorkSpaces/00.GodotProjects/heroes-are-made --quit`
+- Fallback command (Windows PowerShell via WSL; use when WSL direct launch fails with `socket failed 1`):
+  - `powershell.exe -NoProfile -Command "& 'C:\Godot_v4.6.1\Godot_v4.6.1-stable_win64_console.exe' --headless --path 'D:\04.GameWorkSpaces\00.GodotProjects\heroes-are-made' --quit"`
+- Fallback command for specific scene validation:
+  - `powershell.exe -NoProfile -Command "& 'C:\Godot_v4.6.1\Godot_v4.6.1-stable_win64_console.exe' --headless --path 'D:\04.GameWorkSpaces\00.GodotProjects\heroes-are-made' --scene 'res://scenes/levels/level_02.tscn' --quit"`
 - Record validation outcome in the response:
   - pass/fail
   - command used
   - key error line(s) if failed
 - If CLI execution is blocked by known WSL limitation (`UtilBindVsockAnyPort ... socket failed 1`), do not skip silently:
-  - report the attempted command and the blocking error
+  - report the 1st attempted WSL command and the blocking error
+  - retry with the PowerShell fallback command above and report pass/fail
+  - if both attempts fail, mark as `CLI validation blocked`
   - run and report alternative regression checks possible in current environment
-  - keep the task marked as "CLI validation blocked" until executable environment is available
+  - keep the task marked as `CLI validation blocked` until executable environment is available
 
 ## Response Format (Mandatory)
 
