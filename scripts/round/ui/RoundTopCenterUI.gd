@@ -2,7 +2,15 @@ extends Control
 
 @export var round_countdown_label_path: NodePath
 @export var next_round_button_path: NodePath
-@export var debug_show_next_round_button: bool = false
+var _debug_show_next_round_button: bool = false
+@export var debug_show_next_round_button: bool:
+	set(value):
+		if _debug_show_next_round_button == value:
+			return
+		_debug_show_next_round_button = value
+		_apply_visibility()
+	get:
+		return _debug_show_next_round_button
 
 @onready var _round_countdown_label: Label = get_node_or_null(round_countdown_label_path) as Label
 @onready var _next_round_button: Button = get_node_or_null(next_round_button_path) as Button
@@ -14,15 +22,9 @@ var _next_round_button_auto_visible: bool = false
 func _ready() -> void:
 	if _round_countdown_label == null or _next_round_button == null:
 		push_error("RoundTopCenterUI: node paths are invalid.")
-		set_process(false)
 		return
 	_next_round_button.pressed.connect(_on_next_round_button_pressed)
 	_update_round_countdown_label()
-	_apply_visibility()
-	set_process(true)
-
-
-func _process(_delta: float) -> void:
 	_apply_visibility()
 
 

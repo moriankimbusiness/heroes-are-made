@@ -68,9 +68,33 @@ Before implementing any new feature, confirm these design constraints first.
 4. Definition of done
 - Feature behavior works.
 - Architecture is validated (responsibility split and inheritance reflection).
+- Performance structure is reviewed (frame-loop necessity, event-driven alternatives, hot-path cost).
 - `TODO.md` is updated.
 - Regression check points are documented.
 - Godot CLI validation is executed and result is recorded.
+
+## Godot Performance & Architecture Review Gate (Mandatory)
+
+For every gameplay/UI/script change, run a lightweight performance/architecture review before completion.
+
+### Required checks
+
+- Avoid per-frame updates by default:
+  - `_process` / `_physics_process` are allowed only when frame-by-frame behavior is truly required.
+  - If event/signal-based update is possible, prefer event/signal-based update.
+- Keep UI event-driven:
+  - UI visibility/text/state updates should be triggered by signals or explicit state-change methods.
+- Avoid high-cost work in frame loops:
+  - No repeated `get_node*`, resource loading, large array rebuilds, or avoidable string-heavy formatting inside frame callbacks.
+- Preserve editor-authored authority:
+  - Do not override Inspector-authored values at runtime unless explicitly requested.
+
+### Completion criteria
+
+- Feature works functionally.
+- Performance/architecture checklist reviewed and recorded.
+- Godot CLI validation executed and result recorded.
+- `TODO.md` updated with review and validation outcome.
 
 ## Godot CLI Validation (Mandatory)
 
