@@ -36,6 +36,7 @@
 	- [x] 2-1단계: `EnemySpawnController`에 `round_enemy_health_multipliers` export 추가
 	- [x] 2-2단계: 스폰 직후 `base_max_health * round_multiplier` 적용
 	- [x] 2-3단계: 라운드 배율 배열 fallback 규칙(범위 밖: 마지막 값 또는 1.0) 적용
+	- [x] 2-4단계: 무한모드 대비 하이브리드 배율(테이블 이후 공식 적용) 추가
 	- [ ] 3단계: 피격/사망 경계값 동작 확인
 	- [ ] 3-1단계: death 후 alive 카운트 제외 검증 (`auto_free_on_death_end=false` 케이스 포함)
 - [ ] HealthBar 구조 리팩터링 검증

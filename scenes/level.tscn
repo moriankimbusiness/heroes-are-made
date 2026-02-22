@@ -25,10 +25,15 @@ autostart = true
 script = ExtResource("2_7j7ff")
 enemy_scene = ExtResource("1_jfytv")
 round_enemy_scenes = Array[PackedScene]([ExtResource("1_jfytv"), ExtResource("4_h5f3e")])
+round_enemy_health_multipliers = Array[float]([1.0, 1.1, 1.21, 1.33, 1.46, 1.61, 1.77, 1.95, 2.14, 2.36])
+use_formula_after_table = true
+formula_growth_rate = 0.08
+formula_softcap_rate = 0.015
+formula_softcap_power = 0.6
 path2d_path = NodePath("../Path2D")
 portal_path = NodePath("../Portal")
 spawn_timer_path = NodePath("../SpawnTimer")
-current_round = 2
+current_round = 1
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
 position = Vector2(576, 336)

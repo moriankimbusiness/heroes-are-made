@@ -3,6 +3,10 @@ extends Node
 @export var enemy_scene: PackedScene
 @export var round_enemy_scenes: Array[PackedScene] = []
 @export var round_enemy_health_multipliers: Array[float] = []
+@export var use_formula_after_table: bool = true
+@export_range(0.0, 1.0, 0.001) var formula_growth_rate: float = 0.08
+@export_range(0.0, 1.0, 0.001) var formula_softcap_rate: float = 0.015
+@export_range(0.0, 3.0, 0.01) var formula_softcap_power: float = 0.6
 @export var path2d_path: NodePath
 @export var portal_path: NodePath
 @export var spawn_timer_path: NodePath
@@ -116,12 +120,34 @@ func _get_health_multiplier_for_current_round() -> float:
 		if candidate > 0.0:
 			return candidate
 
+	if use_formula_after_table:
+		return _get_formula_health_multiplier_for_current_round()
+
 	if round_enemy_health_multipliers.size() > 0:
 		var fallback: float = round_enemy_health_multipliers[round_enemy_health_multipliers.size() - 1]
 		if fallback > 0.0:
 			return fallback
 
 	return 1.0
+
+
+func _get_formula_health_multiplier_for_current_round() -> float:
+	var table_size: int = round_enemy_health_multipliers.size()
+	var formula_round: int = max(1, current_round - table_size)
+
+	var base_multiplier: float = 1.0
+	if table_size > 0:
+		var table_last: float = round_enemy_health_multipliers[table_size - 1]
+		if table_last > 0.0:
+			base_multiplier = table_last
+
+	var growth_factor: float = pow(1.0 + formula_growth_rate, formula_round)
+	var softcap_base: float = maxf(1.0, 1.0 + formula_softcap_rate * float(formula_round))
+	var softcap_factor: float = pow(softcap_base, formula_softcap_power)
+	if softcap_factor <= 0.0:
+		softcap_factor = 1.0
+
+	return maxf(1.0, base_multiplier * growth_factor / softcap_factor)
 
 
 func _attach_enemy_to_path(enemy: Node2D) -> void:
