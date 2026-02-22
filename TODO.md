@@ -44,8 +44,8 @@
 	- [x] `enemy_orc.tscn` / `enemy_orc2.tscn` 상속 반영 확인
 	- [ ] 체력 임계색(초록/노랑/빨강) 회귀 확인
 - [ ] RoundManager v1 구현
-	- [ ] 1단계: `scripts/RoundManager.gd` 생성 (상태: PREPARE/WAVE_ACTIVE/INTERMISSION/FAILED/CLEARED)
-	- [ ] 2단계: 실패 조건 구현 (`alive_enemy_count >= 30` 즉시 실패)
+	- [x] 1단계: `scripts/round/RoundManager.gd` 생성 (상태: PREPARE/WAVE_ACTIVE/INTERMISSION/FAILED/CLEARED)
+	- [x] 2단계: 실패 조건 구현 (`alive_enemy_count >= 30` 즉시 실패)
 	- [ ] 3단계: 웨이브 시작/종료 제어 (`set_round`, `begin_wave`, `stop_wave`)
 	- [ ] 4단계: 시그널 추가 (`round_started`, `round_cleared`, `game_failed`, `all_rounds_cleared`)
 	- [ ] 5단계: `level.tscn` 연결 (`SpawnTimer.autostart=false`, NodePath 연결)

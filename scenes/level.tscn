@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://vhlaxs7p4jc0" path="res://scripts/debug/PathFollowDebug.gd" id="1_j1m2n"]
 [ext_resource type="PackedScene" uid="uid://dxy2tsd6es252" path="res://scenes/enemies/variants/enemy_orc.tscn" id="1_jfytv"]
 [ext_resource type="Script" uid="uid://cv7uu8u2bhiyl" path="res://scripts/spawn/EnemySpawnController.gd" id="2_7j7ff"]
+[ext_resource type="Script" path="res://scripts/round/RoundManager.gd" id="3_lf3o0"]
 [ext_resource type="PackedScene" uid="uid://cy3xax8p7da1h" path="res://scenes/portal.tscn" id="3_o2tba"]
 [ext_resource type="PackedScene" uid="uid://jg52hv41yh4p" path="res://scenes/enemies/variants/enemy_orc2.tscn" id="4_h5f3e"]
 
@@ -34,6 +35,11 @@ path2d_path = NodePath("../Path2D")
 portal_path = NodePath("../Portal")
 spawn_timer_path = NodePath("../SpawnTimer")
 current_round = 1
+
+[node name="RoundManager" type="Node" parent="." unique_id=960498918]
+script = ExtResource("3_lf3o0")
+enemy_spawn_controller_path = NodePath("../EnemySpawnController")
+spawn_timer_path = NodePath("../SpawnTimer")
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
 position = Vector2(576, 336)
