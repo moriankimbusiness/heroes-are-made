@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cy3xax8p7da1h"]
 
-[ext_resource type="Script" path="res://scripts/Portal.gd" id="1_6brqs"]
+[ext_resource type="Script" uid="uid://clx7rlyi3w8t1" path="res://scripts/portals/Portal.gd" id="1_6brqs"]
 [ext_resource type="Texture2D" uid="uid://c3pdycvpju0mb" path="res://assets/sprites/objects/portal.png" id="2_1ffj6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0"]

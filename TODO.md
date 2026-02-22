@@ -50,6 +50,10 @@
 	- [ ] 5단계: `level.tscn` 연결 (`SpawnTimer.autostart=false`, NodePath 연결)
 	- [ ] 6단계: 10라운드 데이터 입력 (`round_spawn_counts`, `round_enemy_health_multipliers`)
 	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
+- [ ] Scripts 디렉토리 구조 정리
+	- [x] 1단계: 디렉토리 생성 (`enemies`, `enemies/ui`, `spawn`, `portals`, `round`, `debug`)
+	- [x] 2단계: 스크립트/uid 파일 이동
+	- [x] 3단계: 씬 스크립트 참조 경로 자동 갱신/회귀 확인
 - [ ] Enemy 이동속도 변경
 	- [ ] 1단계: 경로 이동 Agent 속도 주입 경로 추가
 	- [ ] 2단계: Round별 이동속도 값 연결

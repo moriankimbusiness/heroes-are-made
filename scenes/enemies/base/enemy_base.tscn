@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://da3dlus5rcbvq"]
 
-[ext_resource type="Script" uid="uid://b33e8m40y8g32" path="res://scripts/Enemy.gd" id="1_md0e3"]
+[ext_resource type="Script" uid="uid://b33e8m40y8g32" path="res://scripts/enemies/Enemy.gd" id="1_md0e3"]
 [ext_resource type="Texture2D" uid="uid://momjdgwemgas" path="res://assets/sprites/enemies/Orc.png" id="2_4ra3w"]
-[ext_resource type="Script" path="res://scripts/EnemyHealthBar.gd" id="3_t4rps"]
+[ext_resource type="Script" uid="uid://vftdq5d1a6d0" path="res://scripts/enemies/ui/EnemyHealthBar.gd" id="3_t4rps"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2_0"]
 atlas = ExtResource("2_4ra3w")
@@ -294,6 +294,6 @@ offset_left = -11.0
 offset_top = -27.0
 offset_right = 11.0
 offset_bottom = -22.0
-script = ExtResource("3_t4rps")
 value = 100.0
 show_percentage = false
+script = ExtResource("3_t4rps")
