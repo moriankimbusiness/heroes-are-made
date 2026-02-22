@@ -3,10 +3,13 @@
 [ext_resource type="Script" uid="uid://vhlaxs7p4jc0" path="res://scripts/debug/PathFollowDebug.gd" id="1_j1m2n"]
 [ext_resource type="PackedScene" uid="uid://dxy2tsd6es252" path="res://scenes/enemies/variants/enemy_orc.tscn" id="1_jfytv"]
 [ext_resource type="Script" uid="uid://cv7uu8u2bhiyl" path="res://scripts/spawn/EnemySpawnController.gd" id="2_7j7ff"]
-[ext_resource type="Script" path="res://scripts/round/RoundManager.gd" id="3_lf3o0"]
+[ext_resource type="Script" uid="uid://c6ifelmqypvhs" path="res://scripts/round/RoundManager.gd" id="3_lf3o0"]
 [ext_resource type="PackedScene" uid="uid://cy3xax8p7da1h" path="res://scenes/portal.tscn" id="3_o2tba"]
 [ext_resource type="PackedScene" uid="uid://jg52hv41yh4p" path="res://scenes/enemies/variants/enemy_orc2.tscn" id="4_h5f3e"]
-[ext_resource type="Script" path="res://scripts/round/ui/RoundManagerUI.gd" id="5_wcogo"]
+[ext_resource type="Script" uid="uid://cjd8qjvanhafh" path="res://scripts/round/ui/RoundManagerUI.gd" id="5_wcogo"]
+[ext_resource type="Script" uid="uid://o1mhotbk1bb4" path="res://scripts/round/ui/RoundTopCenterUI.gd" id="6_qt4yu"]
+[ext_resource type="Script" uid="uid://ca2f66xlx7ldb" path="res://scripts/round/ui/RoundFailActionsUI.gd" id="7_txa0w"]
+[ext_resource type="Script" path="res://scripts/debug/DebugRoundControls.gd" id="8_73h3v"]
 
 [sub_resource type="Curve2D" id="Curve2D_rd3vj"]
 _data = {
@@ -17,11 +20,10 @@ point_count = 5
 [node name="Level" type="Node2D" unique_id=867026977]
 
 [node name="Portal" parent="." unique_id=665752176 groups=["spawn_portal"] instance=ExtResource("3_o2tba")]
-position = Vector2(270, 330)
+position = Vector2(348, 357)
 
 [node name="SpawnTimer" type="Timer" parent="." unique_id=562782423]
 wait_time = 1.5
-autostart = false
 
 [node name="EnemySpawnController" type="Node" parent="." unique_id=1623964248]
 script = ExtResource("2_7j7ff")
@@ -29,14 +31,9 @@ enemy_scene = ExtResource("1_jfytv")
 round_enemy_scenes = Array[PackedScene]([ExtResource("1_jfytv"), ExtResource("4_h5f3e")])
 round_spawn_counts = Array[int]([10, 12, 14, 16, 18, 20, 22, 24, 26, 28])
 round_enemy_health_multipliers = Array[float]([1.0, 1.1, 1.21, 1.33, 1.46, 1.61, 1.77, 1.95, 2.14, 2.36])
-use_formula_after_table = true
-formula_growth_rate = 0.08
-formula_softcap_rate = 0.015
-formula_softcap_power = 0.6
 path2d_path = NodePath("../Path2D")
 portal_path = NodePath("../Portal")
 spawn_timer_path = NodePath("../SpawnTimer")
-current_round = 1
 
 [node name="RoundManager" type="Node" parent="." unique_id=960498918]
 script = ExtResource("3_lf3o0")
@@ -49,9 +46,52 @@ round_manager_path = NodePath("../RoundManager")
 round_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/RoundLabel")
 alive_enemy_count_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/AliveEnemyCountLabel")
 status_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/StatusLabel")
-fail_actions_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions")
-retry_button_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions/RetryButton")
-quit_button_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions/QuitButton")
+top_center_ui_path = NodePath("TopCenterUI")
+fail_actions_ui_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions")
+
+[node name="TopCenterUI" type="Control" parent="RoundHUD" unique_id=1775429933]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -140.0
+offset_top = 14.0
+offset_right = 140.0
+offset_bottom = 102.0
+grow_horizontal = 2
+script = ExtResource("6_qt4yu")
+round_countdown_label_path = NodePath("VBoxContainer/RoundCountdownLabel")
+next_round_button_path = NodePath("VBoxContainer/NextRoundButton")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RoundHUD/TopCenterUI" unique_id=1314129233]
+layout_mode = 0
+offset_right = 280.0
+offset_bottom = 88.0
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="RoundCountdownLabel" type="Label" parent="RoundHUD/TopCenterUI/VBoxContainer" unique_id=45343078]
+layout_mode = 2
+text = "Next Round In: 60s"
+horizontal_alignment = 1
+
+[node name="NextRoundButton" type="Button" parent="RoundHUD/TopCenterUI/VBoxContainer" unique_id=1954689784]
+visible = false
+layout_mode = 2
+text = "다음 라운드 시작"
+
+[node name="DebugRoundControls" type="Control" parent="RoundHUD/TopCenterUI/VBoxContainer" unique_id=1906446634]
+layout_mode = 2
+script = ExtResource("8_73h3v")
+round_manager_path = NodePath("../../../../RoundManager")
+force_next_round_button_path = NodePath("ForceNextRoundButton")
+
+[node name="ForceNextRoundButton" type="Button" parent="RoundHUD/TopCenterUI/VBoxContainer/DebugRoundControls" unique_id=1913150164]
+visible = false
+layout_mode = 0
+offset_right = 280.0
+offset_bottom = 31.0
+text = "[DEBUG] Force Next Round"
 
 [node name="HUDPanel" type="Panel" parent="RoundHUD" unique_id=736327385]
 offset_left = 16.0
@@ -60,6 +100,7 @@ offset_right = 236.0
 offset_bottom = 128.0
 
 [node name="MarginContainer" type="MarginContainer" parent="RoundHUD/HUDPanel" unique_id=894026183]
+layout_mode = 0
 offset_right = 220.0
 offset_bottom = 112.0
 theme_override_constants/margin_left = 10
@@ -68,31 +109,40 @@ theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="RoundHUD/HUDPanel/MarginContainer" unique_id=140415829]
-offset_right = 200.0
-offset_bottom = 96.0
+layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="RoundLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=1797503581]
+layout_mode = 2
 text = "Round: 1"
 
 [node name="AliveEnemyCountLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=1263362374]
+layout_mode = 2
 text = "Alive: 0"
 
 [node name="StatusLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=134388706]
+layout_mode = 2
 text = "Status: PREPARE"
 
 [node name="FailActions" type="HBoxContainer" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=340557386]
 visible = false
+layout_mode = 2
 theme_override_constants/separation = 6
+script = ExtResource("7_txa0w")
+fail_actions_path = NodePath(".")
+retry_button_path = NodePath("RetryButton")
+quit_button_path = NodePath("QuitButton")
 
 [node name="RetryButton" type="Button" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer/FailActions" unique_id=751617345]
+layout_mode = 2
 text = "Retry"
 
 [node name="QuitButton" type="Button" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer/FailActions" unique_id=1493798396]
+layout_mode = 2
 text = "Quit"
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
-position = Vector2(576, 336)
+position = Vector2(635, 357)
 curve = SubResource("Curve2D_rd3vj")
 
 [node name="EnemyPathAgentTemplate" type="PathFollow2D" parent="Path2D" unique_id=1505150669]
