@@ -83,3 +83,14 @@ Do not invert this order.
 1. Work from `TODO.md` during the day.
 2. Roll over: move/save daily outcomes to `docs/todo/YYYY-MM-Nw/YYYY-MM-DD.md`.
 3. Reset/update `TODO.md` for the new day and continue work from there.
+
+## Godot Executable Path (Environment Note)
+
+- Windows install path:
+  - `C:\Godot_v4.6.1\Godot_v4.6.1-stable_win64.exe`
+  - `C:\Godot_v4.6.1\Godot_v4.6.1-stable_win64_console.exe`
+- WSL path mapping:
+  - `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64.exe`
+  - `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe`
+- Verified on `2026-02-22`: direct launch from current WSL session fails with
+  `WSL ERROR: UtilBindVsockAnyPort ... socket failed 1`.
