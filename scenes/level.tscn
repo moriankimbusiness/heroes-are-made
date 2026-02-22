@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://bc8vvkbuc5mro"]
 
 [ext_resource type="Script" uid="uid://vhlaxs7p4jc0" path="res://scripts/PathFollowDebug.gd" id="1_j1m2n"]
-[ext_resource type="PackedScene" uid="uid://da3dlus5rcbvq" path="res://scenes/enemy.tscn" id="1_jfytv"]
+[ext_resource type="PackedScene" uid="uid://dxy2tsd6es252" path="res://scenes/enemies/variants/enemy_orc.tscn" id="1_jfytv"]
 [ext_resource type="Script" uid="uid://cv7uu8u2bhiyl" path="res://scripts/EnemySpawnController.gd" id="2_7j7ff"]
 [ext_resource type="PackedScene" uid="uid://cy3xax8p7da1h" path="res://scenes/portal.tscn" id="3_o2tba"]
+[ext_resource type="PackedScene" uid="uid://jg52hv41yh4p" path="res://scenes/enemies/variants/enemy_orc2.tscn" id="4_h5f3e"]
 
 [sub_resource type="Curve2D" id="Curve2D_rd3vj"]
 _data = {
@@ -23,9 +24,11 @@ autostart = true
 [node name="EnemySpawnController" type="Node" parent="." unique_id=1623964248]
 script = ExtResource("2_7j7ff")
 enemy_scene = ExtResource("1_jfytv")
+round_enemy_scenes = Array[PackedScene]([ExtResource("1_jfytv"), ExtResource("4_h5f3e")])
 path2d_path = NodePath("../Path2D")
 portal_path = NodePath("../Portal")
 spawn_timer_path = NodePath("../SpawnTimer")
+current_round = 2
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
 position = Vector2(576, 336)

@@ -44,6 +44,33 @@ For any Godot scene/gameplay setup request, follow this order strictly:
   - replacing editor animation assets with runtime-generated equivalents
   - ignoring inspector-authored values through script hardcoding
 
+## Implementation Design Gate (Mandatory)
+
+Before implementing any new feature, confirm these design constraints first.
+
+1. Responsibility split
+- Gameplay/domain logic belongs in entity scripts (for example, `Enemy.gd`).
+- UI rendering logic belongs in UI-node scripts (for example, `EnemyHealthBar.gd`).
+- Entity scripts must not directly control UI style/color/presentation.
+- Entity scripts should emit state via signals (for example, `health_changed`, `died`).
+
+2. Scene inheritance consistency
+- If base/variant structure exists, each variant must instance/inherit the base scene.
+- Add common nodes only in base scenes.
+- Keep variants limited to required overrides.
+- After base changes, verify inherited node visibility/behavior in each variant.
+
+3. Implementation order
+- Editor setup first (node tree, Inspector values, resource links).
+- Script changes second, only for runtime trigger/feature behavior.
+- Scripts must not override editor-authored values by default.
+
+4. Definition of done
+- Feature behavior works.
+- Architecture is validated (responsibility split and inheritance reflection).
+- `TODO.md` is updated.
+- Regression check points are documented.
+
 ## Response Format (Mandatory)
 
 When answering setup/change requests:

@@ -20,7 +20,45 @@
 - [x] Enemy AnimatedSprite2D 전환 (API 유지형)
 - [x] Enemy `play_*` / `is_state_finished()` 인터페이스 유지
 - [ ] Enemy non-loop 종료 규칙 회귀 확인 (실행 중 확인 필요)
-- [ ] Round 별 Enemy 변경 / Enemy 체력, 이동속도, sprite 변경
+- [ ] Round 별 Enemy 변경
+	- [x] 1단계: 라운드별 Enemy Scene 선택 로직 추가 (`EnemySpawnController`)
+	- [x] 2단계: 레벨 씬 인스펙터에서 Round별 Enemy Scene 슬롯 설정
+	- [ ] 3단계: Round 전환 트리거(라운드 시작 시 `set_round`) 연결
+	- [ ] 4단계: 라운드 매니저/웨이브 매니저 설계 및 구현
+	- [ ] 5단계: 10라운드 `round_enemy_scenes` 슬롯(라운드별 다른 Enemy) 최종 연결
+- [ ] Enemy 체력 변경
+	- [x] 1단계: `Enemy` 기본 체력 export 변수/초기값 정의
+	- [x] 1-1단계: `set_max_health()` / `apply_damage()` / `is_dead()` API 추가
+	- [x] 1-2단계: 월드 Enemy 체력바(`HealthBar`) 노드 추가 및 체력 연동
+	- [x] 1-3단계: 체력바 색상 임계값 연동 (50% 노랑 전환, 20% 빨강 전환)
+	- [x] 1-4단계: UI 책임 분리 (`EnemyHealthBar.gd`로 체력바 표시/색상 로직 이관)
+	- [ ] 2단계: Round별 체력 배율(또는 절대값) 적용 경로 설계/연결
+	- [ ] 2-1단계: `EnemySpawnController`에 `round_enemy_health_multipliers` export 추가
+	- [ ] 2-2단계: 스폰 직후 `base_max_health * round_multiplier` 적용
+	- [ ] 2-3단계: 라운드 배율 배열 fallback 규칙(범위 밖: 마지막 값 또는 1.0) 적용
+	- [ ] 3단계: 피격/사망 경계값 동작 확인
+	- [ ] 3-1단계: death 후 alive 카운트 제외 검증 (`auto_free_on_death_end=false` 케이스 포함)
+- [ ] HealthBar 구조 리팩터링 검증
+	- [x] `enemy_base.tscn` HealthBar 스크립트 연결 상태 확인
+	- [x] `enemy_orc.tscn` / `enemy_orc2.tscn` 상속 반영 확인
+	- [ ] 체력 임계색(초록/노랑/빨강) 회귀 확인
+- [ ] RoundManager v1 구현
+	- [ ] 1단계: `scripts/RoundManager.gd` 생성 (상태: PREPARE/WAVE_ACTIVE/INTERMISSION/FAILED/CLEARED)
+	- [ ] 2단계: 실패 조건 구현 (`alive_enemy_count >= 30` 즉시 실패)
+	- [ ] 3단계: 웨이브 시작/종료 제어 (`set_round`, `begin_wave`, `stop_wave`)
+	- [ ] 4단계: 시그널 추가 (`round_started`, `round_cleared`, `game_failed`, `all_rounds_cleared`)
+	- [ ] 5단계: `level.tscn` 연결 (`SpawnTimer.autostart=false`, NodePath 연결)
+	- [ ] 6단계: 10라운드 데이터 입력 (`round_spawn_counts`, `round_enemy_health_multipliers`)
+	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
+- [ ] Enemy 이동속도 변경
+	- [ ] 1단계: 경로 이동 Agent 속도 주입 경로 추가
+	- [ ] 2단계: Round별 이동속도 값 연결
+	- [ ] 3단계: Portal 진입 속도와 Path 이동 속도 밸런스 확인
+- [ ] Enemy sprite 변경
+	- [x] 1단계: Round별 Enemy Scene(또는 SpriteFrames) 에셋 매핑 확정
+	- [x] 2단계: 인스펙터에서 라운드별 리소스 연결
+	- [x] 2-1단계: `scenes/enemies/base` / `scenes/enemies/variants` 구조 정리
+	- [ ] 3단계: 애니메이션 상태명/loop/fps 회귀 확인
 - [ ] 주간 목표 2
 
 주간 폴더: `docs/todo/2026-02-4w/`

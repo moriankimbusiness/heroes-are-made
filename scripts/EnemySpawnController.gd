@@ -1,12 +1,14 @@
 extends Node
 
 @export var enemy_scene: PackedScene
+@export var round_enemy_scenes: Array[PackedScene] = []
 @export var path2d_path: NodePath
 @export var portal_path: NodePath
 @export var spawn_timer_path: NodePath
 @export var entry_speed: float = 90.0
 @export var max_spawn_count: int = 10
 @export var entry_arrival_distance: float = 2.0
+@export_range(1, 999, 1) var current_round: int = 1
 
 var _spawned_count: int = 0
 var _entry_enemies: Array[Node2D] = []
@@ -62,15 +64,33 @@ func _on_spawn_timer_timeout() -> void:
 		_spawn_timer.stop()
 		return
 
-	var enemy: Node2D = enemy_scene.instantiate() as Node2D
+	var selected_enemy_scene: PackedScene = _get_enemy_scene_for_current_round()
+	if selected_enemy_scene == null:
+		push_error("EnemySpawnController: enemy scene is not assigned.")
+		return
+
+	var enemy: Node2D = selected_enemy_scene.instantiate() as Node2D
 	if enemy == null:
-		push_error("EnemySpawnController: enemy_scene root must inherit Node2D.")
+		push_error("EnemySpawnController: selected enemy scene root must inherit Node2D.")
 		return
 
 	get_tree().current_scene.add_child(enemy)
 	enemy.global_position = _portal.global_position
 	_entry_enemies.append(enemy)
 	_spawned_count += 1
+
+
+func set_round(round_value: int) -> void:
+	current_round = maxi(1, round_value)
+
+
+func _get_enemy_scene_for_current_round() -> PackedScene:
+	var round_index: int = current_round - 1
+	if round_index >= 0 and round_index < round_enemy_scenes.size():
+		var candidate: PackedScene = round_enemy_scenes[round_index]
+		if candidate != null:
+			return candidate
+	return enemy_scene
 
 
 func _attach_enemy_to_path(enemy: Node2D) -> void:

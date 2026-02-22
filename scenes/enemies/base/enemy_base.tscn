@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b33e8m40y8g32" path="res://scripts/Enemy.gd" id="1_md0e3"]
 [ext_resource type="Texture2D" uid="uid://momjdgwemgas" path="res://assets/sprites/enemies/Orc.png" id="2_4ra3w"]
+[ext_resource type="Script" path="res://scripts/EnemyHealthBar.gd" id="3_t4rps"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2_0"]
 atlas = ExtResource("2_4ra3w")
@@ -276,17 +277,23 @@ animations = [{
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_md0e3"]
 
-[node name="Enemy" type="Area2D" unique_id=1614204188]
+[node name="EnemyBase" type="Area2D" unique_id=1614204188]
 script = ExtResource("1_md0e3")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1489677892]
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_md0e3")
-animation = &"attack01"
+animation = &"walk"
 autoplay = "walk"
-frame = 5
-frame_progress = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=999267602]
-position = Vector2(1, 0)
 shape = SubResource("CircleShape2D_md0e3")
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=101301111]
+offset_left = -11.0
+offset_top = -27.0
+offset_right = 11.0
+offset_bottom = -22.0
+script = ExtResource("3_t4rps")
+value = 100.0
+show_percentage = false
