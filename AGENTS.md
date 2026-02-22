@@ -70,6 +70,23 @@ Before implementing any new feature, confirm these design constraints first.
 - Architecture is validated (responsibility split and inheritance reflection).
 - `TODO.md` is updated.
 - Regression check points are documented.
+- Godot CLI validation is executed and result is recorded.
+
+## Godot CLI Validation (Mandatory)
+
+- After every code/scene change, run Godot CLI validation before completion.
+- Preferred command (WSL path):
+  - `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
+- If needed, use explicit project path:
+  - `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path /mnt/d/04.GameWorkSpaces/00.GodotProjects/heroes-are-made --quit`
+- Record validation outcome in the response:
+  - pass/fail
+  - command used
+  - key error line(s) if failed
+- If CLI execution is blocked by known WSL limitation (`UtilBindVsockAnyPort ... socket failed 1`), do not skip silently:
+  - report the attempted command and the blocking error
+  - run and report alternative regression checks possible in current environment
+  - keep the task marked as "CLI validation blocked" until executable environment is available
 
 ## Response Format (Mandatory)
 

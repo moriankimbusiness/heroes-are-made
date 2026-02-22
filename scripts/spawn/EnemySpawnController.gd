@@ -2,6 +2,7 @@ extends Node
 
 @export var enemy_scene: PackedScene
 @export var round_enemy_scenes: Array[PackedScene] = []
+@export var round_enemy_health_multipliers: Array[float] = []
 @export var path2d_path: NodePath
 @export var portal_path: NodePath
 @export var spawn_timer_path: NodePath
@@ -75,6 +76,7 @@ func _on_spawn_timer_timeout() -> void:
 		return
 
 	get_tree().current_scene.add_child(enemy)
+	_apply_round_health_multiplier(enemy)
 	enemy.global_position = _portal.global_position
 	_entry_enemies.append(enemy)
 	_spawned_count += 1
@@ -91,6 +93,35 @@ func _get_enemy_scene_for_current_round() -> PackedScene:
 		if candidate != null:
 			return candidate
 	return enemy_scene
+
+
+func _apply_round_health_multiplier(enemy: Node) -> void:
+	if not enemy.has_method("set_max_health"):
+		return
+
+	var base_max_health: float = 100.0
+	if enemy.has_method("get_base_max_health"):
+		base_max_health = float(enemy.call("get_base_max_health"))
+	elif enemy.has_method("get_max_health"):
+		base_max_health = float(enemy.call("get_max_health"))
+
+	var multiplier: float = _get_health_multiplier_for_current_round()
+	enemy.call("set_max_health", base_max_health * multiplier)
+
+
+func _get_health_multiplier_for_current_round() -> float:
+	var round_index: int = current_round - 1
+	if round_index >= 0 and round_index < round_enemy_health_multipliers.size():
+		var candidate: float = round_enemy_health_multipliers[round_index]
+		if candidate > 0.0:
+			return candidate
+
+	if round_enemy_health_multipliers.size() > 0:
+		var fallback: float = round_enemy_health_multipliers[round_enemy_health_multipliers.size() - 1]
+		if fallback > 0.0:
+			return fallback
+
+	return 1.0
 
 
 func _attach_enemy_to_path(enemy: Node2D) -> void:

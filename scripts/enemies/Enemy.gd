@@ -113,6 +113,10 @@ func get_max_health() -> float:
 	return max_health
 
 
+func get_base_max_health() -> float:
+	return base_max_health
+
+
 func get_health_ratio() -> float:
 	if max_health <= 0.0:
 		return 0.0

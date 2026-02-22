@@ -32,10 +32,10 @@
 	- [x] 1-2단계: 월드 Enemy 체력바(`HealthBar`) 노드 추가 및 체력 연동
 	- [x] 1-3단계: 체력바 색상 임계값 연동 (50% 노랑 전환, 20% 빨강 전환)
 	- [x] 1-4단계: UI 책임 분리 (`EnemyHealthBar.gd`로 체력바 표시/색상 로직 이관)
-	- [ ] 2단계: Round별 체력 배율(또는 절대값) 적용 경로 설계/연결
-	- [ ] 2-1단계: `EnemySpawnController`에 `round_enemy_health_multipliers` export 추가
-	- [ ] 2-2단계: 스폰 직후 `base_max_health * round_multiplier` 적용
-	- [ ] 2-3단계: 라운드 배율 배열 fallback 규칙(범위 밖: 마지막 값 또는 1.0) 적용
+	- [x] 2단계: Round별 체력 배율(또는 절대값) 적용 경로 설계/연결
+	- [x] 2-1단계: `EnemySpawnController`에 `round_enemy_health_multipliers` export 추가
+	- [x] 2-2단계: 스폰 직후 `base_max_health * round_multiplier` 적용
+	- [x] 2-3단계: 라운드 배율 배열 fallback 규칙(범위 밖: 마지막 값 또는 1.0) 적용
 	- [ ] 3단계: 피격/사망 경계값 동작 확인
 	- [ ] 3-1단계: death 후 alive 카운트 제외 검증 (`auto_free_on_death_end=false` 케이스 포함)
 - [ ] HealthBar 구조 리팩터링 검증
