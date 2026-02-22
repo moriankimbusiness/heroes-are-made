@@ -3,13 +3,56 @@
 [ext_resource type="Script" path="res://scripts/Portal.gd" id="1_6brqs"]
 [ext_resource type="Texture2D" uid="uid://c3pdycvpju0mb" path="res://assets/sprites/objects/portal.png" id="2_1ffj6"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_0"]
+atlas = ExtResource("2_1ffj6")
+region = Rect2(0, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1"]
+atlas = ExtResource("2_1ffj6")
+region = Rect2(32, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2"]
+atlas = ExtResource("2_1ffj6")
+region = Rect2(64, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3"]
+atlas = ExtResource("2_1ffj6")
+region = Rect2(96, 0, 32, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4"]
+atlas = ExtResource("2_1ffj6")
+region = Rect2(128, 0, 32, 40)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_portal"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 8.0
+}]
+
 [node name="Portal" type="Node2D" unique_id=665752176]
 script = ExtResource("1_6brqs")
+groups = ["spawn_portal"]
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1878975309]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1878975309]
 position = Vector2(0, -1)
 scale = Vector2(1.2, 1.2)
-texture = ExtResource("2_1ffj6")
-hframes = 8
-vframes = 6
-frame = 8
+sprite_frames = SubResource("SpriteFrames_portal")
+animation = &"idle"
+autoplay = "idle"

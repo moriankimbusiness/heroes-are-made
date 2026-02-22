@@ -12,6 +12,9 @@ point_count = 5
 
 [node name="Level" type="Node2D" unique_id=867026977]
 
+[node name="Portal" parent="." unique_id=665752176 instance=ExtResource("3_o2tba")]
+position = Vector2(319, 331)
+
 [node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
 position = Vector2(576, 336)
 curve = SubResource("Curve2D_rd3vj")
@@ -23,9 +26,3 @@ script = ExtResource("1_j1m2n")
 
 [node name="Enemy" parent="Path2D/PathFollow2D" unique_id=961921827 instance=ExtResource("1_jfytv")]
 position = Vector2(-3, -2)
-
-[node name="Portals" type="Node2D" parent="."]
-
-[node name="Portal_01" parent="Portals" instance=ExtResource("3_o2tba")]
-position = Vector2(162, 114)
-portal_id = &"portal_01"
