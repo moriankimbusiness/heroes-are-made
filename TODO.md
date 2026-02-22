@@ -50,6 +50,8 @@
 	- [x] 4단계: 시그널 추가 (`round_started`, `round_cleared`, `game_failed`, `all_rounds_cleared`)
 	- [x] 5단계: `level.tscn` 연결 (`SpawnTimer.autostart=false`, NodePath 연결)
 	- [x] 6단계: 10라운드 데이터 입력 (`round_spawn_counts`, `round_enemy_health_multipliers`)
+	- [x] 6-1단계: RoundManager HUD UI 연결 (`Round/Alive/Status` 라벨)
+	- [x] 6-2단계: 실패 UI 액션 추가 (`Retry`, `Quit` 버튼)
 	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
 - [ ] Scripts 디렉토리 구조 정리
 	- [x] 1단계: 디렉토리 생성 (`enemies`, `enemies/ui`, `spawn`, `portals`, `round`, `debug`)

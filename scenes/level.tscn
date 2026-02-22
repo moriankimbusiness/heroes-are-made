@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/round/RoundManager.gd" id="3_lf3o0"]
 [ext_resource type="PackedScene" uid="uid://cy3xax8p7da1h" path="res://scenes/portal.tscn" id="3_o2tba"]
 [ext_resource type="PackedScene" uid="uid://jg52hv41yh4p" path="res://scenes/enemies/variants/enemy_orc2.tscn" id="4_h5f3e"]
+[ext_resource type="Script" path="res://scripts/round/ui/RoundManagerUI.gd" id="5_wcogo"]
 
 [sub_resource type="Curve2D" id="Curve2D_rd3vj"]
 _data = {
@@ -41,6 +42,54 @@ current_round = 1
 script = ExtResource("3_lf3o0")
 enemy_spawn_controller_path = NodePath("../EnemySpawnController")
 spawn_timer_path = NodePath("../SpawnTimer")
+
+[node name="RoundHUD" type="CanvasLayer" parent="." unique_id=1130613858]
+script = ExtResource("5_wcogo")
+round_manager_path = NodePath("../RoundManager")
+round_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/RoundLabel")
+alive_enemy_count_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/AliveEnemyCountLabel")
+status_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/StatusLabel")
+fail_actions_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions")
+retry_button_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions/RetryButton")
+quit_button_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions/QuitButton")
+
+[node name="HUDPanel" type="Panel" parent="RoundHUD" unique_id=736327385]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 236.0
+offset_bottom = 128.0
+
+[node name="MarginContainer" type="MarginContainer" parent="RoundHUD/HUDPanel" unique_id=894026183]
+offset_right = 220.0
+offset_bottom = 112.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RoundHUD/HUDPanel/MarginContainer" unique_id=140415829]
+offset_right = 200.0
+offset_bottom = 96.0
+theme_override_constants/separation = 4
+
+[node name="RoundLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=1797503581]
+text = "Round: 1"
+
+[node name="AliveEnemyCountLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=1263362374]
+text = "Alive: 0"
+
+[node name="StatusLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=134388706]
+text = "Status: PREPARE"
+
+[node name="FailActions" type="HBoxContainer" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=340557386]
+visible = false
+theme_override_constants/separation = 6
+
+[node name="RetryButton" type="Button" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer/FailActions" unique_id=751617345]
+text = "Retry"
+
+[node name="QuitButton" type="Button" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer/FailActions" unique_id=1493798396]
+text = "Quit"
 
 [node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
 position = Vector2(576, 336)
