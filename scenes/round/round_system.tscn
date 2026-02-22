@@ -1,0 +1,115 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://c6ifelmqypvhs" path="res://scripts/round/RoundManager.gd" id="1_a0jg5"]
+[ext_resource type="Script" uid="uid://cjd8qjvanhafh" path="res://scripts/round/ui/RoundManagerUI.gd" id="2_40f1n"]
+[ext_resource type="Script" uid="uid://o1mhotbk1bb4" path="res://scripts/round/ui/RoundTopCenterUI.gd" id="3_k37li"]
+[ext_resource type="Script" uid="uid://ca2f66xlx7ldb" path="res://scripts/round/ui/RoundFailActionsUI.gd" id="4_jbgjg"]
+[ext_resource type="Script" uid="uid://docnm2r2urxcu" path="res://scripts/debug/DebugRoundControls.gd" id="5_mqtq7"]
+
+[node name="RoundSystem" type="Node" unique_id=1945532616]
+
+[node name="RoundManager" type="Node" parent="." unique_id=960498918]
+script = ExtResource("1_a0jg5")
+enemy_spawn_controller_path = NodePath("../../EnemySpawnController")
+spawn_timer_path = NodePath("../../SpawnTimer")
+
+[node name="RoundHUD" type="CanvasLayer" parent="." unique_id=1130613858]
+script = ExtResource("2_40f1n")
+round_manager_path = NodePath("../RoundManager")
+round_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/RoundLabel")
+alive_enemy_count_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/AliveEnemyCountLabel")
+status_label_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/StatusLabel")
+top_center_ui_path = NodePath("TopCenterUI")
+fail_actions_ui_path = NodePath("HUDPanel/MarginContainer/VBoxContainer/FailActions")
+
+[node name="TopCenterUI" type="Control" parent="RoundHUD" unique_id=1775429933]
+layout_mode = 3
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -140.0
+offset_top = 14.0
+offset_right = 140.0
+offset_bottom = 102.0
+grow_horizontal = 2
+script = ExtResource("3_k37li")
+round_countdown_label_path = NodePath("VBoxContainer/RoundCountdownLabel")
+next_round_button_path = NodePath("VBoxContainer/NextRoundButton")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RoundHUD/TopCenterUI" unique_id=1314129233]
+layout_mode = 0
+offset_right = 280.0
+offset_bottom = 88.0
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="RoundCountdownLabel" type="Label" parent="RoundHUD/TopCenterUI/VBoxContainer" unique_id=45343078]
+layout_mode = 2
+text = "Next Round In: 60s"
+horizontal_alignment = 1
+
+[node name="NextRoundButton" type="Button" parent="RoundHUD/TopCenterUI/VBoxContainer" unique_id=1954689784]
+visible = false
+layout_mode = 2
+text = "다음 라운드 시작"
+
+[node name="DebugRoundControls" type="Control" parent="RoundHUD/TopCenterUI/VBoxContainer" unique_id=1906446634]
+layout_mode = 2
+script = ExtResource("5_mqtq7")
+round_manager_path = NodePath("../../../../RoundManager")
+force_next_round_button_path = NodePath("ForceNextRoundButton")
+
+[node name="ForceNextRoundButton" type="Button" parent="RoundHUD/TopCenterUI/VBoxContainer/DebugRoundControls" unique_id=1913150164]
+visible = false
+layout_mode = 0
+offset_right = 280.0
+offset_bottom = 31.0
+text = "[DEBUG] Force Next Round"
+
+[node name="HUDPanel" type="Panel" parent="RoundHUD" unique_id=736327385]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 236.0
+offset_bottom = 128.0
+
+[node name="MarginContainer" type="MarginContainer" parent="RoundHUD/HUDPanel" unique_id=894026183]
+layout_mode = 0
+offset_right = 220.0
+offset_bottom = 112.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RoundHUD/HUDPanel/MarginContainer" unique_id=140415829]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RoundLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=1797503581]
+layout_mode = 2
+text = "Round: 1"
+
+[node name="AliveEnemyCountLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=1263362374]
+layout_mode = 2
+text = "Alive: 0"
+
+[node name="StatusLabel" type="Label" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=134388706]
+layout_mode = 2
+text = "Status: PREPARE"
+
+[node name="FailActions" type="HBoxContainer" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer" unique_id=340557386]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+script = ExtResource("4_jbgjg")
+fail_actions_path = NodePath(".")
+retry_button_path = NodePath("RetryButton")
+quit_button_path = NodePath("QuitButton")
+
+[node name="RetryButton" type="Button" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer/FailActions" unique_id=751617345]
+layout_mode = 2
+text = "Retry"
+
+[node name="QuitButton" type="Button" parent="RoundHUD/HUDPanel/MarginContainer/VBoxContainer/FailActions" unique_id=1493798396]
+layout_mode = 2
+text = "Quit"
