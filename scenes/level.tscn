@@ -20,7 +20,7 @@ position = Vector2(270, 330)
 
 [node name="SpawnTimer" type="Timer" parent="." unique_id=562782423]
 wait_time = 1.5
-autostart = true
+autostart = false
 
 [node name="EnemySpawnController" type="Node" parent="." unique_id=1623964248]
 script = ExtResource("2_7j7ff")

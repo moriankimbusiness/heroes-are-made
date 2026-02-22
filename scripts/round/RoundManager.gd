@@ -17,6 +17,7 @@ enum State {
 @export_range(1, 999, 1) var fail_alive_enemy_threshold: int = 30
 @export var enemy_spawn_controller_path: NodePath
 @export var spawn_timer_path: NodePath
+@export var auto_begin_wave_on_ready: bool = true
 
 var state: State = State.PREPARE
 var current_round: int = 1
@@ -41,6 +42,10 @@ func _ready() -> void:
 	else:
 		state = State.WAVE_ACTIVE
 
+	set_round(current_round)
+	if auto_begin_wave_on_ready and state == State.PREPARE:
+		call_deferred("begin_wave")
+
 	set_process(true)
 
 
@@ -62,7 +67,9 @@ func begin_wave() -> void:
 	if state == State.FAILED or state == State.CLEARED:
 		return
 	state = State.WAVE_ACTIVE
-	if _spawn_timer != null and _spawn_timer.is_stopped():
+	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_method("begin_round_spawn"):
+		_enemy_spawn_controller.call("begin_round_spawn")
+	elif _spawn_timer != null and _spawn_timer.is_stopped():
 		_spawn_timer.start()
 	round_started.emit(current_round)
 
@@ -82,7 +89,9 @@ func _fail_game() -> void:
 
 
 func _stop_wave() -> void:
-	if _spawn_timer != null:
+	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_method("stop_spawn"):
+		_enemy_spawn_controller.call("stop_spawn")
+	elif _spawn_timer != null:
 		_spawn_timer.stop()
 
 

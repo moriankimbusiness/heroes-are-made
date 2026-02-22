@@ -46,9 +46,9 @@
 - [ ] RoundManager v1 구현
 	- [x] 1단계: `scripts/round/RoundManager.gd` 생성 (상태: PREPARE/WAVE_ACTIVE/INTERMISSION/FAILED/CLEARED)
 	- [x] 2단계: 실패 조건 구현 (`alive_enemy_count >= 30` 즉시 실패)
-	- [ ] 3단계: 웨이브 시작/종료 제어 (`set_round`, `begin_wave`, `stop_wave`)
-	- [ ] 4단계: 시그널 추가 (`round_started`, `round_cleared`, `game_failed`, `all_rounds_cleared`)
-	- [ ] 5단계: `level.tscn` 연결 (`SpawnTimer.autostart=false`, NodePath 연결)
+	- [x] 3단계: 웨이브 시작/종료 제어 (`set_round`, `begin_wave`, `stop_wave`)
+	- [x] 4단계: 시그널 추가 (`round_started`, `round_cleared`, `game_failed`, `all_rounds_cleared`)
+	- [x] 5단계: `level.tscn` 연결 (`SpawnTimer.autostart=false`, NodePath 연결)
 	- [ ] 6단계: 10라운드 데이터 입력 (`round_spawn_counts`, `round_enemy_health_multipliers`)
 	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
 - [ ] Scripts 디렉토리 구조 정리

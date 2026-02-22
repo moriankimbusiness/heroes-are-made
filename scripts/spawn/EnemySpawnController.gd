@@ -90,6 +90,17 @@ func set_round(round_value: int) -> void:
 	current_round = maxi(1, round_value)
 
 
+func begin_round_spawn() -> void:
+	_spawned_count = 0
+	if _spawn_timer != null:
+		_spawn_timer.start()
+
+
+func stop_spawn() -> void:
+	if _spawn_timer != null:
+		_spawn_timer.stop()
+
+
 func _get_enemy_scene_for_current_round() -> PackedScene:
 	var round_index: int = current_round - 1
 	if round_index >= 0 and round_index < round_enemy_scenes.size():
