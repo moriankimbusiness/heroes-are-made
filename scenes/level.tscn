@@ -13,7 +13,7 @@ point_count = 5
 
 [node name="Level" type="Node2D" unique_id=867026977]
 
-[node name="Portal" parent="." unique_id=665752176 instance=ExtResource("3_o2tba")]
+[node name="Portal" parent="." unique_id=665752176 groups=["spawn_portal"] instance=ExtResource("3_o2tba")]
 position = Vector2(270, 330)
 
 [node name="SpawnTimer" type="Timer" parent="." unique_id=562782423]

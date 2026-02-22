@@ -5,11 +5,12 @@
 	- [x] `portal.tscn` 생성 및 시각 노드 구성
 	- [x] `Portal.gd` + `portal_id` export 추가
 	- [x] `level.tscn`에 `Portals/Portal_01` 배치
-	- [ ] `"spawn_portal"` 그룹 등록 및 조회 확인 (실행 중 확인 필요)
+	- [x] `"spawn_portal"` 그룹 등록 확인
+	- [x] `"spawn_portal"` 그룹 조회 확인 (`get_nodes_in_group`)
 - [x] Enemy 스폰 포탈 애니메이션 추가
 - [x] `portal.tscn` Sprite2D -> AnimatedSprite2D 전환
 - [x] `idle` 5프레임(0..4), loop, 8 FPS 설정
-- [ ] `level.tscn`에서 포탈 자동 재생 확인 (실행 중 확인 필요)
+- [x] `level.tscn`에서 포탈 자동 재생 확인
 - [x] Enemy 스폰 기능
 	- [x] `EnemySpawnController.gd` 추가 (포탈 생성/진입 이동/경로 전환)
 	- [x] `level.tscn`에 `SpawnTimer` / `EnemySpawnController` 배치
