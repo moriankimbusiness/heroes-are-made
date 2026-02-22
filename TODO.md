@@ -59,6 +59,7 @@
 	- [x] 6-7단계: Debug override 단순화 (`Debug UI Override Enabled` 제거, `Debug Show`만 사용)
 	- [x] 6-8단계: 비즈니스 로직 분리용 디버그 강제 라운드 전환 컨트롤 추가 (`DebugRoundControls`)
 	- [x] 6-9단계: `RoundTopCenterUI` 다음 라운드 버튼 가시성 갱신 이벤트 기반 전환 (`_process` 제거)
+	- [x] 6-10단계: `DebugRoundControls.gd` Resource UID 재생성 및 `level.tscn` ext_resource 정합성 복구
 	- [ ] 7단계: 플레이 검증 (30마리 실패/라운드 전환/10라운드 종료)
 - [ ] Scripts 디렉토리 구조 정리
 	- [x] 1단계: 디렉토리 생성 (`enemies`, `enemies/ui`, `spawn`, `portals`, `round`, `debug`)
