@@ -7,10 +7,42 @@ For any Godot scene/gameplay setup request, follow this order strictly:
 1. **Editor-first instructions**
    - Explain what to set in the Godot editor first (node selection, Inspector values, scene tree actions, save step).
    - These editor steps must be provided before any script guidance.
+   - If a value can be authored in the editor, it must be authored in the editor first.
 
 2. **Script-second instructions**
    - After editor steps, explain only the script part that is still needed.
    - Script must not override editor-authored values unless the user explicitly asks for runtime override behavior.
+   - Script scope is limited to trigger/feature logic unless runtime override is explicitly requested by the user.
+
+## Editor-Authoritative Policy (Mandatory)
+
+- Treat the Godot editor as the single source of truth for authorable data.
+- Anything configurable in editor must be authored in editor:
+  - node hierarchy and scene composition
+  - Inspector-authored values and resource references
+  - animation assets/settings (`SpriteFrames`, animation names, FPS, loop, autoplay)
+  - visual/audio/collision setup
+- Do not replace editor-authored setup with script-driven data construction by default.
+
+## Script Responsibility Boundary (Mandatory)
+
+- Script is responsible for trigger and feature behavior only.
+- Allowed in script:
+  - state transition triggers (e.g., `play_*` calls)
+  - signal connection/handling
+  - gameplay systems (spawn/combat/round rules)
+  - event-driven runtime reactions
+- Not allowed in script by default:
+  - dynamic creation of animation frame assets meant to be editor-authored
+  - hardcoding animation tables/FPS/loop in place of editor-authored animation data
+  - resetting editor-authored values at runtime
+
+## Prohibited Script Overrides (Mandatory)
+
+- Unless the user explicitly requests runtime override behavior, prohibit:
+  - forcing animation/FPS/loop/autoplay from script
+  - replacing editor animation assets with runtime-generated equivalents
+  - ignoring inspector-authored values through script hardcoding
 
 ## Response Format (Mandatory)
 
@@ -20,6 +52,7 @@ When answering setup/change requests:
 2. `그 다음 스크립트`
 
 Do not invert this order.
+- In script section, explain only the minimum trigger/feature code still required after editor setup.
 
 ## Language for Godot UI Terms (Mandatory)
 
