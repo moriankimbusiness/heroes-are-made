@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cy3xax8p7da1h" path="res://scenes/portal.tscn" id="3_o2tba"]
 [ext_resource type="PackedScene" uid="uid://jg52hv41yh4p" path="res://scenes/enemies/variants/enemy_orc2.tscn" id="4_h5f3e"]
 [ext_resource type="PackedScene" path="res://scenes/round/round_system.tscn" id="5_scmn0"]
+[ext_resource type="PackedScene" path="res://scenes/playground/playground.tscn" id="6_playground"]
 
 [sub_resource type="Curve2D" id="Curve2D_rd3vj"]
 _data = {
@@ -43,3 +44,6 @@ curve = SubResource("Curve2D_rd3vj")
 position = Vector2(-220, 0)
 rotates = false
 script = ExtResource("1_j1m2n")
+
+[node name="PlayGround" parent="." instance=ExtResource("6_playground")]
+position = Vector2(635, 357)
