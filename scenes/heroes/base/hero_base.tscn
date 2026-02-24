@@ -35,62 +35,6 @@ region = Rect2(400, 200, 100, 100)
 atlas = ExtResource("2_soldier")
 region = Rect2(500, 200, 100, 100)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_3_0"]
-atlas = ExtResource("2_soldier")
-region = Rect2(0, 300, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3_1"]
-atlas = ExtResource("2_soldier")
-region = Rect2(100, 300, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3_2"]
-atlas = ExtResource("2_soldier")
-region = Rect2(200, 300, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3_3"]
-atlas = ExtResource("2_soldier")
-region = Rect2(300, 300, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3_4"]
-atlas = ExtResource("2_soldier")
-region = Rect2(400, 300, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_3_5"]
-atlas = ExtResource("2_soldier")
-region = Rect2(500, 300, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6_0"]
-atlas = ExtResource("2_soldier")
-region = Rect2(0, 600, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6_1"]
-atlas = ExtResource("2_soldier")
-region = Rect2(100, 600, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6_2"]
-atlas = ExtResource("2_soldier")
-region = Rect2(200, 600, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6_3"]
-atlas = ExtResource("2_soldier")
-region = Rect2(300, 600, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5_0"]
-atlas = ExtResource("2_soldier")
-region = Rect2(0, 500, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5_1"]
-atlas = ExtResource("2_soldier")
-region = Rect2(100, 500, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5_2"]
-atlas = ExtResource("2_soldier")
-region = Rect2(200, 500, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_5_3"]
-atlas = ExtResource("2_soldier")
-region = Rect2(300, 500, 100, 100)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_0_0"]
 atlas = ExtResource("2_soldier")
 region = Rect2(0, 0, 100, 100)
@@ -114,38 +58,6 @@ region = Rect2(400, 0, 100, 100)
 [sub_resource type="AtlasTexture" id="AtlasTexture_0_5"]
 atlas = ExtResource("2_soldier")
 region = Rect2(500, 0, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_0"]
-atlas = ExtResource("2_soldier")
-region = Rect2(0, 100, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_1"]
-atlas = ExtResource("2_soldier")
-region = Rect2(100, 100, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_2"]
-atlas = ExtResource("2_soldier")
-region = Rect2(200, 100, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_3"]
-atlas = ExtResource("2_soldier")
-region = Rect2(300, 100, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_4"]
-atlas = ExtResource("2_soldier")
-region = Rect2(400, 100, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_5"]
-atlas = ExtResource("2_soldier")
-region = Rect2(500, 100, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_6"]
-atlas = ExtResource("2_soldier")
-region = Rect2(600, 100, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_1_7"]
-atlas = ExtResource("2_soldier")
-region = Rect2(700, 100, 100, 100)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_hero"]
 animations = [{
@@ -174,63 +86,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_3_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3_3")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3_4")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3_5")
-}],
-"loop": false,
-"name": &"attack02",
-"speed": 12.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6_3")
-}],
-"loop": false,
-"name": &"death",
-"speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_5_3")
-}],
-"loop": false,
-"name": &"hurt",
-"speed": 10.0
-}, {
-"frames": [{
-"duration": 1.0,
 "texture": SubResource("AtlasTexture_0_0")
 }, {
 "duration": 1.0,
@@ -251,53 +106,40 @@ animations = [{
 "loop": true,
 "name": &"idle",
 "speed": 8.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_0")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_1")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_3")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_4")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_5")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_6")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1_7")
-}],
-"loop": true,
-"name": &"walk",
-"speed": 10.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_drag"]
 radius = 14.0
 height = 36.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_attack_range"]
+radius = 66.068146
+
 [node name="HeroBase" type="Area2D" unique_id=1631851130 groups=["hero"]]
 collision_layer = 8
 collision_mask = 0
 script = ExtResource("1_hero")
+attacks_per_second = 3.4
+target_priority = 2
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=383494157]
 material = SubResource("ShaderMaterial_outline")
 scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_hero")
-animation = &"idle"
+animation = &"attack01"
 autoplay = "idle"
 
 [node name="DragShape" type="CollisionShape2D" parent="." unique_id=240656232]
 position = Vector2(-2, -3)
 shape = SubResource("CapsuleShape2D_drag")
+
+[node name="AttackRange" type="Area2D" parent="." unique_id=1272016421]
+collision_layer = 0
+input_pickable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange" unique_id=948138958]
+shape = SubResource("CircleShape2D_attack_range")
+
+[node name="AttackTimer" type="Timer" parent="." unique_id=2133531099]
+wait_time = 0.8
+one_shot = true
