@@ -12,6 +12,7 @@ script = ExtResource("1_4mb6e")
 
 [node name="RoundManager" type="Node" parent="." unique_id=960498918]
 script = ExtResource("1_a0jg5")
+round_duration_seconds = 40.0
 
 [node name="RoundHUD" type="CanvasLayer" parent="." unique_id=1130613858]
 script = ExtResource("2_40f1n")
