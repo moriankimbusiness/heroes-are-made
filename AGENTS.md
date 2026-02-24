@@ -44,6 +44,15 @@ For any Godot scene/gameplay setup request, follow this order strictly:
   - replacing editor animation assets with runtime-generated equivalents
   - ignoring inspector-authored values through script hardcoding
 
+## Action Animation Restart Policy (Mandatory)
+
+- For explicit action triggers (`play_*` style calls), restart the target animation by default even when the state is unchanged.
+- Implement this in script trigger methods (for example, by using a forced state transition), not by modifying editor-authored animation resources.
+- Do not restart animations from per-frame loops unless frame-by-frame behavior is explicitly required.
+- Scope:
+  - Entity gameplay actions (Hero/Enemy attack, hurt, death, walk triggers) follow restart-on-action as the default behavior.
+  - If a specific action must preserve current playback progress, document that exception in `TODO.md`.
+
 ## Implementation Design Gate (Mandatory)
 
 Before implementing any new feature, confirm these design constraints first.
