@@ -15,8 +15,6 @@ func _ready() -> void:
 
 	if _enemy.has_signal("health_changed"):
 		_enemy.connect("health_changed", _on_enemy_health_changed)
-	if _enemy.has_signal("died"):
-		_enemy.connect("died", _on_enemy_died)
 
 	_sync_from_enemy()
 
@@ -39,10 +37,6 @@ func _sync_from_enemy() -> void:
 
 func _on_enemy_health_changed(current: float, max_health: float, ratio: float) -> void:
 	_apply_health(current, max_health, ratio)
-
-
-func _on_enemy_died(_enemy_node: Area2D) -> void:
-	visible = false
 
 
 func _apply_health(current: float, max_health: float, ratio: float) -> void:
