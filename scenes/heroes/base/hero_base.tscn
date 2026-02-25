@@ -119,8 +119,12 @@ radius = 66.068146
 collision_layer = 8
 collision_mask = 0
 script = ExtResource("1_hero")
-attacks_per_second = 3.4
 target_priority = 2
+base_strength = 3
+base_agility = 2
+base_intelligence = 1
+base_attacks_per_second = 1.2
+enhance_attack_multipliers = Array[float]([1.0, 1.12, 1.26, 1.42, 1.6, 1.8, 2.02, 2.26, 2.52, 2.8, 3.1, 3.42, 3.76, 4.12, 4.5, 4.9])
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=383494157]
 material = SubResource("ShaderMaterial_outline")

@@ -197,14 +197,15 @@ func resolve_overlaps_smooth(pos: Vector2, exclude: Node, hint_dir: Vector2 = Ve
 	return safe
 
 
-func summon_hero() -> void:
+func summon_hero() -> Hero:
 	if hero_scene == null:
 		push_warning("PlayGround: hero_scene is not set")
-		return
-	var hero: Area2D = hero_scene.instantiate()
+		return null
+	var hero: Hero = hero_scene.instantiate()
 	hero.playground = self
 	hero_container.add_child(hero)
 	hero.global_position = _find_spawn_position(hero)
+	return hero
 
 
 func _find_spawn_position(hero: Area2D) -> Vector2:

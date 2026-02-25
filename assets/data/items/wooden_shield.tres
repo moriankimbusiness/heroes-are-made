@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/ItemData.gd" id="1_item_data"]
+
+[resource]
+script = ExtResource("1_item_data")
+item_id = &"wooden_shield"
+display_name = "나무 방패"
+item_type = 3
+strength_bonus = 1
+agility_bonus = -1

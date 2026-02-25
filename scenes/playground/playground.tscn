@@ -1,25 +1,33 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dyskcnci6tlwd"]
 
-[ext_resource type="Script" path="res://scripts/playground/PlayGround.gd" id="1_playground"]
-[ext_resource type="Script" path="res://scripts/playground/ui/HeroSummonUI.gd" id="2_summon_ui"]
-[ext_resource type="PackedScene" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
+[ext_resource type="Script" uid="uid://mb6qpk3jg4p" path="res://scripts/playground/PlayGround.gd" id="1_playground"]
+[ext_resource type="Script" uid="uid://cj2sc2yvs26xr" path="res://scripts/playground/ui/HeroHUD.gd" id="2_hero_hud"]
+[ext_resource type="PackedScene" uid="uid://6d25jelm06ao" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
+[ext_resource type="Script" uid="uid://br6j1md20h47e" path="res://scripts/playground/ui/ItemSlotUI.gd" id="4_item_slot"]
+[ext_resource type="Script" uid="uid://dib86u33xavit" path="res://scripts/items/ItemData.gd" id="4_yqvi2"]
+[ext_resource type="Resource" path="res://assets/data/items/rusty_sword.tres" id="5_sword"]
+[ext_resource type="Resource" path="res://assets/data/items/leather_helm.tres" id="6_helm"]
+[ext_resource type="Resource" path="res://assets/data/items/apprentice_robe.tres" id="7_robe"]
+[ext_resource type="Resource" path="res://assets/data/items/wooden_shield.tres" id="8_shield"]
+[ext_resource type="Resource" path="res://assets/data/items/light_boots.tres" id="9_boots"]
 
-[node name="PlayGround" type="Node2D"]
+[node name="PlayGround" type="Node2D" unique_id=1971475998]
 script = ExtResource("1_playground")
 hero_scene = ExtResource("3_hero")
 
-[node name="DiamondOutline" type="Line2D" parent="."]
+[node name="DiamondOutline" type="Line2D" parent="." unique_id=1806974366]
 points = PackedVector2Array(-170, 0, 0, -170, 170, 0, 0, 170, -170, 0)
 width = 2.0
 default_color = Color(1, 1, 1, 0.35)
 
-[node name="HeroContainer" type="Node2D" parent="."]
+[node name="HeroContainer" type="Node2D" parent="." unique_id=1063084318]
 y_sort_enabled = true
 
-[node name="HeroHUD" type="CanvasLayer" parent="."]
-script = ExtResource("2_summon_ui")
+[node name="HeroHUD" type="CanvasLayer" parent="." unique_id=1528719271]
+script = ExtResource("2_hero_hud")
+shared_starter_items = Array[ExtResource("4_yqvi2")]([ExtResource("5_sword"), ExtResource("5_sword"), ExtResource("6_helm"), ExtResource("7_robe"), ExtResource("8_shield"), ExtResource("9_boots")])
 
-[node name="BottomCenterUI" type="Control" parent="HeroHUD"]
+[node name="BottomCenterUI" type="Control" parent="HeroHUD" unique_id=99880028]
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5
@@ -27,17 +35,531 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -75.0
-offset_top = -60.0
+offset_top = -120.0
 offset_right = 75.0
-offset_bottom = -16.0
+offset_bottom = -76.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="SummonButton" type="Button" parent="HeroHUD/BottomCenterUI"]
+[node name="SummonButton" type="Button" parent="HeroHUD/BottomCenterUI" unique_id=365277363]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -9.0
+offset_top = -55.0
+offset_right = -9.0
+offset_bottom = -55.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "모험가 뽑기"
+
+[node name="InventoryRoot" type="Control" parent="HeroHUD" unique_id=1933566642]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -380.0
+offset_top = -110.0
+offset_right = 380.0
+offset_bottom = -22.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="InventoryPanel" type="PanelContainer" parent="HeroHUD/InventoryRoot" unique_id=468930310]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -13.5
+offset_bottom = 13.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel" unique_id=355271384]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer" unique_id=1969542384]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="InventoryTitle" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer" unique_id=1063230917]
+layout_mode = 2
+text = "인벤토리 (9칸)"
+horizontal_alignment = 1
+
+[node name="InventorySlots" type="HBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer" unique_id=1252940226]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Slot0" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=717713344]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot0" unique_id=952747037]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot0/MarginContainer" unique_id=1674219032]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot0/MarginContainer/VBoxContainer" unique_id=2109323070]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot0/MarginContainer/VBoxContainer" unique_id=1658166030]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot1" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=586483036]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot1" unique_id=506556244]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot1/MarginContainer" unique_id=1092963185]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot1/MarginContainer/VBoxContainer" unique_id=1947564722]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot1/MarginContainer/VBoxContainer" unique_id=1143151569]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot2" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=1073051141]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot2" unique_id=1531170504]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot2/MarginContainer" unique_id=1568579915]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot2/MarginContainer/VBoxContainer" unique_id=1340472958]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot2/MarginContainer/VBoxContainer" unique_id=358142384]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot3" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=1393964616]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot3" unique_id=1280870815]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot3/MarginContainer" unique_id=1145981847]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot3/MarginContainer/VBoxContainer" unique_id=166898297]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot3/MarginContainer/VBoxContainer" unique_id=2099004995]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot4" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=1761670365]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot4" unique_id=1266919507]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot4/MarginContainer" unique_id=755807958]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot4/MarginContainer/VBoxContainer" unique_id=680780079]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot4/MarginContainer/VBoxContainer" unique_id=1821956297]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot5" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=1699653412]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 5
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot5" unique_id=609558442]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot5/MarginContainer" unique_id=743962677]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot5/MarginContainer/VBoxContainer" unique_id=584880854]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot5/MarginContainer/VBoxContainer" unique_id=126053449]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot6" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=43440257]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 6
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot6" unique_id=509025328]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot6/MarginContainer" unique_id=707688630]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot6/MarginContainer/VBoxContainer" unique_id=1755838031]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot6/MarginContainer/VBoxContainer" unique_id=223194363]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot7" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=158067039]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 7
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot7" unique_id=399501778]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot7/MarginContainer" unique_id=622049586]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot7/MarginContainer/VBoxContainer" unique_id=1185751396]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot7/MarginContainer/VBoxContainer" unique_id=578272119]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Slot8" type="PanelContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots" unique_id=214852363]
+custom_minimum_size = Vector2(74, 74)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_index = 8
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot8" unique_id=513768232]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot8/MarginContainer" unique_id=501983940]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot8/MarginContainer/VBoxContainer" unique_id=917279591]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventorySlots/Slot8/MarginContainer/VBoxContainer" unique_id=1731050385]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="StatusRoot" type="Control" parent="HeroHUD" unique_id=219590879]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 280.0
+offset_bottom = 220.0
+
+[node name="StatusPanel" type="PanelContainer" parent="HeroHUD/StatusRoot" unique_id=263793067]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "모험가 뽑기"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/StatusRoot/StatusPanel" unique_id=1047274096]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer" unique_id=1620806680]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StatsPanel" type="VBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer" unique_id=708336604]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="StatsTitle" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=1901078397]
+layout_mode = 2
+text = "스텟"
+
+[node name="StrengthLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=133975802]
+layout_mode = 2
+text = "힘: -"
+
+[node name="AgilityLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=1367426064]
+layout_mode = 2
+text = "민첩: -"
+
+[node name="IntelligenceLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=640720993]
+layout_mode = 2
+text = "지능: -"
+
+[node name="HSeparator" type="HSeparator" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=1868212818]
+layout_mode = 2
+
+[node name="PhysicalAttackLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=2072533855]
+layout_mode = 2
+text = "물리공격력: -"
+
+[node name="MagicAttackLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=1963970763]
+layout_mode = 2
+text = "마법공격력: -"
+
+[node name="AttackSpeedLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=846169566]
+layout_mode = 2
+text = "공격속도: -"
+
+[node name="EquipPanel" type="VBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer" unique_id=761790589]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="EquipTitle" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel" unique_id=1948426469]
+layout_mode = 2
+text = "장비"
+
+[node name="EquipSlots" type="GridContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel" unique_id=1181008688]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+columns = 2
+
+[node name="HeadSlot" type="PanelContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots" unique_id=131221827]
+custom_minimum_size = Vector2(90, 68)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_kind = "equipment"
+slot_index = 0
+empty_label_text = "머리"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/HeadSlot" unique_id=2138287327]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/HeadSlot/MarginContainer" unique_id=1295890373]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/HeadSlot/MarginContainer/VBoxContainer" unique_id=1618724404]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/HeadSlot/MarginContainer/VBoxContainer" unique_id=1556656526]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="LeftHandSlot" type="PanelContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots" unique_id=1002948673]
+custom_minimum_size = Vector2(90, 68)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_kind = "equipment"
+slot_index = 1
+empty_label_text = "왼손"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/LeftHandSlot" unique_id=1849231590]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/LeftHandSlot/MarginContainer" unique_id=56465692]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/LeftHandSlot/MarginContainer/VBoxContainer" unique_id=380529010]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/LeftHandSlot/MarginContainer/VBoxContainer" unique_id=1235641306]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="BodySlot" type="PanelContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots" unique_id=2042796346]
+custom_minimum_size = Vector2(90, 68)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_kind = "equipment"
+slot_index = 2
+empty_label_text = "몸"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/BodySlot" unique_id=658041739]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/BodySlot/MarginContainer" unique_id=629696653]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/BodySlot/MarginContainer/VBoxContainer" unique_id=70454495]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/BodySlot/MarginContainer/VBoxContainer" unique_id=368802804]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="RightHandSlot" type="PanelContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots" unique_id=731854072]
+custom_minimum_size = Vector2(90, 68)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_kind = "equipment"
+slot_index = 3
+empty_label_text = "오른손"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/RightHandSlot" unique_id=2027158575]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/RightHandSlot/MarginContainer" unique_id=674510339]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/RightHandSlot/MarginContainer/VBoxContainer" unique_id=796920885]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/RightHandSlot/MarginContainer/VBoxContainer" unique_id=1853946655]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="FeetSlot" type="PanelContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots" unique_id=203975828]
+custom_minimum_size = Vector2(90, 68)
+layout_mode = 2
+script = ExtResource("4_item_slot")
+slot_kind = "equipment"
+slot_index = 4
+empty_label_text = "발"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/FeetSlot" unique_id=1890610184]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/FeetSlot/MarginContainer" unique_id=977636998]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/FeetSlot/MarginContainer/VBoxContainer" unique_id=589170440]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots/FeetSlot/MarginContainer/VBoxContainer" unique_id=1503487784]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="TooltipPanel" type="PanelContainer" parent="HeroHUD" unique_id=806513108]
+visible = false
+offset_right = 180.0
+offset_bottom = 80.0
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/TooltipPanel" unique_id=1517713060]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="TooltipLabel" type="Label" parent="HeroHUD/TooltipPanel/MarginContainer" unique_id=1750612695]
+layout_mode = 2
+autowrap_mode = 2

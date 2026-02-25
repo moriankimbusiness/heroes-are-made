@@ -1,4 +1,13 @@
 extends Area2D
+class_name Hero
+
+const EquipmentStateRef = preload("res://scripts/items/EquipmentState.gd")
+const ItemEnumsRef = preload("res://scripts/items/ItemEnums.gd")
+
+signal hero_clicked(hero: Hero)
+signal hero_moved(hero: Hero, world_position: Vector2)
+signal hero_stats_changed(hero: Hero, stats: HeroStats)
+signal equipment_changed(hero: Hero, slot: int, item: ItemData)
 
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var drag_shape: CollisionShape2D = $DragShape
@@ -25,6 +34,14 @@ enum TargetPriority {
 @export var disable_attack_while_dragging: bool = true
 @export_range(0.0, 20.0, 0.1) var attack_flip_deadzone: float = 0.1
 @export var show_drag_collision_debug: bool = false
+@export_range(-999, 999, 1) var base_strength: int = 2
+@export_range(-999, 999, 1) var base_agility: int = 2
+@export_range(-999, 999, 1) var base_intelligence: int = 1
+@export_range(0.1, 9999.0, 0.1) var base_physical_attack: float = 10.0
+@export_range(0.0, 9999.0, 0.1) var base_magic_attack: float = 5.0
+@export_range(0.1, 20.0, 0.1) var base_attacks_per_second: float = 1.2
+@export_range(0.0, 3.0, 0.01) var agility_attack_speed_factor: float = 0.03
+@export var enhance_attack_multipliers: Array[float] = [1.0, 1.12, 1.26, 1.42, 1.6, 1.8, 2.02, 2.26, 2.52, 2.8, 3.1]
 
 var state: State = State.IDLE
 static var _any_dragging: bool = false
@@ -46,6 +63,8 @@ var _pending_attack_target: Area2D = null
 var _pending_attack_damage: float = 0.0
 var _pending_hit_frame_fired: bool = false
 var playground: Node2D = null
+var _stats: HeroStats = HeroStats.new()
+var _equipment: EquipmentState = null
 
 const CLICK_SELECTION_DISTANCE_SQ: float = 25.0
 
@@ -55,6 +74,7 @@ func _ready() -> void:
 	anim.frame_changed.connect(_on_animation_frame_changed)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+	_setup_equipment_system()
 	_attack01_base_duration_seconds = _get_animation_base_duration_seconds(&"attack01")
 	if attack_range != null:
 		attack_range.area_entered.connect(_on_attack_range_area_entered)
@@ -105,6 +125,7 @@ func _input(event: InputEvent) -> void:
 			_drag_velocity = Vector2.ZERO
 			if was_click:
 				_show_attack_range_preview = not _preview_state_before_press
+				hero_clicked.emit(self)
 			else:
 				_show_attack_range_preview = false
 			set_process(false)
@@ -143,6 +164,93 @@ func _process(delta: float) -> void:
 	if move.length_squared() > 0.0001:
 		_last_nonzero_move = move
 	global_position = desired
+	hero_moved.emit(self, global_position)
+
+
+func _setup_equipment_system() -> void:
+	_equipment = EquipmentStateRef.new()
+	_equipment.changed.connect(_on_equipment_state_changed)
+	_recalculate_stats()
+
+
+func get_current_stats() -> HeroStats:
+	return _stats.duplicate_state()
+
+
+func get_equipment_item(slot: int) -> ItemData:
+	if _equipment == null:
+		return null
+	return _equipment.get_item(slot)
+
+
+func can_equip_item(slot: int, item: ItemData) -> bool:
+	if _equipment == null:
+		return false
+	if item == null:
+		return false
+	return ItemEnumsRef.default_slot_for_item(item.item_type) == slot
+
+
+func equip_item(slot: int, item: ItemData) -> bool:
+	if not can_equip_item(slot, item):
+		return false
+	_equipment.set_item(slot, item)
+	return true
+
+
+func unequip_item(slot: int) -> ItemData:
+	if _equipment == null:
+		return null
+	var equipped_item: ItemData = _equipment.get_item(slot)
+	if equipped_item == null:
+		return null
+	_equipment.set_item(slot, null)
+	return equipped_item
+
+
+func _on_equipment_state_changed(slot: int, item: ItemData) -> void:
+	_recalculate_stats()
+	equipment_changed.emit(self, slot, item)
+
+
+func _recalculate_stats() -> void:
+	var total_strength: int = base_strength
+	var total_agility: int = base_agility
+	var total_intelligence: int = base_intelligence
+	var total_physical_bonus: float = 0.0
+	var total_magic_bonus: float = 0.0
+	for slot: int in ItemEnumsRef.all_equip_slots():
+		var item: ItemData = _equipment.get_item(slot) if _equipment != null else null
+		if item == null:
+			continue
+		total_strength += item.strength_bonus
+		total_agility += item.agility_bonus
+		total_intelligence += item.intelligence_bonus
+		var enhance_multiplier: float = _get_enhance_multiplier(item.enhance_level)
+		total_physical_bonus += item.physical_attack_bonus * enhance_multiplier
+		total_magic_bonus += item.magic_attack_bonus * enhance_multiplier
+
+	_stats.strength = total_strength
+	_stats.agility = total_agility
+	_stats.intelligence = total_intelligence
+	_stats.physical_attack = base_physical_attack + float(total_strength) + total_physical_bonus
+	_stats.magic_attack = base_magic_attack + float(total_intelligence) + total_magic_bonus
+	_stats.attacks_per_second = maxf(0.1, base_attacks_per_second * (1.0 + float(total_agility) * agility_attack_speed_factor))
+
+	attack_damage = maxf(0.1, _stats.physical_attack)
+	attacks_per_second = _stats.attacks_per_second
+	if state == State.ATTACK01:
+		_apply_attack_anim_speed_for_aps()
+	hero_stats_changed.emit(self, _stats.duplicate_state())
+
+
+func _get_enhance_multiplier(level: int) -> float:
+	if level <= 0:
+		return 1.0
+	if enhance_attack_multipliers.is_empty():
+		return 1.0 + float(level) * 0.12
+	var index: int = clampi(level, 0, enhance_attack_multipliers.size() - 1)
+	return enhance_attack_multipliers[index]
 
 
 func _on_attack_range_area_entered(area: Area2D) -> void:
