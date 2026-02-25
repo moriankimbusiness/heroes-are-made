@@ -1,0 +1,68 @@
+{
+  "items": [
+    {
+      "id": "rusty_sword",
+      "name": "낡은 검",
+      "type": "WEAPON",
+      "tier": "common",
+      "str": 2,
+      "agi": 0,
+      "int": 0,
+      "patk": 8.0,
+      "matk": 0.0
+    },
+    {
+      "id": "leather_helm",
+      "name": "가죽 투구",
+      "type": "HELMET",
+      "tier": "uncommon",
+      "str": 1,
+      "agi": 0,
+      "int": 0,
+      "patk": 0.0,
+      "matk": 0.0
+    },
+    {
+      "id": "apprentice_robe",
+      "name": "수련자 로브",
+      "type": "ARMOR",
+      "tier": "rare",
+      "str": 0,
+      "agi": 0,
+      "int": 3,
+      "patk": 0.0,
+      "matk": 4.0
+    },
+    {
+      "id": "wooden_shield",
+      "name": "나무 방패",
+      "type": "SHIELD",
+      "tier": "uncommon",
+      "str": 1,
+      "agi": -1,
+      "int": 0,
+      "patk": 0.0,
+      "matk": 0.0
+    },
+    {
+      "id": "light_boots",
+      "name": "경량 부츠",
+      "type": "BOOTS",
+      "tier": "common",
+      "str": 0,
+      "agi": 3,
+      "int": 0,
+      "patk": 0.0,
+      "matk": 0.0
+    }
+  ],
+  "pool": [
+    { "id": "rusty_sword", "w": 35.0 },
+    { "id": "leather_helm", "w": 20.0 },
+    { "id": "apprentice_robe", "w": 15.0 },
+    { "id": "wooden_shield", "w": 20.0 },
+    { "id": "light_boots", "w": 10.0 }
+  ],
+  "start": [
+  ]
+}
