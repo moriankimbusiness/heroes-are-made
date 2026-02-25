@@ -4,6 +4,7 @@ class_name ItemSlotUI
 const ItemEnumsRef = preload("res://scripts/items/ItemEnums.gd")
 
 signal slot_clicked(slot_kind: String, slot_index: int)
+signal slot_right_clicked(slot_kind: String, slot_index: int)
 signal slot_hover_started(slot_kind: String, slot_index: int)
 signal slot_hover_ended(slot_kind: String, slot_index: int)
 signal slot_drop_requested(source_kind: String, source_index: int, target_kind: String, target_index: int)
@@ -154,15 +155,18 @@ func _drop_data(_at_position: Vector2, data: Variant) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
-		if mb.button_index != MOUSE_BUTTON_LEFT:
+		if mb.button_index == MOUSE_BUTTON_RIGHT:
+			if mb.pressed:
+				slot_right_clicked.emit(slot_kind, slot_index)
 			return
-		if mb.pressed:
-			_pressed = true
-			_drag_started_this_press = false
-		else:
-			if _pressed and not _drag_started_this_press:
-				slot_clicked.emit(slot_kind, slot_index)
-			_pressed = false
+		if mb.button_index == MOUSE_BUTTON_LEFT:
+			if mb.pressed:
+				_pressed = true
+				_drag_started_this_press = false
+			else:
+				if _pressed and not _drag_started_this_press:
+					slot_clicked.emit(slot_kind, slot_index)
+				_pressed = false
 
 
 func _notification(what: int) -> void:

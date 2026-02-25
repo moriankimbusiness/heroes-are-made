@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-@onready var summon_button: Button = $BottomCenterUI/SummonButton
+@onready var summon_button: Button = $BottomCenterUI/ButtonsRow/SummonButton
 
 
 func _ready() -> void:

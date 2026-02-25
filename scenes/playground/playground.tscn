@@ -4,12 +4,6 @@
 [ext_resource type="Script" uid="uid://cj2sc2yvs26xr" path="res://scripts/playground/ui/HeroHUD.gd" id="2_hero_hud"]
 [ext_resource type="PackedScene" uid="uid://6d25jelm06ao" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
 [ext_resource type="Script" uid="uid://br6j1md20h47e" path="res://scripts/playground/ui/ItemSlotUI.gd" id="4_item_slot"]
-[ext_resource type="Script" uid="uid://dib86u33xavit" path="res://scripts/items/ItemData.gd" id="4_yqvi2"]
-[ext_resource type="Resource" path="res://assets/data/items/rusty_sword.tres" id="5_sword"]
-[ext_resource type="Resource" path="res://assets/data/items/leather_helm.tres" id="6_helm"]
-[ext_resource type="Resource" path="res://assets/data/items/apprentice_robe.tres" id="7_robe"]
-[ext_resource type="Resource" path="res://assets/data/items/wooden_shield.tres" id="8_shield"]
-[ext_resource type="Resource" path="res://assets/data/items/light_boots.tres" id="9_boots"]
 
 [node name="PlayGround" type="Node2D" unique_id=1971475998]
 script = ExtResource("1_playground")
@@ -25,7 +19,6 @@ y_sort_enabled = true
 
 [node name="HeroHUD" type="CanvasLayer" parent="." unique_id=1528719271]
 script = ExtResource("2_hero_hud")
-shared_starter_items = Array[ExtResource("4_yqvi2")]([ExtResource("5_sword"), ExtResource("5_sword"), ExtResource("6_helm"), ExtResource("7_robe"), ExtResource("8_shield"), ExtResource("9_boots")])
 
 [node name="BottomCenterUI" type="Control" parent="HeroHUD" unique_id=99880028]
 layout_mode = 3
@@ -34,21 +27,43 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -75.0
-offset_top = -180.0
-offset_right = 75.0
-offset_bottom = -136.0
+offset_left = -188.0
+offset_top = -188.0
+offset_right = 188.0
+offset_bottom = -108.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="SummonButton" type="Button" parent="HeroHUD/BottomCenterUI" unique_id=365277363]
+[node name="ButtonsRow" type="HBoxContainer" parent="HeroHUD/BottomCenterUI" unique_id=1948511301]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
+offset_bottom = 44.0
 grow_horizontal = 2
-grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="SummonButton" type="Button" parent="HeroHUD/BottomCenterUI/ButtonsRow" unique_id=365277363]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+size_flags_horizontal = 3
 text = "모험가 뽑기"
+
+[node name="EquipmentDrawButton" type="Button" parent="HeroHUD/BottomCenterUI/ButtonsRow" unique_id=1210356694]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "장비 뽑기"
+
+[node name="DrawNoticeLabel" type="Label" parent="HeroHUD/BottomCenterUI" unique_id=339064490]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 50.0
+offset_bottom = 76.0
+grow_horizontal = 2
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="InventoryRoot" type="Control" parent="HeroHUD" unique_id=1933566642]
 layout_mode = 3

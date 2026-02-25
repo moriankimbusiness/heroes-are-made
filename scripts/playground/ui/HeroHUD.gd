@@ -1,15 +1,17 @@
 extends CanvasLayer
 
 const ItemEnumsRef = preload("res://scripts/items/ItemEnums.gd")
+const ItemDataRef = preload("res://scripts/items/ItemData.gd")
 const InventoryStateRef = preload("res://scripts/items/InventoryState.gd")
 
 const SLOT_KIND_INVENTORY := "inventory"
 const SLOT_KIND_EQUIPMENT := "equipment"
 
 @export_range(1, 64, 1) var shared_inventory_slot_count: int = 9
-@export var shared_starter_items: Array[ItemData] = []
 
-@onready var summon_button: Button = $BottomCenterUI/SummonButton
+@onready var summon_button: Button = $BottomCenterUI/ButtonsRow/SummonButton
+@onready var equipment_draw_button: Button = $BottomCenterUI/ButtonsRow/EquipmentDrawButton
+@onready var draw_notice_label: Label = $BottomCenterUI/DrawNoticeLabel
 @onready var bottom_center_ui: Control = $BottomCenterUI
 @onready var inventory_root: Control = $InventoryRoot
 @onready var inventory_title_label: Label = $InventoryRoot/InventoryPanel/MarginContainer/VBoxContainer/InventoryTitle
@@ -38,11 +40,15 @@ var _equipment_slots: Dictionary = {}
 var _registered_hero_ids: Dictionary = {}
 var _registered_enemy_ids: Dictionary = {}
 var _slot_drag_in_progress: bool = false
+var _draw_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _draw_notice_serial: int = 0
 
 
 func _ready() -> void:
 	_playground = get_parent() as Node2D
 	summon_button.pressed.connect(_on_summon_button_pressed)
+	equipment_draw_button.pressed.connect(_on_equipment_draw_button_pressed)
+	_draw_rng.randomize()
 	_cache_slot_nodes()
 	_connect_slot_signals()
 	_setup_shared_inventory()
@@ -53,6 +59,7 @@ func _ready() -> void:
 	status_root.visible = false
 	enemy_status_root.visible = false
 	tooltip_panel.visible = false
+	draw_notice_label.visible = false
 	_refresh_ui()
 
 
@@ -78,11 +85,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _setup_shared_inventory() -> void:
 	_shared_inventory = InventoryStateRef.new(shared_inventory_slot_count)
-	for i: int in mini(shared_starter_items.size(), _shared_inventory.get_slot_count()):
-		var starter: ItemData = shared_starter_items[i]
-		if starter == null:
-			continue
-		_shared_inventory.set_item(i, starter.duplicate_item())
+	_populate_shared_inventory_from_item_database()
 	_shared_inventory.changed.connect(_on_shared_inventory_changed)
 
 
@@ -102,6 +105,7 @@ func _cache_slot_nodes() -> void:
 func _connect_slot_signals() -> void:
 	for slot: ItemSlotUI in _inventory_slots:
 		slot.slot_clicked.connect(_on_slot_clicked)
+		slot.slot_right_clicked.connect(_on_slot_right_clicked)
 		slot.slot_hover_started.connect(_on_slot_hover_started)
 		slot.slot_hover_ended.connect(_on_slot_hover_ended)
 		slot.slot_drop_requested.connect(_on_slot_drop_requested)
@@ -109,6 +113,7 @@ func _connect_slot_signals() -> void:
 		slot.slot_drag_ended.connect(_on_slot_drag_ended)
 	for slot_node: ItemSlotUI in _equipment_slots.values():
 		slot_node.slot_clicked.connect(_on_slot_clicked)
+		slot_node.slot_right_clicked.connect(_on_slot_right_clicked)
 		slot_node.slot_hover_started.connect(_on_slot_hover_started)
 		slot_node.slot_hover_ended.connect(_on_slot_hover_ended)
 		slot_node.slot_drop_requested.connect(_on_slot_drop_requested)
@@ -208,6 +213,30 @@ func _on_summon_button_pressed() -> void:
 	if hero == null:
 		return
 	_register_hero(hero)
+
+
+func _on_equipment_draw_button_pressed() -> void:
+	if _shared_inventory == null:
+		return
+	var empty_slot: int = _shared_inventory.find_first_empty_slot()
+	if empty_slot < 0:
+		_show_draw_notice("인벤토리가 가득 찼습니다.", Color(1.0, 0.6, 0.6, 1.0))
+		return
+
+	var item_db: Node = _get_item_database()
+	if item_db == null:
+		_show_draw_notice("아이템 DB를 찾을 수 없습니다.", Color(1.0, 0.6, 0.6, 1.0))
+		return
+	if not bool(item_db.call("is_ready")):
+		_show_draw_notice("아이템 DB가 준비되지 않았습니다.", Color(1.0, 0.6, 0.6, 1.0))
+		return
+
+	var rolled_item: ItemData = item_db.call("roll_draw_item", _draw_rng) as ItemData
+	if rolled_item == null:
+		_show_draw_notice("장비 뽑기 풀을 확인해 주세요.", Color(1.0, 0.6, 0.6, 1.0))
+		return
+	_shared_inventory.set_item(empty_slot, rolled_item)
+	_show_draw_notice("획득: %s" % _resolve_item_display_name(rolled_item), Color(0.7, 1.0, 0.75, 1.0))
 
 
 func _on_hero_clicked(hero: Hero) -> void:
@@ -335,7 +364,8 @@ func _refresh_ui() -> void:
 
 
 func _refresh_inventory_slots() -> void:
-	inventory_title_label.text = "공용 인벤토리 (9칸)"
+	var slot_count: int = _shared_inventory.get_slot_count() if _shared_inventory != null else shared_inventory_slot_count
+	inventory_title_label.text = "공용 인벤토리 (%d칸)" % slot_count
 	for slot: ItemSlotUI in _inventory_slots:
 		var item: ItemData = _shared_inventory.get_item(slot.slot_index) if _shared_inventory != null else null
 		slot.set_item(item)
@@ -385,11 +415,21 @@ func _format_signed_int(value: int) -> String:
 	return "%d" % value
 
 
+func _format_signed_float(value: float) -> String:
+	return "%+0.1f" % value
+
+
 func _on_slot_clicked(slot_kind: String, slot_index: int) -> void:
 	if slot_kind == SLOT_KIND_INVENTORY:
 		_try_equip_inventory_click(slot_index)
 	elif slot_kind == SLOT_KIND_EQUIPMENT:
 		_try_unequip_click(slot_index)
+
+
+func _on_slot_right_clicked(slot_kind: String, slot_index: int) -> void:
+	if slot_kind != SLOT_KIND_INVENTORY:
+		return
+	_try_auto_combine_inventory_click(slot_index)
 
 
 func _try_equip_inventory_click(inventory_index: int) -> bool:
@@ -447,12 +487,54 @@ func _apply_inventory_to_inventory_drop(source_index: int, target_index: int) ->
 	if source_item == null:
 		return false
 	var target_item: ItemData = _shared_inventory.get_item(target_index)
-	if target_item != null and target_item.can_combine_with(source_item):
-		target_item.enhance_level += 1
-		_shared_inventory.set_item(target_index, target_item)
-		_shared_inventory.set_item(source_index, null)
+	if _try_combine_inventory_items(source_index, target_index):
 		return true
 	_shared_inventory.swap_items(source_index, target_index)
+	return true
+
+
+func _try_auto_combine_inventory_click(source_index: int) -> bool:
+	if _shared_inventory == null:
+		return false
+	var source_item: ItemData = _shared_inventory.get_item(source_index)
+	if source_item == null:
+		return false
+
+	var target_index: int = _find_matching_combine_target_index(source_item, source_index)
+	if target_index < 0:
+		return false
+
+	return _try_combine_inventory_items(source_index, target_index)
+
+
+func _find_matching_combine_target_index(source_item: ItemData, source_index: int) -> int:
+	for i: int in _shared_inventory.get_slot_count():
+		if i == source_index:
+			continue
+		var candidate: ItemData = _shared_inventory.get_item(i)
+		if candidate == null:
+			continue
+		if candidate.can_combine_with(source_item):
+			return i
+	return -1
+
+
+func _try_combine_inventory_items(source_index: int, target_index: int) -> bool:
+	if _shared_inventory == null:
+		return false
+	if source_index == target_index:
+		return false
+	var source_item: ItemData = _shared_inventory.get_item(source_index)
+	var target_item: ItemData = _shared_inventory.get_item(target_index)
+	if source_item == null or target_item == null:
+		return false
+	if not target_item.can_combine_with(source_item):
+		return false
+	if target_item.enhance_level >= _get_max_enhance_level():
+		return false
+	target_item.enhance_level += 1
+	_shared_inventory.set_item(target_index, target_item)
+	_shared_inventory.set_item(source_index, null)
 	return true
 
 
@@ -545,20 +627,30 @@ func _build_item_detail_text(item: ItemData) -> String:
 	var title := item.display_name
 	if title.is_empty():
 		title = String(item.item_id)
+	title = "[%s] %s" % [ItemDataRef.tier_label(item.tier), title]
 	if item.enhance_level > 0:
 		title = "%s +%d" % [title, item.enhance_level]
 	lines.append(title)
 	lines.append("종류: %s" % ItemEnumsRef.item_type_label(item.item_type))
+	var stat_multiplier: float = _resolve_enhance_stat_multiplier(item.enhance_level)
+	var attack_multiplier: float = _resolve_enhance_attack_multiplier(item.enhance_level)
 	if item.strength_bonus != 0:
-		lines.append("힘 %s" % _format_signed_int(item.strength_bonus))
+		var final_strength: int = int(roundi(float(item.strength_bonus) * stat_multiplier))
+		lines.append("힘 %s (기본 %s x%.2f)" % [_format_signed_int(final_strength), _format_signed_int(item.strength_bonus), stat_multiplier])
 	if item.agility_bonus != 0:
-		lines.append("민첩 %s" % _format_signed_int(item.agility_bonus))
+		var final_agility: int = int(roundi(float(item.agility_bonus) * stat_multiplier))
+		lines.append("민첩 %s (기본 %s x%.2f)" % [_format_signed_int(final_agility), _format_signed_int(item.agility_bonus), stat_multiplier])
 	if item.intelligence_bonus != 0:
-		lines.append("지능 %s" % _format_signed_int(item.intelligence_bonus))
+		var final_intelligence: int = int(roundi(float(item.intelligence_bonus) * stat_multiplier))
+		lines.append("지능 %s (기본 %s x%.2f)" % [_format_signed_int(final_intelligence), _format_signed_int(item.intelligence_bonus), stat_multiplier])
 	if not is_zero_approx(item.physical_attack_bonus):
-		lines.append("물리 %+0.1f" % item.physical_attack_bonus)
+		var final_physical: float = item.physical_attack_bonus * attack_multiplier
+		lines.append("물리 %s (기본 %s x%.2f)" % [_format_signed_float(final_physical), _format_signed_float(item.physical_attack_bonus), attack_multiplier])
 	if not is_zero_approx(item.magic_attack_bonus):
-		lines.append("마법 %+0.1f" % item.magic_attack_bonus)
+		var final_magic: float = item.magic_attack_bonus * attack_multiplier
+		lines.append("마법 %s (기본 %s x%.2f)" % [_format_signed_float(final_magic), _format_signed_float(item.magic_attack_bonus), attack_multiplier])
+	if item.enhance_level >= _get_max_enhance_level():
+		lines.append("강화 상한 도달 (+%d)" % _get_max_enhance_level())
 	if lines.size() == 2:
 		lines.append("추가 스텟 없음")
 	return "\n".join(lines)
@@ -639,3 +731,77 @@ func _contains_point(control: Control, point: Vector2) -> bool:
 	if not control.visible:
 		return false
 	return control.get_global_rect().has_point(point)
+
+
+func _populate_shared_inventory_from_item_database() -> void:
+	var item_db: Node = _get_item_database()
+	if item_db == null:
+		return
+	if not bool(item_db.call("is_ready")):
+		return
+	var starter_ids: Array = item_db.call("get_starter_inventory_item_ids")
+	for i: int in mini(starter_ids.size(), _shared_inventory.get_slot_count()):
+		var item_id: Variant = starter_ids[i]
+		if not (item_id is String or item_id is StringName):
+			continue
+		var item: ItemData = item_db.call("create_item_instance_by_id", StringName(item_id)) as ItemData
+		if item == null:
+			continue
+		_shared_inventory.set_item(i, item)
+
+
+func _get_item_database() -> Node:
+	return get_tree().root.get_node_or_null("ItemDatabase")
+
+
+func _get_max_enhance_level() -> int:
+	if _selected_hero != null and is_instance_valid(_selected_hero):
+		return _selected_hero.get_max_enhance_level()
+	var item_db: Node = _get_item_database()
+	if item_db != null and item_db.has_method("get_max_enhance_level"):
+		return int(item_db.call("get_max_enhance_level"))
+	return ItemDataRef.MAX_ENHANCE_LEVEL
+
+
+func _resolve_enhance_attack_multiplier(level: int) -> float:
+	if _selected_hero != null and is_instance_valid(_selected_hero):
+		return _selected_hero.get_enhance_attack_multiplier(level)
+	var item_db: Node = _get_item_database()
+	if item_db != null and item_db.has_method("get_enhance_attack_multiplier"):
+		return float(item_db.call("get_enhance_attack_multiplier", level))
+	return 1.0 + float(clampi(level, 0, _get_max_enhance_level())) * 0.12
+
+
+func _resolve_enhance_stat_multiplier(level: int) -> float:
+	if _selected_hero != null and is_instance_valid(_selected_hero):
+		return _selected_hero.get_enhance_stat_multiplier(level)
+	var item_db: Node = _get_item_database()
+	if item_db != null and item_db.has_method("get_enhance_stat_multiplier"):
+		return float(item_db.call("get_enhance_stat_multiplier", level))
+	return 1.0 + float(clampi(level, 0, _get_max_enhance_level())) * 0.05
+
+
+func _resolve_item_display_name(item: ItemData) -> String:
+	if item == null:
+		return "알 수 없는 아이템"
+	if not item.display_name.is_empty():
+		return item.display_name
+	if item.item_id != StringName():
+		return String(item.item_id)
+	return "알 수 없는 아이템"
+
+
+func _show_draw_notice(message: String, tint: Color) -> void:
+	_draw_notice_serial += 1
+	var serial: int = _draw_notice_serial
+	draw_notice_label.text = message
+	draw_notice_label.modulate = tint
+	draw_notice_label.visible = true
+	var hide_timer: SceneTreeTimer = get_tree().create_timer(1.5)
+	hide_timer.timeout.connect(_on_draw_notice_hide_timeout.bind(serial))
+
+
+func _on_draw_notice_hide_timeout(serial: int) -> void:
+	if serial != _draw_notice_serial:
+		return
+	draw_notice_label.visible = false

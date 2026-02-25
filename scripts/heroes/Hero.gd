@@ -42,7 +42,14 @@ enum TargetPriority {
 @export_range(0.0, 9999.0, 0.1) var base_magic_attack: float = 5.0
 @export_range(0.1, 20.0, 0.1) var base_attacks_per_second: float = 1.2
 @export_range(0.0, 3.0, 0.01) var agility_attack_speed_factor: float = 0.03
-@export var enhance_attack_multipliers: Array[float] = [1.0, 1.12, 1.26, 1.42, 1.6, 1.8, 2.02, 2.26, 2.52, 2.8, 3.1]
+@export var enhance_attack_multipliers: Array[float] = [
+	1.0, 1.12, 1.26, 1.42, 1.60, 1.80, 2.02, 2.26,
+	2.52, 2.80, 3.10, 3.42, 3.76, 4.12, 4.50, 4.90
+]
+@export var enhance_stat_multipliers: Array[float] = [
+	1.0, 1.05, 1.10, 1.16, 1.22, 1.29, 1.36, 1.44,
+	1.52, 1.61, 1.70, 1.80, 1.91, 2.02, 2.14, 2.26
+]
 
 var state: State = State.IDLE
 static var _any_dragging: bool = false
@@ -230,12 +237,13 @@ func _recalculate_stats() -> void:
 		var item: ItemData = _equipment.get_item(slot) if _equipment != null else null
 		if item == null:
 			continue
-		total_strength += item.strength_bonus
-		total_agility += item.agility_bonus
-		total_intelligence += item.intelligence_bonus
-		var enhance_multiplier: float = _get_enhance_multiplier(item.enhance_level)
-		total_physical_bonus += item.physical_attack_bonus * enhance_multiplier
-		total_magic_bonus += item.magic_attack_bonus * enhance_multiplier
+		var stat_multiplier: float = _get_enhance_stat_multiplier(item.enhance_level)
+		total_strength += int(roundi(float(item.strength_bonus) * stat_multiplier))
+		total_agility += int(roundi(float(item.agility_bonus) * stat_multiplier))
+		total_intelligence += int(roundi(float(item.intelligence_bonus) * stat_multiplier))
+		var attack_multiplier: float = _get_enhance_attack_multiplier(item.enhance_level)
+		total_physical_bonus += item.physical_attack_bonus * attack_multiplier
+		total_magic_bonus += item.magic_attack_bonus * attack_multiplier
 
 	_stats.strength = total_strength
 	_stats.agility = total_agility
@@ -251,13 +259,40 @@ func _recalculate_stats() -> void:
 	hero_stats_changed.emit(self, _stats.duplicate_state())
 
 
-func _get_enhance_multiplier(level: int) -> float:
-	if level <= 0:
+func get_max_enhance_level() -> int:
+	return _get_max_enhance_level()
+
+
+func get_enhance_attack_multiplier(level: int) -> float:
+	return _get_enhance_attack_multiplier(level)
+
+
+func get_enhance_stat_multiplier(level: int) -> float:
+	return _get_enhance_stat_multiplier(level)
+
+
+func _get_max_enhance_level() -> int:
+	return ItemData.MAX_ENHANCE_LEVEL
+
+
+func _get_enhance_attack_multiplier(level: int) -> float:
+	var clamped_level: int = clampi(level, 0, _get_max_enhance_level())
+	if clamped_level <= 0:
 		return 1.0
 	if enhance_attack_multipliers.is_empty():
-		return 1.0 + float(level) * 0.12
-	var index: int = clampi(level, 0, enhance_attack_multipliers.size() - 1)
+		return 1.0 + float(clamped_level) * 0.12
+	var index: int = clampi(clamped_level, 0, enhance_attack_multipliers.size() - 1)
 	return enhance_attack_multipliers[index]
+
+
+func _get_enhance_stat_multiplier(level: int) -> float:
+	var clamped_level: int = clampi(level, 0, _get_max_enhance_level())
+	if clamped_level <= 0:
+		return 1.0
+	if enhance_stat_multipliers.is_empty():
+		return 1.0 + float(clamped_level) * 0.05
+	var index: int = clampi(clamped_level, 0, enhance_stat_multipliers.size() - 1)
+	return enhance_stat_multipliers[index]
 
 
 func _on_attack_range_area_entered(area: Area2D) -> void:
