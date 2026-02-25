@@ -167,6 +167,12 @@ Do not invert this order.
 2. Roll over: move/save daily outcomes to `docs/todo/YYYY-MM-Nw/YYYY-MM-DD.md`.
 3. Reset/update `TODO.md` for the new day and continue work from there.
 
+## Game Plan Sync (Mandatory)
+
+- Whenever a gameplay/UI/system feature is newly implemented or behavior is changed, update `GAME_PLAN.md` in the same task.
+- `GAME_PLAN.md` must reflect the latest implemented behavior (interaction rules, ownership/scope changes, and key formulas/tables).
+- Treat `TODO.md` and `GAME_PLAN.md` updates as part of the definition of done for feature implementation.
+
 ## Godot Executable Path (Environment Note)
 
 - Windows install path:
