@@ -27,6 +27,16 @@
   - [x] 인벤토리 -> 장비창: 클릭 장착 + 드래그 드롭 장착
   - [x] 장비창 -> 인벤토리: 클릭 해제 + 드래그 드롭 이동
 - [x] 상태창 외부(비-UI 월드) 클릭 시 상태창 닫기 동작 추가
+- [x] Enemy 라운드 체력 설계 반영
+  - [x] 최종 체력 공식 분리 적용: `base_max_health * level_hp_scale * round_multiplier`
+  - [x] 라운드 체력 배율 테이블 30라운드(1.00 -> 5.99) 공통화
+  - [x] Level 1/2 난이도 분리: `level_hp_scale`(L1=1.0, L2=2.0)
+  - [x] 밸런스 문서 추가: `docs/balance/enemy_health_round_table.md`
+- [x] Enemy 클릭 시 Enemy 상태창 표시 + Enemy 우측 배치/추적
+- [x] Enemy 상태창 체력 표시 추가: `현재체력 / 최대체력`
+- [x] Enemy 상태창 체력 UI 정수 표기 적용(내부 연산은 기존 float 유지)
+- [x] Hero/Enemy 상태창 위치 기준을 씬 앵커(`StatusAnchor`)로 분리
+- [x] `hero_base`/`enemy_base`에서 에디터로 상태창 기준 위치 조정 가능하도록 반영
 
 ## 백로그 (기획서 미구현)
 
@@ -64,10 +74,20 @@
 - [x] 강화 단계(+1, +2, +3, +4...)별 기본 공격력 증가 밸런스 테이블 작성
 - [x] 강화 결과 스텟/공격력 반영 및 UI 갱신
 
+### Enemy 상태창
+- [x] Enemy 클릭 시 상태창 표시 (Enemy 기준 오른쪽 배치)
+- [x] Enemy 이동 중 상태창 추적(Enemy 시그널 기반)
+- [x] Enemy 상태창 체력 표시(`현재체력 / 최대체력`)
+- [x] 체력 텍스트 정수 표기 적용
+
 ## 성능/아키텍처 & 검증 (2026-02-25)
 - [x] 이벤트 기반 UI 갱신 유지 (Hero 시그널 기반 선택/추적/스텟 갱신)
 - [x] 불필요한 `_process`/`_physics_process` 신규 추가 없음
 - [x] Inspector/Resource 기반 값(authoritative) 유지
 - [x] UI 입력 라우팅 정리: 드래그 중 클릭 닫기 오동작 방지(`_slot_drag_in_progress`)
+- [x] Enemy 체력 구조 분리: Enemy 기준체력 + Level 스케일 + Round 배율
+- [x] Enemy 상태창 갱신 이벤트 기반 유지(`enemy_clicked`, `enemy_moved`, `health_changed`)
+- [x] HeroHUD 신규 `_process` 추가 없이 Enemy 상태창 추적 구현
+- [x] HUD(UI) 책임 유지 + 엔티티 씬 앵커 책임 분리 적용
 - [x] Godot CLI 검증 통과
   - [x] 명령어: `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`

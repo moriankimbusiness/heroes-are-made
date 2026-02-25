@@ -1,10 +1,13 @@
 extends Area2D
 
 signal died(enemy: Area2D)
+signal enemy_clicked(enemy: Area2D)
+signal enemy_moved(enemy: Area2D, world_position: Vector2)
 signal health_changed(current: float, max_value: float, ratio: float)
 signal damage_taken(amount: float)
 
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
+@onready var status_anchor: Marker2D = $StatusAnchor
 
 enum State {
 	WALK,
@@ -20,6 +23,7 @@ enum State {
 var state: State = State.WALK
 var _is_finished: bool = false
 var _prev_global_x: float = 0.0
+var _prev_global_position: Vector2 = Vector2.ZERO
 var _is_dead: bool = false
 var _death_fade_started: bool = false
 var max_health: float = 100.0
@@ -31,12 +35,26 @@ func _ready() -> void:
 	_death_fade_started = false
 	set_max_health(base_max_health)
 	_prev_global_x = global_position.x
+	_prev_global_position = global_position
 	anim.animation_finished.connect(_on_animation_finished)
 	_play(State.WALK, true)
 
 
+func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
+	if _is_dead:
+		return
+	if event is not InputEventMouseButton:
+		return
+	var mb := event as InputEventMouseButton
+	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
+		return
+	enemy_clicked.emit(self)
+	get_viewport().set_input_as_handled()
+
+
 func _process(delta: float) -> void:
 	_update_facing_by_horizontal_motion()
+	_emit_moved_if_needed()
 
 
 func _update_facing_by_horizontal_motion() -> void:
@@ -114,6 +132,12 @@ func get_health_ratio() -> float:
 	return current_health / max_health
 
 
+func get_status_anchor_canvas_position() -> Vector2:
+	if status_anchor != null:
+		return status_anchor.get_global_transform_with_canvas().origin
+	return get_global_transform_with_canvas().origin
+
+
 func _play(new_state: State, force: bool = false) -> void:
 	if _is_dead and new_state != State.DEATH:
 		return
@@ -182,6 +206,7 @@ func _detach_from_path_agent() -> void:
 
 	reparent(world_parent, true)
 	_prev_global_x = global_position.x
+	_prev_global_position = global_position
 	if is_instance_valid(path_agent):
 		path_agent.queue_free()
 
@@ -202,6 +227,13 @@ func _start_death_fade_and_free() -> void:
 
 func _emit_health_changed() -> void:
 	health_changed.emit(current_health, max_health, get_health_ratio())
+
+
+func _emit_moved_if_needed() -> void:
+	if global_position.is_equal_approx(_prev_global_position):
+		return
+	_prev_global_position = global_position
+	enemy_moved.emit(self, global_position)
 
 func _anim_name_from_state(target_state: State) -> StringName:
 	match target_state:

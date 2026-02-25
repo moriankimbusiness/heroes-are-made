@@ -23,15 +23,20 @@ const SLOT_KIND_EQUIPMENT := "equipment"
 @onready var magic_attack_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/MagicAttackLabel
 @onready var attack_speed_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/AttackSpeedLabel
 @onready var equipment_slots_root: GridContainer = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/EquipPanel/EquipSlots
+@onready var enemy_status_root: Control = $EnemyStatusRoot
+@onready var enemy_status_panel: PanelContainer = $EnemyStatusRoot/EnemyStatusPanel
+@onready var enemy_health_label: Label = $EnemyStatusRoot/EnemyStatusPanel/MarginContainer/VBoxContainer/EnemyHealthLabel
 @onready var tooltip_panel: PanelContainer = $TooltipPanel
 @onready var tooltip_label: Label = $TooltipPanel/MarginContainer/TooltipLabel
 
 var _playground: Node2D = null
 var _selected_hero: Hero = null
+var _selected_enemy: Area2D = null
 var _shared_inventory: InventoryState = null
 var _inventory_slots: Array[ItemSlotUI] = []
 var _equipment_slots: Dictionary = {}
 var _registered_hero_ids: Dictionary = {}
+var _registered_enemy_ids: Dictionary = {}
 var _slot_drag_in_progress: bool = false
 
 
@@ -43,7 +48,10 @@ func _ready() -> void:
 	_setup_shared_inventory()
 	_register_existing_heroes()
 	_connect_hero_container()
+	_register_existing_enemies()
+	_connect_world_root_for_enemies()
 	status_root.visible = false
+	enemy_status_root.visible = false
 	tooltip_panel.visible = false
 	_refresh_ui()
 
@@ -54,7 +62,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not status_root.visible:
+	if not status_root.visible and not enemy_status_root.visible:
 		return
 	if _slot_drag_in_progress:
 		return
@@ -65,7 +73,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _is_click_inside_ui(mb.position):
 		return
-	_deselect_hero()
+	_clear_selection()
 
 
 func _setup_shared_inventory() -> void:
@@ -117,9 +125,21 @@ func _connect_hero_container() -> void:
 	hero_container.child_entered_tree.connect(_on_hero_container_child_entered_tree)
 
 
+func _connect_world_root_for_enemies() -> void:
+	var world_root: Node = get_tree().current_scene
+	if world_root == null:
+		return
+	world_root.child_entered_tree.connect(_on_world_child_entered_tree)
+
+
 func _register_existing_heroes() -> void:
 	for node: Node in get_tree().get_nodes_in_group(&"hero"):
 		_register_hero(node)
+
+
+func _register_existing_enemies() -> void:
+	for node: Node in get_tree().get_nodes_in_group(&"enemy"):
+		_register_enemy(node)
 
 
 func _register_hero(node: Node) -> void:
@@ -140,8 +160,43 @@ func _register_hero(node: Node) -> void:
 	node.tree_exited.connect(_on_hero_tree_exited.bind(hero_id))
 
 
+func _register_enemy(node: Node) -> void:
+	if node == null:
+		return
+	if not (node is Area2D):
+		return
+	if not node.is_in_group(&"enemy"):
+		return
+	if not node.has_signal("enemy_clicked"):
+		return
+
+	var enemy_id: int = node.get_instance_id()
+	if _registered_enemy_ids.has(enemy_id):
+		return
+	_registered_enemy_ids[enemy_id] = true
+
+	var clicked_callable := Callable(self, "_on_enemy_clicked")
+	if not node.is_connected("enemy_clicked", clicked_callable):
+		node.connect("enemy_clicked", clicked_callable)
+	if node.has_signal("enemy_moved"):
+		var moved_callable := Callable(self, "_on_enemy_moved")
+		if not node.is_connected("enemy_moved", moved_callable):
+			node.connect("enemy_moved", moved_callable)
+	if node.has_signal("health_changed"):
+		var health_callable := Callable(self, "_on_enemy_health_changed").bind(node)
+		if not node.is_connected("health_changed", health_callable):
+			node.connect("health_changed", health_callable)
+	var tree_exit_callable := _on_enemy_tree_exited.bind(enemy_id)
+	if not node.tree_exited.is_connected(tree_exit_callable):
+		node.tree_exited.connect(tree_exit_callable)
+
+
 func _on_hero_container_child_entered_tree(node: Node) -> void:
 	_register_hero(node)
+
+
+func _on_world_child_entered_tree(node: Node) -> void:
+	_register_enemy(node)
 
 
 func _on_summon_button_pressed() -> void:
@@ -159,10 +214,20 @@ func _on_hero_clicked(hero: Hero) -> void:
 	_select_hero(hero)
 
 
+func _on_enemy_clicked(enemy: Area2D) -> void:
+	_select_enemy(enemy)
+
+
 func _on_hero_moved(hero: Hero, _world_position: Vector2) -> void:
 	if hero != _selected_hero:
 		return
 	_update_status_position()
+
+
+func _on_enemy_moved(enemy: Area2D, _world_position: Vector2) -> void:
+	if enemy != _selected_enemy:
+		return
+	_update_enemy_status_position()
 
 
 func _on_hero_stats_changed(hero: Hero, _stats: HeroStats) -> void:
@@ -178,6 +243,12 @@ func _on_hero_equipment_changed(hero: Hero, _slot: int, _item: ItemData) -> void
 	_refresh_stat_labels()
 
 
+func _on_enemy_health_changed(current: float, max_value: float, _ratio: float, enemy: Area2D) -> void:
+	if enemy != _selected_enemy:
+		return
+	_refresh_enemy_health_from_values(current, max_value)
+
+
 func _on_hero_tree_exited(hero_id: int) -> void:
 	_registered_hero_ids.erase(hero_id)
 	if _selected_hero == null:
@@ -190,15 +261,50 @@ func _on_hero_tree_exited(hero_id: int) -> void:
 	_deselect_hero()
 
 
+func _on_enemy_tree_exited(enemy_id: int) -> void:
+	call_deferred("_on_enemy_tree_exited_deferred", enemy_id)
+
+
+func _on_enemy_tree_exited_deferred(enemy_id: int) -> void:
+	var enemy_obj: Object = instance_from_id(enemy_id)
+	if enemy_obj != null and enemy_obj is Node and (enemy_obj as Node).is_inside_tree():
+		return
+	_registered_enemy_ids.erase(enemy_id)
+	if _selected_enemy == null:
+		return
+	if not is_instance_valid(_selected_enemy):
+		_deselect_enemy()
+		return
+	if _selected_enemy.get_instance_id() != enemy_id:
+		return
+	_deselect_enemy()
+
+
 func _select_hero(hero: Hero) -> void:
 	if hero == null:
 		return
 	if not is_instance_valid(hero):
 		return
+	if _selected_enemy != null:
+		_deselect_enemy()
 	_selected_hero = hero
 	status_root.visible = true
 	_refresh_ui()
 	_update_status_position()
+
+
+func _select_enemy(enemy: Area2D) -> void:
+	if enemy == null:
+		return
+	if not is_instance_valid(enemy):
+		return
+	if _selected_hero != null:
+		_deselect_hero()
+	_selected_enemy = enemy
+	enemy_status_root.visible = true
+	tooltip_panel.visible = false
+	_refresh_enemy_health_label()
+	_update_enemy_status_position()
 
 
 func _deselect_hero() -> void:
@@ -206,6 +312,20 @@ func _deselect_hero() -> void:
 	status_root.visible = false
 	tooltip_panel.visible = false
 	_refresh_ui()
+
+
+func _deselect_enemy() -> void:
+	_selected_enemy = null
+	enemy_status_root.visible = false
+	enemy_health_label.text = "체력: - / -"
+	tooltip_panel.visible = false
+
+
+func _clear_selection() -> void:
+	if _selected_hero != null:
+		_deselect_hero()
+	if _selected_enemy != null:
+		_deselect_enemy()
 
 
 func _refresh_ui() -> void:
@@ -461,8 +581,7 @@ func _update_tooltip_position() -> void:
 func _update_status_position() -> void:
 	if _selected_hero == null or not is_instance_valid(_selected_hero):
 		return
-	var hero_canvas_pos: Vector2 = _selected_hero.get_global_transform_with_canvas().origin
-	var target := hero_canvas_pos + Vector2(120.0, -120.0)
+	var target: Vector2 = _selected_hero.get_status_anchor_canvas_position()
 	var viewport_size := get_viewport().get_visible_rect().size
 	var panel_size := status_panel.size
 	target.x = clampf(target.x, 0.0, maxf(0.0, viewport_size.x - panel_size.x))
@@ -470,8 +589,45 @@ func _update_status_position() -> void:
 	status_root.position = target
 
 
+func _update_enemy_status_position() -> void:
+	if _selected_enemy == null or not is_instance_valid(_selected_enemy):
+		return
+	var target: Vector2
+	if _selected_enemy.has_method("get_status_anchor_canvas_position"):
+		target = _selected_enemy.call("get_status_anchor_canvas_position")
+	else:
+		target = _selected_enemy.get_global_transform_with_canvas().origin
+	var viewport_size := get_viewport().get_visible_rect().size
+	var panel_size := enemy_status_panel.size
+	target.x = clampf(target.x, 0.0, maxf(0.0, viewport_size.x - panel_size.x))
+	target.y = clampf(target.y, 0.0, maxf(0.0, viewport_size.y - panel_size.y))
+	enemy_status_root.position = target
+
+
+func _refresh_enemy_health_label() -> void:
+	if _selected_enemy == null or not is_instance_valid(_selected_enemy):
+		enemy_health_label.text = "체력: - / -"
+		return
+	if not _selected_enemy.has_method("get_current_health"):
+		enemy_health_label.text = "체력: - / -"
+		return
+	if not _selected_enemy.has_method("get_max_health"):
+		enemy_health_label.text = "체력: - / -"
+		return
+	var current: float = float(_selected_enemy.call("get_current_health"))
+	var max_value: float = float(_selected_enemy.call("get_max_health"))
+	_refresh_enemy_health_from_values(current, max_value)
+
+
+func _refresh_enemy_health_from_values(current: float, max_value: float) -> void:
+	var max_int: int = maxi(1, roundi(max_value))
+	var current_int: int = clampi(roundi(current), 0, max_int)
+	enemy_health_label.text = "체력: %d / %d" % [current_int, max_int]
+
+
 func _is_click_inside_ui(point: Vector2) -> bool:
 	return _contains_point(status_panel, point) \
+		or _contains_point(enemy_status_panel, point) \
 		or _contains_point(inventory_root, point) \
 		or _contains_point(bottom_center_ui, point) \
 		or _contains_point(tooltip_panel, point)

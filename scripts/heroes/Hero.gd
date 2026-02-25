@@ -14,6 +14,7 @@ signal equipment_changed(hero: Hero, slot: int, item: ItemData)
 @onready var attack_range: Area2D = $AttackRange
 @onready var attack_range_shape: CollisionShape2D = $AttackRange/CollisionShape2D
 @onready var attack_timer: Timer = $AttackTimer
+@onready var status_anchor: Marker2D = $StatusAnchor
 
 enum State {
 	IDLE,
@@ -175,6 +176,12 @@ func _setup_equipment_system() -> void:
 
 func get_current_stats() -> HeroStats:
 	return _stats.duplicate_state()
+
+
+func get_status_anchor_canvas_position() -> Vector2:
+	if status_anchor != null:
+		return status_anchor.get_global_transform_with_canvas().origin
+	return get_global_transform_with_canvas().origin
 
 
 func get_equipment_item(slot: int) -> ItemData:

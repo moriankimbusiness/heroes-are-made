@@ -24,7 +24,9 @@
 * `히어로를 클릭했을 때만` 상태창이 열린다.
 * 상태창은 선택 히어로의 우측에 표시된다.
 * 히어로를 드래그로 이동하면 상태창도 함께 따라간다.
-* 상태창/인벤토리/UI 바깥 월드를 클릭하면 상태창이 닫힌다.
+* 상태창/인벤토리/UI 바깥 월드를 클릭하면 열려 있는 상태창(히어로/Enemy)이 닫힌다.
+* 히어로 상태창 기준점은 `hero_base`의 `StatusAnchor`로 관리한다.
+* 상태창 우측 위치 튜닝은 `hero_base`에서 `StatusAnchor` 위치를 에디터로 조정한다.
 
 ---
 
@@ -95,3 +97,43 @@
 * 강화 시 원본 1개는 소모되고 대상 아이템 강화 수치가 증가
 * 강화 배율 테이블: `docs/balance/enhance_table.md`
 * 강화 결과는 스텟/공격력에 즉시 반영
+
+---
+
+# Enemy
+
+## 상태창
+
+* `Enemy를 클릭했을 때만` Enemy 상태창이 열린다.
+* Enemy 상태창은 선택된 Enemy 우측에 표시된다.
+* Enemy가 이동하면 상태창도 함께 따라간다.
+* 표시 정보는 `체력: 현재체력 / 최대체력`이다.
+* 체력 표시는 정수로 표기한다.
+* 선택 상태는 히어로/Enemy 중 하나만 유지된다.
+* Enemy 상태창 기준점은 `enemy_base`의 `StatusAnchor`로 관리한다.
+* 상태창 우측 위치 튜닝은 `enemy_base`에서 `StatusAnchor` 위치를 에디터로 조정한다.
+
+---
+
+# Enemy 라운드 체력 설계
+
+## 역할 분리
+
+* `enemy_base`는 적 타입 기준 체력(`base_max_health`)을 가진다.
+* `level`은 레벨별 난이도 스케일(`level_hp_scale`)을 가진다.
+* `round`는 라운드 체력 배율(`round_enemy_health_multipliers`)을 가진다.
+
+## 최종 체력 공식
+
+* `final_hp = enemy_base_max_health * level_hp_scale * round_multiplier`
+
+## 레벨별 적용 기준
+
+* Level 1: `level_hp_scale = 1.0`
+* Level 2: `level_hp_scale = 2.0`
+* 라운드 배율은 Level 1/2 모두 공통 `1~30` 테이블을 사용한다.
+
+## 30라운드 이후
+
+* `use_formula_after_table = true`로 자동 확장한다.
+* 상세값은 `docs/balance/enemy_health_round_table.md` 기준으로 관리한다.

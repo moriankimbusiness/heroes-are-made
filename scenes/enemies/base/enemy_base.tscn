@@ -151,6 +151,9 @@ autoplay = "walk"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=999267602]
 shape = SubResource("CircleShape2D_md0e3")
 
+[node name="StatusAnchor" type="Marker2D" parent="." unique_id=2057288743]
+position = Vector2(36, -46)
+
 [node name="HealthBar" type="ProgressBar" parent="." unique_id=101301111]
 offset_left = -11.0
 offset_top = -27.0
