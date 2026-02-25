@@ -37,6 +37,20 @@
 - [x] Enemy 상태창 체력 UI 정수 표기 적용(내부 연산은 기존 float 유지)
 - [x] Hero/Enemy 상태창 위치 기준을 씬 앵커(`StatusAnchor`)로 분리
 - [x] `hero_base`/`enemy_base`에서 에디터로 상태창 기준 위치 조정 가능하도록 반영
+- [x] 하단 중앙 `장비 뽑기` 버튼 UI 추가 (`모험가 뽑기`와 나란히 배치)
+- [x] 장비 뽑기 가중치 랜덤 지급 구현 (공용 인벤토리 빈칸 1개 지급)
+- [x] 인벤토리 가득 참 상태에서 장비 뽑기 클릭 허용 + 경고 라벨 안내
+- [x] 아이템 데이터 원본을 JSON 테이블(`assets/data/items/item_table.json`)로 전환
+- [x] 게임 시작 시 `ItemDatabase` Autoload에서 아이템/뽑기 풀 1회 로드
+- [x] JSON 파싱/스키마 오류 시 즉시 종료(fail-fast) 정책 반영
+- [x] JSON 키 네이밍 축약 적용 (`type/str/agi/int/patk/matk`, `pool`, `start`)
+- [x] 아이템 합성 조건을 동일 아이템 + 동일 강화 레벨로 제한 (`+0/+0`, `+1/+1` ...)
+- [x] 인벤토리 우클릭 자동 합성 추가 (같은 강화 레벨 짝 자동 탐색 후 1회 합성)
+- [x] 인벤토리 드래그 합성 경로를 우클릭과 동일 규칙 함수로 공통화 (같은 아이템+같은 강화 레벨)
+- [x] 아이템 티어(`common/uncommon/rare/epic/legendary`) 필드 추가 및 JSON 파싱 검증 반영
+- [x] 강화 상한 `+15` 고정 및 상한 도달 아이템 합성 차단
+- [x] 강화 시 기본스탯/공격보너스 분리 배율 적용 (`enh_stat`, `enh_atk`)
+- [x] Hover 툴팁 최종 수치 표시 + `기본값 x 강화배율` 분해 정보 표시
 
 ## 백로그 (기획서 미구현)
 
@@ -89,5 +103,9 @@
 - [x] Enemy 상태창 갱신 이벤트 기반 유지(`enemy_clicked`, `enemy_moved`, `health_changed`)
 - [x] HeroHUD 신규 `_process` 추가 없이 Enemy 상태창 추적 구현
 - [x] HUD(UI) 책임 유지 + 엔티티 씬 앵커 책임 분리 적용
+- [x] 장비 뽑기 안내 라벨 자동 숨김을 `SceneTreeTimer` 이벤트 기반으로 구현 (`_process` 미사용)
+- [x] 아이템/뽑기 데이터 Editor/Inspector 하드코딩 제거, JSON authoritative 구조로 정리
+- [x] 합성 규칙/우클릭 자동 합성 모두 이벤트 입력 기반 처리 (`_process`/`_physics_process` 추가 없음)
+- [x] 강화 상한/티어/툴팁 계산 로직 이벤트 기반 갱신 유지 (`_process`/`_physics_process` 추가 없음)
 - [x] Godot CLI 검증 통과
-  - [x] 명령어: `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
+  - [x] 명령어: `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit` (최종 통과)
