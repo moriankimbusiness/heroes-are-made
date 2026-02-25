@@ -4,6 +4,7 @@ extends Node
 @export var round_enemy_scenes: Array[PackedScene] = []
 @export var round_spawn_counts: Array[int] = []
 @export var round_enemy_health_multipliers: Array[float] = []
+@export_range(0.1, 10.0, 0.1) var level_hp_scale: float = 1.0
 @export var use_formula_after_table: bool = true
 @export_range(0.0, 1.0, 0.001) var formula_growth_rate: float = 0.08
 @export_range(0.0, 1.0, 0.001) var formula_softcap_rate: float = 0.015
@@ -154,7 +155,7 @@ func _apply_round_health_multiplier(enemy: Node) -> void:
 		base_max_health = float(enemy.call("get_max_health"))
 
 	var multiplier: float = _get_health_multiplier_for_current_round()
-	enemy.call("set_max_health", base_max_health * multiplier)
+	enemy.call("set_max_health", base_max_health * level_hp_scale * multiplier)
 
 
 func _get_health_multiplier_for_current_round() -> float:
