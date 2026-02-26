@@ -166,6 +166,7 @@ Do not invert this order.
 1. Work from `TODO.md` during the day.
 2. Roll over: move/save daily outcomes to `docs/todo/YYYY-MM-Nw/YYYY-MM-DD.md`.
 3. Reset/update `TODO.md` for the new day and continue work from there.
+4. When updating `TODO.md`, if completed sections from any previous date are still present, move them first to the matching daily archive file (`docs/todo/YYYY-MM-Nw/YYYY-MM-DD.md`) before adding new entries.
 
 ## Game Plan Sync (Mandatory)
 
