@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+AppSettings="*res://scripts/core/AppSettings.gd"
 ItemDatabase="*res://scripts/items/ItemDatabase.gd"
 
 [display]

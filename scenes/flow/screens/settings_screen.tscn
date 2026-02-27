@@ -1,0 +1,106 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/flow/screens/SettingsScreen.gd" id="1_script"]
+
+[node name="SettingsScreen" type="PanelContainer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -210.0
+offset_right = 320.0
+offset_bottom = 210.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "설정"
+horizontal_alignment = 1
+
+[node name="ResolutionRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ResolutionLabel" type="Label" parent="MarginContainer/VBoxContainer/ResolutionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "해상도"
+
+[node name="ResolutionOptionButton" type="OptionButton" parent="MarginContainer/VBoxContainer/ResolutionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FullscreenCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/ResolutionRow"]
+layout_mode = 2
+text = "전체화면"
+
+[node name="BgmRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BgmLabel" type="Label" parent="MarginContainer/VBoxContainer/BgmRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "배경음"
+
+[node name="BgmVolumeSlider" type="HSlider" parent="MarginContainer/VBoxContainer/BgmRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="BgmVolumeLabel" type="Label" parent="MarginContainer/VBoxContainer/BgmRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(56, 0)
+text = "100%"
+horizontal_alignment = 2
+
+[node name="BgmMuteCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/BgmRow"]
+layout_mode = 2
+text = "음소거"
+
+[node name="SfxRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SfxLabel" type="Label" parent="MarginContainer/VBoxContainer/SfxRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "효과음"
+
+[node name="SfxVolumeSlider" type="HSlider" parent="MarginContainer/VBoxContainer/SfxRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="SfxVolumeLabel" type="Label" parent="MarginContainer/VBoxContainer/SfxRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(56, 0)
+text = "100%"
+horizontal_alignment = 2
+
+[node name="SfxMuteCheckBox" type="CheckBox" parent="MarginContainer/VBoxContainer/SfxRow"]
+layout_mode = 2
+text = "음소거"
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "메인으로"

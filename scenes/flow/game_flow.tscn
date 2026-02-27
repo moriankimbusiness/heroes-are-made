@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/flow/screens/node_resolve_screen.tscn" id="6_node_resolve"]
 [ext_resource type="PackedScene" path="res://scenes/flow/screens/node_result_screen.tscn" id="7_node_result"]
 [ext_resource type="PackedScene" path="res://scenes/flow/screens/run_result_screen.tscn" id="8_run_result"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/settings_screen.tscn" id="9_settings"]
 
 [node name="GameFlow" type="Node"]
 script = ExtResource("1_flow")
@@ -27,3 +28,5 @@ script = ExtResource("1_flow")
 [node name="NodeResultScreen" parent="UI" instance=ExtResource("7_node_result")]
 
 [node name="RunResultScreen" parent="UI" instance=ExtResource("8_run_result")]
+
+[node name="SettingsScreen" parent="UI" instance=ExtResource("9_settings")]

@@ -45,6 +45,10 @@ text = "새 런 시작"
 layout_mode = 2
 text = "이어하기"
 
+[node name="SettingsButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "설정"
+
 [node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=474093265]
 layout_mode = 2
 text = "게임 종료"

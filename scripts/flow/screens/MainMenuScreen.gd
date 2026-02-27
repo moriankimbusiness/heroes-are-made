@@ -2,10 +2,12 @@ extends PanelContainer
 
 signal start_new_run_requested
 signal continue_requested
+signal settings_requested
 signal quit_requested
 
 @onready var _start_run_button: Button = $MarginContainer/VBoxContainer/StartRunButton
 @onready var _continue_button: Button = $MarginContainer/VBoxContainer/ContinueRunButton
+@onready var _settings_button: Button = $MarginContainer/VBoxContainer/SettingsButton
 @onready var _quit_button: Button = $MarginContainer/VBoxContainer/QuitButton
 @onready var _save_info_label: Label = $MarginContainer/VBoxContainer/SaveInfoLabel
 
@@ -13,6 +15,7 @@ signal quit_requested
 func _ready() -> void:
 	_start_run_button.pressed.connect(func() -> void: start_new_run_requested.emit())
 	_continue_button.pressed.connect(func() -> void: continue_requested.emit())
+	_settings_button.pressed.connect(func() -> void: settings_requested.emit())
 	_quit_button.pressed.connect(func() -> void: quit_requested.emit())
 	hide_screen()
 

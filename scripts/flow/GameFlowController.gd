@@ -25,6 +25,7 @@ const NODE_TYPE_FINAL_BOSS := "final_boss"
 @onready var _node_resolve_screen: Control = $UI/NodeResolveScreen
 @onready var _node_result_screen: Control = $UI/NodeResultScreen
 @onready var _run_result_screen: Control = $UI/RunResultScreen
+@onready var _settings_screen: Control = $UI/SettingsScreen
 
 var _screens: Array[Node] = []
 var _world_generator = WorldMapGeneratorRef.new()
@@ -39,6 +40,7 @@ func _ready() -> void:
 	_rng.randomize()
 	_screens = [
 		_main_menu_screen,
+		_settings_screen,
 		_chapter_prep_screen,
 		_world_map_screen,
 		_node_resolve_screen,
@@ -54,8 +56,13 @@ func _connect_screen_signals() -> void:
 		_main_menu_screen.connect("start_new_run_requested", _on_start_new_run_requested)
 	if _main_menu_screen.has_signal("continue_requested"):
 		_main_menu_screen.connect("continue_requested", _on_continue_requested)
+	if _main_menu_screen.has_signal("settings_requested"):
+		_main_menu_screen.connect("settings_requested", _on_settings_requested)
 	if _main_menu_screen.has_signal("quit_requested"):
 		_main_menu_screen.connect("quit_requested", _on_quit_requested)
+
+	if _settings_screen.has_signal("back_requested"):
+		_settings_screen.connect("back_requested", _on_settings_back_requested)
 
 	if _chapter_prep_screen.has_signal("start_expedition_requested"):
 		_chapter_prep_screen.connect("start_expedition_requested", _on_start_expedition_requested)
@@ -147,6 +154,16 @@ func _on_continue_requested() -> void:
 
 func _on_quit_requested() -> void:
 	get_tree().quit()
+
+
+func _on_settings_requested() -> void:
+	_show_screen(_settings_screen, {
+		"settings": AppSettings.get_settings()
+	})
+
+
+func _on_settings_back_requested() -> void:
+	_show_main_menu()
 
 
 func _on_start_expedition_requested() -> void:
