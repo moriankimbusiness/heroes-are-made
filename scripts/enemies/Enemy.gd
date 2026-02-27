@@ -21,22 +21,35 @@ enum State {
 	DEATH
 }
 @export_group("사망/기본 전투")
+## 사망 연출 종료 시 노드를 자동 해제할지 여부입니다.
 @export var auto_free_on_death_end: bool = false
+## 사망 후 페이드아웃 지속 시간(초)입니다.
 @export_range(0.0, 30.0, 0.1) var death_fade_duration: float = 3.0
+## 좌우 반전 변경을 무시할 X축 데드존입니다.
 @export var horizontal_flip_deadzone: float = 0.1
+## 기본 최대 체력 값입니다.
 @export var base_max_health: float = 100.0
+## 이동 속도(px/s)입니다.
 @export_range(1.0, 500.0, 1.0) var move_speed: float = 70.0
+## 코어 도달로 간주하는 거리 임계값(px)입니다.
 @export_range(0.1, 50.0, 0.1) var core_reach_distance: float = 8.0
+## 기본 1회 공격 피해량입니다.
 @export_range(0.1, 9999.0, 0.1) var attack_damage: float = 8.0
+## 초당 공격 횟수(APS)입니다.
 @export_range(0.1, 20.0, 0.1) var attacks_per_second: float = 1.0
 
 @export_group("공격 사거리 시각화")
+## 선택 시 공격 사거리 표시 여부입니다.
 @export var show_attack_range_on_select: bool = false
+## 공격 사거리 미리보기 선/면 기본 색상입니다.
 @export var attack_range_color: Color = Color(1.0, 0.30, 0.30, 0.85)
+## 공격 사거리 미리보기 선 두께(px)입니다.
 @export_range(0.5, 6.0, 0.1) var attack_range_line_width: float = 1.6
+## 공격 사거리 미리보기 채움 알파값입니다.
 @export_range(0.0, 1.0, 0.01) var attack_range_fill_alpha: float = 0.08
 
 @export_group("코어 연결 경로")
+## 코어 노드 경로입니다.
 @export var core_path: NodePath
 
 var state: State = State.WALK

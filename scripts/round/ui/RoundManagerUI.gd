@@ -1,10 +1,16 @@
 extends CanvasLayer
 @export_group("RoundManagerUI 노드 경로")
+## RoundManager 노드 경로입니다.
 @export var round_manager_path: NodePath
+## 현재 라운드 라벨 노드 경로입니다.
 @export var round_label_path: NodePath
+## 현재 생존 적 수 라벨 노드 경로입니다.
 @export var alive_enemy_count_label_path: NodePath
+## 상태 표시 라벨 노드 경로입니다.
 @export var status_label_path: NodePath
+## RoundTopCenterUI 노드 경로입니다.
 @export var top_center_ui_path: NodePath
+## RoundFailActionsUI 노드 경로입니다.
 @export var fail_actions_ui_path: NodePath
 
 @onready var _round_manager: Node = get_node_or_null(round_manager_path)

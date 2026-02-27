@@ -32,45 +32,77 @@ enum TargetPriority {
 	NEAREST
 }
 @export_group("공격 기본값")
+## 자동 공격 동작 활성화 여부입니다.
 @export var attack_enabled: bool = true
+## 기본 1회 공격 피해량입니다.
 @export_range(0.1, 9999.0, 0.1) var attack_damage: float = 10.0
+## 초당 공격 횟수(APS)입니다.
 @export_range(0.1, 20.0, 0.1) var attacks_per_second: float = 1.2
+## 공격 사거리 기본값입니다.
 @export_range(1.0, 9999.0, 0.1) var base_attack_range: float = 35.014282
+## 공격 사거리 가산값입니다.
 @export_range(-9999.0, 9999.0, 0.1) var attack_range_add: float = 0.0
+## 공격 사거리 배율값입니다.
 @export_range(0.1, 10.0, 0.01) var attack_range_scale: float = 1.0
+## 공격 대상 우선순위 규칙입니다.
 @export var target_priority: TargetPriority = TargetPriority.PATH_PROGRESS
+## 공격 애니메이션에서 실제 타격이 발생하는 프레임 인덱스입니다.
 @export_range(0, 99, 1) var attack_hit_frame_index: int = 2
+## 공격 방향 반전 시 무시할 X축 데드존입니다.
 @export_range(0.0, 20.0, 0.1) var attack_flip_deadzone: float = 0.1
 @export_group("이동")
+## 이동 속도(px/s)입니다.
 @export_range(1.0, 500.0, 1.0) var move_speed: float = 160.0
+## 이동 목표 도착으로 간주하는 거리(px)입니다.
 @export_range(0.1, 64.0, 0.1) var move_stop_distance: float = 6.0
 @export_group("기본 스탯")
+## 기본 힘 스탯입니다.
 @export_range(-999, 999, 1) var base_strength: int = 2
+## 기본 민첩 스탯입니다.
 @export_range(-999, 999, 1) var base_agility: int = 2
+## 기본 지능 스탯입니다.
 @export_range(-999, 999, 1) var base_intelligence: int = 1
+## 기본 물리 공격력입니다.
 @export_range(0.1, 9999.0, 0.1) var base_physical_attack: float = 10.0
+## 기본 마법 공격력입니다.
 @export_range(0.0, 9999.0, 0.1) var base_magic_attack: float = 5.0
+## 기본 최대 체력 값입니다.
 @export_range(1.0, 9999.0, 1.0) var base_max_health: float = 100.0
+## 기본 초당 공격 횟수(APS)입니다.
 @export_range(0.1, 20.0, 0.1) var base_attacks_per_second: float = 1.2
 @export_group("성장/레벨")
+## UI에 표시할 히어로 이름입니다.
 @export var hero_display_name: String = "용사"
+## 현재 레벨입니다.
 @export_range(1, 99, 1) var level: int = 1
+## 현재 누적 경험치입니다.
 @export_range(0, 999999, 1) var current_exp: int = 0
+## 다음 레벨에 필요한 경험치입니다.
 @export_range(1, 999999, 1) var required_exp: int = 60
+## 민첩 1당 공격속도 가산 계수입니다.
 @export_range(0.0, 3.0, 0.01) var agility_attack_speed_factor: float = 0.03
 @export_group("피격/선택 비주얼")
+## 피격 플래시 지속 시간(초)입니다.
 @export_range(0.01, 2.0, 0.01) var damage_flash_duration: float = 0.14
+## 마우스 호버 시 외곽선 색상입니다.
 @export var hover_outline_color: Color = Color(1.0, 1.0, 1.0, 1.0)
+## 피격 시 외곽선 색상입니다.
 @export var damage_outline_color: Color = Color(1.0, 0.2, 0.2, 1.0)
+## 피격 시 내부 플래시 채움 색상입니다.
 @export var damage_fill_color: Color = Color(1.0, 0.2, 0.2, 0.55)
+## 선택 상태 외곽선 색상입니다.
 @export var selected_outline_color: Color = Color(0.3, 1.0, 0.4, 1.0)
+## 선택 상태 내부 채움 색상입니다.
 @export var selected_fill_color: Color = Color(0.3, 1.0, 0.4, 0.35)
+## 선택 상태 채움 강도(0~1)입니다.
 @export_range(0.0, 1.0, 0.01) var selected_fill_strength: float = 1.0
 @export_group("강화 계수 테이블")
+## 강화 단계별 공격 배율 테이블입니다.
 @export var enhance_attack_multipliers: Array[float] = [
 	1.0, 1.12, 1.26, 1.42, 1.60, 1.80, 2.02, 2.26,
 	2.52, 2.80, 3.10, 3.42, 3.76, 4.12, 4.50, 4.90
 ]
+## 강화 단계별 스탯 배율 테이블입니다.
 @export var enhance_stat_multipliers: Array[float] = [
 	1.0, 1.05, 1.10, 1.16, 1.22, 1.29, 1.36, 1.44,
 	1.52, 1.61, 1.70, 1.80, 1.91, 2.02, 2.14, 2.26

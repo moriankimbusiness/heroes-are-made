@@ -2,16 +2,19 @@
 extends Area2D
 class_name EnemyRangeArea
 @export_group("범위 계산값 (final = (base + add) * scale)")
+## 사거리 기본값입니다.
 @export_range(1.0, 9999.0, 0.1) var base_range: float = 64.0:
 	set(value):
 		base_range = value
 		_schedule_apply_range()
 
+## 사거리 가산값입니다.
 @export_range(-9999.0, 9999.0, 0.1) var range_add: float = 0.0:
 	set(value):
 		range_add = value
 		_schedule_apply_range()
 
+## 사거리 배율값입니다.
 @export_range(0.1, 10.0, 0.01) var range_scale: float = 1.0:
 	set(value):
 		range_scale = value

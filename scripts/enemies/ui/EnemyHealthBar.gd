@@ -1,7 +1,10 @@
 extends ProgressBar
 @export_group("체력 색상 구간")
+## 체력 비율이 높을 때 적용할 색상입니다.
 @export var hp_color_high: Color = Color(0.25, 0.85, 0.35, 1.0)
+## 체력 비율이 중간일 때 적용할 색상입니다.
 @export var hp_color_mid: Color = Color(0.95, 0.82, 0.20, 1.0)
+## 체력 비율이 낮을 때 적용할 색상입니다.
 @export var hp_color_low: Color = Color(0.90, 0.20, 0.20, 1.0)
 
 var _enemy: Node = null

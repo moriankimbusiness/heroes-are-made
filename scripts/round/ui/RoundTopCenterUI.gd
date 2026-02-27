@@ -1,12 +1,18 @@
 extends Control
 @export_group("RoundTopCenterUI 노드 경로")
+## 라운드 카운트다운 라벨 노드 경로입니다.
 @export var round_countdown_label_path: NodePath
+## 다음 라운드 버튼 노드 경로입니다.
 @export var next_round_button_path: NodePath
+## 일시정지 버튼 노드 경로입니다.
 @export var pause_button_path: NodePath
+## 1배속 버튼 노드 경로입니다.
 @export var speed_1x_button_path: NodePath
+## 2배속 버튼 노드 경로입니다.
 @export var speed_2x_button_path: NodePath
 var _debug_show_next_round_button: bool = false
 @export_group("디버그 표시")
+## 다음 라운드 버튼을 디버그 용도로 강제 표시합니다.
 @export var debug_show_next_round_button: bool:
 	set(value):
 		if _debug_show_next_round_button == value:

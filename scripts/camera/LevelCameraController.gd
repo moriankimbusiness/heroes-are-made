@@ -1,13 +1,20 @@
 extends Camera2D
 
 @export_group("카메라 이동/줌 설정")
+## 이동 속도(px/s)입니다.
 @export_range(50.0, 3000.0, 10.0) var move_speed: float = 600.0
+## 허용되는 최소 줌 배율입니다.
 @export_range(0.1, 4.0, 0.01) var zoom_min: float = 0.75
+## 허용되는 최대 줌 배율입니다.
 @export_range(0.1, 4.0, 0.01) var zoom_max: float = 1.6
+## 마우스 휠 1틱당 변경되는 줌 값입니다.
 @export_range(0.01, 1.0, 0.01) var zoom_step: float = 0.1
 @export_group("카메라 이동 경계 (사용 시)")
+## 카메라 이동을 경계 박스로 제한할지 여부입니다.
 @export var use_move_bounds: bool = false
+## 이동 경계 박스의 중심 좌표입니다.
 @export var move_bounds_center: Vector2 = Vector2.ZERO
+## 이동 경계 박스의 반너비/반높이입니다.
 @export var move_bounds_extents: Vector2 = Vector2.ZERO
 
 

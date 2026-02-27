@@ -15,9 +15,13 @@ enum State {
 	CLEARED
 }
 @export_group("라운드 기본 규칙")
+## 적 카운트에 사용할 그룹 이름입니다.
 @export var enemy_group_name: StringName = &"enemy"
+## 생존 적 수가 이 값을 넘으면 패배 처리합니다.
 @export_range(1, 999, 1) var fail_alive_enemy_threshold: int = 30
+## 라운드 제한 시간(초)입니다.
 @export_range(1.0, 300.0, 1.0) var round_duration_seconds: float = 60.0
+## 준비 완료 시 웨이브 자동 시작 여부입니다.
 @export var auto_begin_wave_on_ready: bool = true
 
 var state: State = State.PREPARE

@@ -1,21 +1,32 @@
 @tool
 extends Node2D
 @export_group("데미지 텍스트 표시")
+## 데미지 숫자 시작 Y 오프셋(px)입니다.
 @export_range(0.0, 60.0, 1.0) var spawn_offset_y: float = -38.0
+## 데미지 숫자가 위로 이동하는 거리(px)입니다.
 @export_range(0.0, 120.0, 1.0) var rise_distance: float = 24.0
+## 데미지 숫자 X축 랜덤 오프셋 최대값(px)입니다.
 @export_range(0.0, 60.0, 1.0) var random_x_jitter: float = 10.0
+## 데미지 숫자가 떠오르고 사라지는 시간(초)입니다.
 @export_range(0.05, 3.0, 0.05) var float_duration: float = 0.6
+## 데미지 숫자 폰트 크기입니다.
 @export_range(8, 72, 1) var damage_font_size: int = 20
+## 텍스트 외곽선 두께입니다.
 @export_range(0, 16, 1) var outline_size: int = 3
+## 데미지 숫자 표시에 사용할 폰트 리소스입니다.
 @export var damage_font: Font
+## 텍스트 본문 색상입니다.
 @export var text_color: Color = Color(1.0, 1.0, 1.0, 1.0)
+## 텍스트 외곽선 색상입니다.
 @export var outline_color: Color = Color(0.0, 0.0, 0.0, 1.0)
 @export_group("디버그 미리보기 (에디터 전용)")
+## 에디터에서 데미지 텍스트 미리보기를 표시합니다.
 @export var show_debug_preview_in_editor: bool = false:
 	set(value):
 		show_debug_preview_in_editor = value
 		if Engine.is_editor_hint():
 			_refresh_debug_preview()
+## 에디터 미리보기로 표시할 데미지 값입니다.
 @export_range(1.0, 99999.0, 1.0) var debug_preview_amount: float = 123.0:
 	set(value):
 		debug_preview_amount = value

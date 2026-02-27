@@ -1,7 +1,10 @@
 extends Node
 @export_group("RoundSystem 의존성 경로")
+## RoundManager 노드 경로입니다.
 @export var round_manager_path: NodePath = NodePath("RoundManager")
+## EnemySpawnController 노드 경로입니다.
 @export var enemy_spawn_controller_path: NodePath
+## 적 스폰 타이머 노드 경로입니다.
 @export var spawn_timer_path: NodePath
 
 

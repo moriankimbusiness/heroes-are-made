@@ -18,8 +18,11 @@ const FEEDBACK_NONE := 0
 const FEEDBACK_OK := 1
 const FEEDBACK_FAIL := 2
 @export_group("슬롯 설정")
+## 슬롯 종류(inventory/equipment)입니다.
 @export_enum("inventory", "equipment") var slot_kind: String = SLOT_KIND_INVENTORY
+## 인벤토리/장비 슬롯 인덱스입니다.
 @export var slot_index: int = -1
+## 빈 슬롯일 때 표시할 텍스트입니다.
 @export var empty_label_text: String = ""
 
 @onready var name_label: Label = $MarginContainer/VBoxContainer/NameLabel

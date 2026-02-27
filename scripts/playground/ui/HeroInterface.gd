@@ -3,13 +3,13 @@ extends CanvasLayer
 const ItemEnumsRef = preload("res://scripts/items/ItemEnums.gd")
 const ItemDataRef = preload("res://scripts/items/ItemData.gd")
 @export_group("HeroInterface 표시/상점 기본값")
-## `portrait_scale` 설정값.
+## 히어로 초상화 표시 배율입니다.
 @export_range(1.0, 4.0, 0.1) var portrait_scale: float = 2.0
-## `card_hover_scale` 설정값.
+## 상점 카드 호버 시 확대 배율입니다.
 @export_range(1.0, 2.0, 0.05) var card_hover_scale: float = 1.3
-## `fallback_starting_gold` 설정값.
+## 초기 골드 입력이 없을 때 사용할 기본값입니다.
 @export_range(0, 99999, 1) var fallback_starting_gold: int = 100
-## `free_reroll_uses` 설정값.
+## 무료 리롤 가능 횟수입니다.
 @export_range(0, 20, 1) var free_reroll_uses: int = 5
 
 @onready var hero_interface_root: Control = $HeroInterfaceRoot

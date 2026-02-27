@@ -1,29 +1,29 @@
 extends Node2D
 
 @export_group("Shape")
-## `ring_radius` 설정값.
+## 이동 마커 타원 반지름(X/Y)입니다.
 @export var ring_radius: Vector2 = Vector2(22.0, 8.0)
-## `ring_line_width` 설정값.
+## 이동 마커 고리 선 두께(px)입니다.
 @export_range(0.5, 8.0, 0.1) var ring_line_width: float = 2.0
-## `ring_color` 설정값.
+## 이동 마커 고리 선 색상입니다.
 @export var ring_color: Color = Color(0.25, 0.95, 0.45, 1.0)
-## `fill_color` 설정값.
+## 이동 마커 내부 채움 색상입니다.
 @export var fill_color: Color = Color(0.25, 0.95, 0.45, 0.2)
-## `arrow_color` 설정값.
+## 이동 마커 화살표 색상입니다.
 @export var arrow_color: Color = Color(0.25, 0.95, 0.45, 0.95)
-## `arrow_size` 설정값.
+## 이동 마커 화살표 크기(px)입니다.
 @export var arrow_size: Vector2 = Vector2(10.0, 9.0)
-## `arrow_gap` 설정값.
+## 고리와 화살표 사이 간격(px)입니다.
 @export_range(0.0, 24.0, 0.1) var arrow_gap: float = 4.0
 
 @export_group("Animation")
-## `bounce_height` 설정값.
+## 바운스 시 상하 이동 높이(px)입니다.
 @export_range(0.0, 40.0, 0.1) var bounce_height: float = 8.0
-## `bounce_duration` 설정값.
+## 바운스 1회 지속 시간(초)입니다.
 @export_range(0.05, 2.0, 0.01) var bounce_duration: float = 0.35
-## `visible_duration` 설정값.
+## 최대 불투명 상태 유지 시간(초)입니다.
 @export_range(0.05, 3.0, 0.01) var visible_duration: float = 0.75
-## `fade_duration` 설정값.
+## 사라질 때 페이드아웃 시간(초)입니다.
 @export_range(0.05, 3.0, 0.01) var fade_duration: float = 0.25
 
 const MIN_RING_SEGMENTS: int = 24

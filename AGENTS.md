@@ -50,7 +50,11 @@ For any Godot scene/gameplay setup request, follow this order strictly:
 - For `.gd` scripts, document exported fields using inspector-visible labels:
   - `@export_group`, `@export_subgroup`, or `@export_category`
   - include concise purpose/unit context in the group/category text when useful
-- Do not rely only on code comments for exported field explanations; the explanation must be visible in Godot Inspector.
+- For per-property hover tooltips in Inspector, add `##` doc comments immediately above each `@export* var` declaration.
+- Do not rely only on regular comments (`# ...`) for exported field explanations; use Inspector-visible labels and doc comments.
+- For any new or changed exported variable in script work, apply both in the same change:
+  - place the variable under an appropriate `@export_group`/`@export_subgroup`/`@export_category`
+  - add a `##` doc comment immediately above that exported variable
 - When adding or changing `@export` fields, update grouping/description labels in the same task.
 
 ## Action Animation Restart Policy (Mandatory)

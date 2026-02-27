@@ -1,9 +1,13 @@
 extends HBoxContainer
 @export_group("RoundFailActionsUI 노드 경로")
+## 패배 액션 루트 컨트롤 노드 경로입니다.
 @export var fail_actions_path: NodePath
+## 재시도 버튼 노드 경로입니다.
 @export var retry_button_path: NodePath
+## 종료 버튼 노드 경로입니다.
 @export var quit_button_path: NodePath
 @export_group("디버그 표시")
+## 패배 액션 UI를 디버그 용도로 강제 표시합니다.
 @export var debug_show_fail_actions: bool = false
 
 @onready var _fail_actions: Control = get_node_or_null(fail_actions_path) as Control

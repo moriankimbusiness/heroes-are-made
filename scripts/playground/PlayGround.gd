@@ -1,22 +1,22 @@
 extends Node2D
 @export_group("플레이그라운드 기본")
-## `hero_scene` 설정값.
+## 전투에서 사용할 히어로 씬 리소스입니다.
 @export var hero_scene: PackedScene
-## `play_area_radius` 설정값.
+## 플레이 가능 영역 반경(px)입니다.
 @export_range(10.0, 2000.0, 1.0) var play_area_radius: float = 220.0
-## `core_path` 설정값.
+## 코어 노드 경로입니다.
 @export var core_path: NodePath
-## `move_command_marker_path` 설정값.
+## 우클릭 이동 마커 노드 경로입니다.
 @export var move_command_marker_path: NodePath
 @export_group("LOS 판정 튜닝")
-## `los_collision_mask` 설정값.
+## LOS 판정에 사용할 물리 레이어 마스크입니다.
 @export_flags_2d_physics var los_collision_mask: int = 1
-## `los_probe_radius` 설정값.
+## LOS 보정 계산에 사용하는 프로브 반지름(px)입니다.
 @export_range(0.0, 64.0, 0.1) var los_probe_radius: float = 6.0
-## `los_hit_backoff` 설정값.
+## 장애물 충돌 시 목표점 보정 백오프 거리(px)입니다.
 @export_range(0.0, 64.0, 0.1) var los_hit_backoff: float = 2.0
 @export_group("디버그 표시")
-## `enable_los_debug_draw` 설정값.
+## LOS 디버그 선/표식 렌더링 여부입니다.
 @export var enable_los_debug_draw: bool = false
 
 @onready var play_area_outline: Line2D = $PlayAreaOutline

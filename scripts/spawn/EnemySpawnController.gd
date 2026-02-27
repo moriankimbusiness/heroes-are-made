@@ -1,22 +1,36 @@
 extends Node
 
 @export_group("라운드 기본 스폰")
+## 기본으로 스폰할 적 씬입니다.
 @export var enemy_scene: PackedScene
+## 라운드별 적 씬 오버라이드 목록입니다.
 @export var round_enemy_scenes: Array[PackedScene] = []
+## 라운드별 스폰 수 테이블입니다.
 @export var round_spawn_counts: Array[int] = []
+## 라운드별 적 체력 배율 테이블입니다.
 @export var round_enemy_health_multipliers: Array[float] = []
+## 레벨 단위로 일괄 적용하는 체력 배율입니다.
 @export_range(0.1, 10.0, 0.1) var level_hp_scale: float = 1.0
 @export_group("체력 공식 (테이블 이후)")
+## 테이블 범위 이후 라운드에 체력 공식을 적용할지 여부입니다.
 @export var use_formula_after_table: bool = true
+## 라운드 증가에 따른 체력 성장률 계수입니다.
 @export_range(0.0, 1.0, 0.001) var formula_growth_rate: float = 0.08
+## 소프트캡 감쇠 증가율 계수입니다.
 @export_range(0.0, 1.0, 0.001) var formula_softcap_rate: float = 0.015
+## 소프트캡 감쇠 강도 지수입니다.
 @export_range(0.0, 3.0, 0.01) var formula_softcap_power: float = 0.6
 @export_group("필수 노드 경로")
+## 스폰 기준 포탈 노드 경로입니다.
 @export var portal_path: NodePath
+## 코어 노드 경로입니다.
 @export var core_path: NodePath
+## 적 스폰 타이머 노드 경로입니다.
 @export var spawn_timer_path: NodePath
 @export_group("런타임 제어")
+## 현재 라운드 최대 스폰 수입니다.
 @export var max_spawn_count: int = 10
+## 현재 진행 라운드 번호(1부터 시작)입니다.
 @export_range(1, 999, 1) var current_round: int = 1
 
 var _spawned_count: int = 0
