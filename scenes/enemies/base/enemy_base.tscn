@@ -4,6 +4,31 @@
 [ext_resource type="Texture2D" uid="uid://momjdgwemgas" path="res://assets/sprites/enemies/Orc.png" id="2_4ra3w"]
 [ext_resource type="Script" uid="uid://vftdq5d1a6d0" path="res://scripts/enemies/ui/EnemyHealthBar.gd" id="3_t4rps"]
 [ext_resource type="Script" uid="uid://ci4oui5wkwxv3" path="res://scripts/enemies/ui/EnemyDamageText.gd" id="4_y7q5v"]
+[ext_resource type="Script" uid="uid://dfsys36ts118h" path="res://scripts/enemies/range/EnemyRangeArea.gd" id="5_enemy_range_area"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7angr"]
+atlas = ExtResource("2_4ra3w")
+region = Rect2(0, 200, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cuvyx"]
+atlas = ExtResource("2_4ra3w")
+region = Rect2(100, 200, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d2rjt"]
+atlas = ExtResource("2_4ra3w")
+region = Rect2(200, 200, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u4hpe"]
+atlas = ExtResource("2_4ra3w")
+region = Rect2(300, 200, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nck0n"]
+atlas = ExtResource("2_4ra3w")
+region = Rect2(400, 200, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f7vtg"]
+atlas = ExtResource("2_4ra3w")
+region = Rect2(500, 200, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5_0"]
 atlas = ExtResource("2_4ra3w")
@@ -73,6 +98,29 @@ region = Rect2(700, 100, 100, 100)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_7angr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cuvyx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d2rjt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u4hpe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nck0n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f7vtg")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_5_0")
 }, {
 "duration": 1.0,
@@ -137,19 +185,49 @@ animations = [{
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_md0e3"]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_hero_detect"]
+radius = 64.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_attack_range"]
+radius = 16.0
+
 [node name="EnemyBase" type="Area2D" unique_id=1614204188 groups=["enemy"]]
 script = ExtResource("1_md0e3")
 auto_free_on_death_end = true
 death_fade_duration = 1.0
+move_speed = 40.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1489677892]
-scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_md0e3")
-animation = &"walk"
+animation = &"attack"
 autoplay = "walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=999267602]
 shape = SubResource("CircleShape2D_md0e3")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=945646126]
+path_desired_distance = 4.0
+target_desired_distance = 8.0
+
+[node name="HeroDetectArea" type="Area2D" parent="." unique_id=388737988]
+collision_mask = 8
+script = ExtResource("5_enemy_range_area")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HeroDetectArea" unique_id=493639146]
+shape = SubResource("CircleShape2D_hero_detect")
+
+[node name="AttackRange" type="Area2D" parent="." unique_id=1848079617]
+collision_layer = 0
+collision_mask = 8
+input_pickable = false
+script = ExtResource("5_enemy_range_area")
+base_range = 16.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange" unique_id=2084781269]
+shape = SubResource("CircleShape2D_attack_range")
+
+[node name="AttackTimer" type="Timer" parent="." unique_id=833407169]
+one_shot = true
 
 [node name="StatusAnchor" type="Marker2D" parent="." unique_id=2057288743]
 position = Vector2(36, -46)

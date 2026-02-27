@@ -21,6 +21,7 @@ const SLOT_KIND_EQUIPMENT := "equipment"
 @onready var strength_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/StrengthLabel
 @onready var agility_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/AgilityLabel
 @onready var intelligence_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/IntelligenceLabel
+@onready var hero_health_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/HeroHealthLabel
 @onready var physical_attack_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/PhysicalAttackLabel
 @onready var magic_attack_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/MagicAttackLabel
 @onready var attack_speed_label: Label = $StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel/AttackSpeedLabel
@@ -162,6 +163,7 @@ func _register_hero(node: Node) -> void:
 	node.connect("hero_moved", Callable(self, "_on_hero_moved"))
 	node.connect("hero_stats_changed", Callable(self, "_on_hero_stats_changed"))
 	node.connect("equipment_changed", Callable(self, "_on_hero_equipment_changed"))
+	node.connect("health_changed", Callable(self, "_on_hero_health_changed"))
 	node.tree_exited.connect(_on_hero_tree_exited.bind(hero_id))
 
 
@@ -265,6 +267,12 @@ func _on_hero_stats_changed(hero: Hero, _stats: HeroStats) -> void:
 	_refresh_stat_labels()
 
 
+func _on_hero_health_changed(hero: Hero, current: float, max_value: float, _ratio: float) -> void:
+	if hero != _selected_hero:
+		return
+	_refresh_hero_health_from_values(current, max_value)
+
+
 func _on_hero_equipment_changed(hero: Hero, _slot: int, _item: ItemData) -> void:
 	if hero != _selected_hero:
 		return
@@ -329,7 +337,10 @@ func _select_enemy(enemy: Area2D) -> void:
 		return
 	if _selected_hero != null:
 		_deselect_hero()
+	if _selected_enemy != null and _selected_enemy != enemy and is_instance_valid(_selected_enemy):
+		_set_enemy_attack_range_preview(_selected_enemy, false)
 	_selected_enemy = enemy
+	_set_enemy_attack_range_preview(_selected_enemy, true)
 	enemy_status_root.visible = true
 	tooltip_panel.visible = false
 	_refresh_enemy_health_label()
@@ -344,10 +355,22 @@ func _deselect_hero() -> void:
 
 
 func _deselect_enemy() -> void:
+	if _selected_enemy != null and is_instance_valid(_selected_enemy):
+		_set_enemy_attack_range_preview(_selected_enemy, false)
 	_selected_enemy = null
 	enemy_status_root.visible = false
 	enemy_health_label.text = "체력: - / -"
 	tooltip_panel.visible = false
+
+
+func _set_enemy_attack_range_preview(enemy: Area2D, visible: bool) -> void:
+	if enemy == null:
+		return
+	if not is_instance_valid(enemy):
+		return
+	if not enemy.has_method("set_attack_range_preview_visible"):
+		return
+	enemy.call("set_attack_range_preview_visible", visible)
 
 
 func _clear_selection() -> void:
@@ -361,6 +384,7 @@ func _refresh_ui() -> void:
 	_refresh_inventory_slots()
 	_refresh_equipment_slots()
 	_refresh_stat_labels()
+	_refresh_hero_health_label()
 
 
 func _refresh_inventory_slots() -> void:
@@ -399,6 +423,27 @@ func _refresh_stat_labels() -> void:
 	physical_attack_label.modulate = Color(1, 1, 1, 1)
 	magic_attack_label.modulate = Color(1, 1, 1, 1)
 	attack_speed_label.modulate = Color(1, 1, 1, 1)
+
+
+func _refresh_hero_health_label() -> void:
+	if _selected_hero == null or not is_instance_valid(_selected_hero):
+		hero_health_label.text = "체력: - / -"
+		return
+	if not _selected_hero.has_method("get_current_health"):
+		hero_health_label.text = "체력: - / -"
+		return
+	if not _selected_hero.has_method("get_max_health"):
+		hero_health_label.text = "체력: - / -"
+		return
+	var current: float = float(_selected_hero.call("get_current_health"))
+	var max_value: float = float(_selected_hero.call("get_max_health"))
+	_refresh_hero_health_from_values(current, max_value)
+
+
+func _refresh_hero_health_from_values(current: float, max_value: float) -> void:
+	var current_int: int = int(roundf(current))
+	var max_int: int = int(roundf(max_value))
+	hero_health_label.text = "체력: %d / %d" % [current_int, max_int]
 
 
 func _set_signed_int_label(label: Label, prefix: String, value: int) -> void:

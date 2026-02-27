@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://jg52hv41yh4p" path="res://scenes/enemies/variants/enemy_orc2.tscn" id="4_h5f3e"]
 [ext_resource type="PackedScene" path="res://scenes/round/round_system.tscn" id="5_scmn0"]
 [ext_resource type="PackedScene" path="res://scenes/playground/playground.tscn" id="6_playground"]
+[ext_resource type="Script" path="res://scripts/camera/LevelCameraController.gd" id="7_level_camera"]
+[ext_resource type="PackedScene" path="res://scenes/core/core_base.tscn" id="8_core_base"]
 
 [sub_resource type="Curve2D" id="Curve2D_rd3vj"]
 _data = {
@@ -15,6 +17,14 @@ _data = {
 point_count = 5
 
 [node name="Level" type="Node2D" unique_id=867026977]
+
+[node name="CoreRoot" parent="." instance=ExtResource("8_core_base")]
+position = Vector2(635, 357)
+
+[node name="MainCamera" type="Camera2D" parent="."]
+position = Vector2(635, 357)
+script = ExtResource("7_level_camera")
+enabled = true
 
 [node name="Portal" parent="." unique_id=665752176 groups=["spawn_portal"] instance=ExtResource("3_o2tba")]
 position = Vector2(348, 357)
@@ -29,8 +39,8 @@ round_enemy_scenes = Array[PackedScene]([ExtResource("1_jfytv"), ExtResource("4_
 round_spawn_counts = Array[int]([10, 12, 14, 16, 18, 20, 22, 24, 26, 28])
 round_enemy_health_multipliers = Array[float]([1.0, 1.06, 1.13, 1.2, 1.28, 1.36, 1.44, 1.53, 1.63, 1.74, 1.85, 1.97, 2.1, 2.23, 2.38, 2.53, 2.69, 2.86, 3.04, 3.24, 3.44, 3.66, 3.89, 4.14, 4.4, 4.68, 4.98, 5.29, 5.63, 5.99])
 level_hp_scale = 1.0
-path2d_path = NodePath("../Path2D")
 portal_path = NodePath("../Portal")
+core_path = NodePath("../CoreRoot")
 spawn_timer_path = NodePath("../SpawnTimer")
 
 [node name="RoundSystem" parent="." unique_id=1945532616 instance=ExtResource("5_scmn0")]

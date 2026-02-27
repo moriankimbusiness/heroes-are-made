@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bqjtq5n4vls2j"]
+
+[ext_resource type="Script" path="res://scripts/core/Core.gd" id="1_core_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_core"]
+size = Vector2(64, 64)
+
+[node name="CoreRoot" type="Area2D" groups=["core"]]
+script = ExtResource("1_core_script")
+
+[node name="CoreVisual" type="Polygon2D" parent="."]
+color = Color(0.94902, 0.768627, 0.282353, 0.8)
+polygon = PackedVector2Array(-32, -32, 32, -32, 32, 32, -32, 32)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_core")
+
+[node name="TargetAnchor" type="Marker2D" parent="."]
