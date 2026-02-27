@@ -120,22 +120,22 @@
 - 챕터별 상세 수치 밸런스(적 체력/보상 수치 테이블).
 - 전투 플레이화면 내부 로직 세부 재설계.
 
-## 구현 반영 (v17, 진행 플로우 1차)
+## 구현 반영 (v18, 진행 플로우 2차)
 
-- 실행 진입 씬을 `scenes/flow/game_flow.tscn`로 전환했다.
-- `scripts/flow/GameFlowController.gd`에서 아래 상태 전이를 실제로 운영한다.
-- `메인화면` -> `챕터 시작 준비` -> `게임월드(경로 선택)` -> `노드 전용 화면` -> `노드 결과 요약` -> `게임월드`.
+- 실행 진입 씬은 `scenes/flow/game_flow.tscn`이며, 루트는 화면 오케스트레이션만 담당한다.
+- 화면 씬을 7개로 분리했다.
+- `main_menu_screen`, `chapter_prep_screen`, `world_map_screen`, `node_resolve_screen`, `node_result_screen`, `run_result_screen`, `battle_screen_host`.
+- `scripts/flow/GameFlowController.gd`는 화면 전환/런 상태/저장 라우팅만 담당한다.
+- `NodeResolveScreen.gd`가 아이템/마을/이벤트 노드 처리 로직을 담당하고 `node_resolved` 결과를 컨트롤러에 전달한다.
+- 상태 전이는 `메인화면` -> `챕터 시작 준비` -> `게임월드(경로 선택)` -> `노드 전용 화면` -> `노드 결과 요약` -> `게임월드`로 유지한다.
 - 월드맵 생성은 `scripts/flow/WorldMapGenerator.gd`에서 처리한다.
 - 규칙 반영: `D0=1`, `D1~D6=1~3 랜덤`, `D4 중간보스 1개`, `D7 최종보스 1개`, `D2~D5 마을 최소 1개`.
-- 월드맵 UI는 `scripts/flow/WorldMapView.gd`로 노드/연결을 시각화하고, 연결된 다음 노드만 선택 가능하게 제한한다.
-- 노드 전용 화면 1차를 구현했다.
-- 아이템 노드: 3개 제시 1개 선택 또는 건너뛰기.
-- 마을 노드: 회복/강화/상점/정비완료 처리.
-- 이벤트 노드: 안전/위험 선택지 처리.
-- 저장/복구 최소 스펙을 `user://run_state.json`에 반영했다.
+- 월드맵 UI는 `WorldMapScreen` 내부 `WorldMapView`로 노드/연결을 시각화하고, 연결된 다음 노드만 선택 가능하게 제한한다.
+- `BattleOverlayPanel`은 제거했고, 전투 중 상태 라벨을 별도 오버레이로 유지하지 않는다.
+- 저장 포맷은 `save_version=2` 기반 `user://run_state_v2.json`으로 전환했다 (v1 마이그레이션 미지원).
 - 노드 선택 확정 시 저장, 노드 해소 확정 시 저장.
 - 전투 노드는 기존 `scenes/levels/level_01.tscn`을 재사용한다.
-- `RoundManager`(`all_rounds_cleared`, `game_failed`)와 코어 `destroyed` 신호를 `battle_finished`/`run_failed` 흐름으로 연결했다.
+- `RoundManager`(`all_rounds_cleared`, `game_failed`)와 코어 `destroyed` 신호는 `BattleScreenHost`를 통해 `battle_finished`/`run_failed` 흐름으로 연결한다.
 
 ---
 

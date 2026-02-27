@@ -59,6 +59,11 @@
 - [x] 런 상태 저장/복구 최소 구현: `RunState`, `ChapterState`, `NodeResolutionResult` 저장 타이밍 연결
 - [x] 플로우 런타임 1차 구현: `scenes/flow/game_flow.tscn` + `GameFlowController` + `WorldMapView`
 - [x] 실행 진입점 전환: `project.godot run/main_scene -> res://scenes/flow/game_flow.tscn`
+- [x] 플로우 화면 씬 분리 2차: `game_flow`에서 7개 화면 씬 인스턴스 구조로 리팩터링
+- [x] 화면별 스크립트 분리: 메뉴/준비/월드맵/노드해소/노드결과/런결과/전투호스트 책임 분리
+- [x] 노드 처리 로직 이관: 아이템/마을/이벤트 해소 로직을 `NodeResolveScreen.gd`로 이동
+- [x] 전투 오버레이 제거: `BattleOverlayPanel` 삭제, 전투 UI 표시는 전투 씬 자체 UI로 유지
+- [x] 저장 포맷 v2 전환: `user://run_state_v2.json`, `save_version=2`, v1 로더 제거
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계
 - [ ] 챕터 준비 2차: 편성/장비관리 UI를 실제 히어로/인벤토리 데이터와 연결
 - [ ] 전투 실패 조건 정합화 2차: `alive_enemy_threshold` 임시 조건에서 코어HP/영웅전멸 기반으로 이관
@@ -76,3 +81,4 @@
 - [x] 성능/아키텍처 점검: 월드맵/노드 해소/UI 전환은 버튼/시그널 이벤트 기반 처리(`_process` 폴링 루프 신규 추가 없음)
 - [x] 성능/아키텍처 점검: 코어 제외 처리는 LOS 쿼리 `exclude`만 추가, 추가 폴링/노드 탐색 루프 없음
 - [x] 성능/아키텍처 점검: 이동 판정은 드래그 이벤트에서 `evaluate_hero_move` 계산으로 수행(상시 폴링 추가 없음)
+- [x] 성능/아키텍처 점검: 화면 씬 분리 후 상태 전환은 `show_screen/hide_screen` 이벤트 호출 기반으로 처리(`_process` 폴링 추가 없음)
