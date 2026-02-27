@@ -82,12 +82,21 @@
 - [x] 피격 연출 전환: `Hero.gd` + `outline.gdshader`에 빨간 윤곽선/내부 반투명 플래시 트리거 추가(`apply_damage` 이벤트 기반)
 - [x] 히어로 월드 체력바 UI 추가: `hero_base.tscn/HealthBar` + `HeroHealthBar.gd` (`health_changed` 시그널 연동)
 - [x] `GAME_PLAN.md` v25 갱신: 히어로 피격 연출(플래시) + 월드 체력바 규칙 반영
+- [x] 히어로 인터페이스 전면 교체: 기존 `HeroHUD` 구조 제거, 하단 1/4 `HeroInterface` 5컬럼 UI(초상화/장비/스탯/카드/리롤)로 재구성
+- [x] 장비 체계 3슬롯 전환: `ItemEnums/ItemDatabase/item_table`을 `무기/방어구/신발` 기준으로 재정의(기존 투구/방패 폐기)
+- [x] 히어로 진행도 임시 데이터 추가: `Hero.gd`에 `hero_display_name/level/current_exp/required_exp` + `progression_changed` 시그널 추가
+- [x] 전투 UI 골드 연동: `GameFlowController -> BattleScreenHost -> HeroInterface.set_starting_gold` payload 연결
+- [x] `GAME_PLAN.md` v26 갱신: 히어로 인터페이스 신규 규칙(실시간 미러 초상화/리롤 비용/전투 임시 레벨EXP) 반영
+- [x] `GAME_PLAN.md` 스터디 및 도메인 분리 기준 확정 (컨셉/원정/플로우/전투/성장)
+- [x] 기획 문서 디렉토리 생성: `docs/planning/game_plan_domains/`
+- [x] 도메인 분리 문서 10종 작성 (코드/구현 경로 제외, 기획 내용만 정리)
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계
 - [ ] 챕터 준비 2차: 편성/장비관리 UI를 실제 히어로/인벤토리 데이터와 연결
 - [ ] 전투 실패 조건 정합화 2차: `alive_enemy_threshold` 임시 조건에서 코어HP/영웅전멸 기반으로 이관
 
 ## 성능/아키텍처 체크 (2026-02-27, 금)
 - [x] 문서 반영 단계에서는 런타임 폴링 추가 없음 (기획/아키텍처 정리만 수행)
+- [x] 도메인 분리 문서 작성은 기획 정보 재구성 작업으로만 수행 (런타임/에셋 변경 없음)
 - [x] 책임 분리 원칙 유지: 엔티티 전투 로직 vs UI 표시 로직 분리 방향 명시
 - [x] Editor-authoritative 원칙 유지: 데이터/리소스는 에디터 및 테이블 중심으로 유지
 - [x] 성능/아키텍처 점검: 히어로 체력 UI 갱신은 `health_changed` 이벤트 기반 유지 (`_process` 추가 없음)
@@ -108,3 +117,6 @@
 - [x] 성능/아키텍처 점검: PathFollow 템플릿 제거 후 적 스폰은 기존 타이머 이벤트 + 포탈 좌표 단일 할당 유지(추가 폴링 없음)
 - [x] 성능/아키텍처 점검: 히어로 피격 플래시는 `apply_damage` 이벤트 + 트윈으로만 처리하고 `_process` 폴링 추가 없음
 - [x] 성능/아키텍처 점검: 히어로 월드 체력바는 `health_changed` 시그널 기반 갱신(`_process` 폴링 없음)
+- [x] 성능/아키텍처 점검: `HeroInterface` 갱신은 히어로/적 선택 및 시그널(`hero_stats_changed`, `equipment_changed`, `progression_changed`) 이벤트 기반 처리
+- [x] 성능/아키텍처 점검: 카드/리롤/구매는 버튼 입력 이벤트 기반 처리(`_process`/`_physics_process` 신규 폴링 없음)
+- [x] 성능/아키텍처 점검: 초상화 미러링은 `AnimatedSprite2D` 프레임/애니메이션 신호 연결 기반 동기화(프레임 루프 폴링 없음)
