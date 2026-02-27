@@ -44,6 +44,15 @@ For any Godot scene/gameplay setup request, follow this order strictly:
   - replacing editor animation assets with runtime-generated equivalents
   - ignoring inspector-authored values through script hardcoding
 
+## Export Variable Description Policy (Mandatory)
+
+- Every exported inspector field must have editor-visible context.
+- For `.gd` scripts, document exported fields using inspector-visible labels:
+  - `@export_group`, `@export_subgroup`, or `@export_category`
+  - include concise purpose/unit context in the group/category text when useful
+- Do not rely only on code comments for exported field explanations; the explanation must be visible in Godot Inspector.
+- When adding or changing `@export` fields, update grouping/description labels in the same task.
+
 ## Action Animation Restart Policy (Mandatory)
 
 - For explicit action triggers (`play_*` style calls), restart the target animation by default even when the state is unchanged.

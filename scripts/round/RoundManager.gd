@@ -14,7 +14,7 @@ enum State {
 	FAILED,
 	CLEARED
 }
-
+@export_group("라운드 기본 규칙")
 @export var enemy_group_name: StringName = &"enemy"
 @export_range(1, 999, 1) var fail_alive_enemy_threshold: int = 30
 @export_range(1.0, 300.0, 1.0) var round_duration_seconds: float = 60.0

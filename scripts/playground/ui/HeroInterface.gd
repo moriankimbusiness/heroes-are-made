@@ -2,7 +2,7 @@ extends CanvasLayer
 
 const ItemEnumsRef = preload("res://scripts/items/ItemEnums.gd")
 const ItemDataRef = preload("res://scripts/items/ItemData.gd")
-
+@export_group("HeroInterface 표시/상점 기본값")
 @export_range(1.0, 4.0, 0.1) var portrait_scale: float = 2.0
 @export_range(1.0, 2.0, 0.05) var card_hover_scale: float = 1.3
 @export_range(0, 99999, 1) var fallback_starting_gold: int = 100
@@ -288,10 +288,12 @@ func _select_hero(hero: Hero) -> void:
 		return
 	if _selected_hero != null and _selected_hero != hero and is_instance_valid(_selected_hero):
 		_set_hero_selected_visual(_selected_hero, false)
+		_set_hero_attack_range_preview(_selected_hero, false)
 	if _selected_enemy != null:
 		_deselect_enemy()
 	_selected_hero = hero
 	_set_hero_selected_visual(_selected_hero, true)
+	_set_hero_attack_range_preview(_selected_hero, true)
 	hero_interface_root.visible = true
 	_bind_portrait_source(hero)
 	_refresh_all_ui()
@@ -300,6 +302,7 @@ func _select_hero(hero: Hero) -> void:
 func _deselect_hero() -> void:
 	if _selected_hero != null and is_instance_valid(_selected_hero):
 		_set_hero_selected_visual(_selected_hero, false)
+		_set_hero_attack_range_preview(_selected_hero, false)
 	_unbind_portrait_source()
 	_selected_hero = null
 	hero_interface_root.visible = false
@@ -354,6 +357,16 @@ func _set_hero_selected_visual(hero: Hero, selected: bool) -> void:
 	if not hero.has_method("set_selected_visual"):
 		return
 	hero.call("set_selected_visual", selected)
+
+
+func _set_hero_attack_range_preview(hero: Hero, visible: bool) -> void:
+	if hero == null:
+		return
+	if not is_instance_valid(hero):
+		return
+	if not hero.has_method("set_attack_range_preview_visible"):
+		return
+	hero.call("set_attack_range_preview_visible", visible)
 
 
 func _bind_portrait_source(hero: Hero) -> void:

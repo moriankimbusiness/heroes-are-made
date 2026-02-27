@@ -31,7 +31,7 @@ enum TargetPriority {
 	LOWEST_HEALTH,
 	NEAREST
 }
-
+@export_group("공격 기본값")
 @export var attack_enabled: bool = true
 @export_range(0.1, 9999.0, 0.1) var attack_damage: float = 10.0
 @export_range(0.1, 20.0, 0.1) var attacks_per_second: float = 1.2
@@ -41,8 +41,10 @@ enum TargetPriority {
 @export var target_priority: TargetPriority = TargetPriority.PATH_PROGRESS
 @export_range(0, 99, 1) var attack_hit_frame_index: int = 2
 @export_range(0.0, 20.0, 0.1) var attack_flip_deadzone: float = 0.1
+@export_group("이동")
 @export_range(1.0, 500.0, 1.0) var move_speed: float = 160.0
 @export_range(0.1, 64.0, 0.1) var move_stop_distance: float = 6.0
+@export_group("기본 스탯")
 @export_range(-999, 999, 1) var base_strength: int = 2
 @export_range(-999, 999, 1) var base_agility: int = 2
 @export_range(-999, 999, 1) var base_intelligence: int = 1
@@ -50,11 +52,13 @@ enum TargetPriority {
 @export_range(0.0, 9999.0, 0.1) var base_magic_attack: float = 5.0
 @export_range(1.0, 9999.0, 1.0) var base_max_health: float = 100.0
 @export_range(0.1, 20.0, 0.1) var base_attacks_per_second: float = 1.2
+@export_group("성장/레벨")
 @export var hero_display_name: String = "용사"
 @export_range(1, 99, 1) var level: int = 1
 @export_range(0, 999999, 1) var current_exp: int = 0
 @export_range(1, 999999, 1) var required_exp: int = 60
 @export_range(0.0, 3.0, 0.01) var agility_attack_speed_factor: float = 0.03
+@export_group("피격/선택 비주얼")
 @export_range(0.01, 2.0, 0.01) var damage_flash_duration: float = 0.14
 @export var hover_outline_color: Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var damage_outline_color: Color = Color(1.0, 0.2, 0.2, 1.0)
@@ -62,6 +66,7 @@ enum TargetPriority {
 @export var selected_outline_color: Color = Color(0.3, 1.0, 0.4, 1.0)
 @export var selected_fill_color: Color = Color(0.3, 1.0, 0.4, 0.35)
 @export_range(0.0, 1.0, 0.01) var selected_fill_strength: float = 1.0
+@export_group("강화 계수 테이블")
 @export var enhance_attack_multipliers: Array[float] = [
 	1.0, 1.12, 1.26, 1.42, 1.60, 1.80, 2.02, 2.26,
 	2.52, 2.80, 3.10, 3.42, 3.76, 4.12, 4.50, 4.90
@@ -128,10 +133,6 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	var mb := event as InputEventMouseButton
 	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
 		return
-	if _is_dead:
-		_show_attack_range_preview = false
-	else:
-		_show_attack_range_preview = not _show_attack_range_preview
 	hero_clicked.emit(self)
 	if not _is_damage_flash_active:
 		_apply_idle_outline_visual()
@@ -139,23 +140,10 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	get_viewport().set_input_as_handled()
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not _show_attack_range_preview:
-		return
-	if event is not InputEventMouseButton:
-		return
-	var mb := event as InputEventMouseButton
-	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
-		return
-	_show_attack_range_preview = false
-	queue_redraw()
-
-
 func issue_move_command(world_target: Vector2) -> void:
 	if _is_dead:
 		return
 	_move_order_target = _clamp_to_play_area(world_target)
-	_show_attack_range_preview = false
 	_clear_pending_attack()
 	_current_target = null
 	if attack_timer != null:
@@ -815,6 +803,13 @@ func is_selected_visual() -> bool:
 	return _is_selected
 
 
+func set_attack_range_preview_visible(visible: bool) -> void:
+	if _show_attack_range_preview == visible:
+		return
+	_show_attack_range_preview = visible
+	queue_redraw()
+
+
 func play_idle() -> void:
 	_play(State.IDLE, true)
 
@@ -882,7 +877,6 @@ func _die() -> void:
 	_targets_in_range.clear()
 	_current_target = null
 	_clear_pending_attack()
-	_show_attack_range_preview = false
 	set_physics_process(false)
 	_cancel_damage_flash()
 	_set_damage_fill_strength(0.0)

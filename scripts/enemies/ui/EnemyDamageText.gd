@@ -1,6 +1,6 @@
 @tool
 extends Node2D
-
+@export_group("데미지 텍스트 표시")
 @export_range(0.0, 60.0, 1.0) var spawn_offset_y: float = -38.0
 @export_range(0.0, 120.0, 1.0) var rise_distance: float = 24.0
 @export_range(0.0, 60.0, 1.0) var random_x_jitter: float = 10.0
@@ -10,7 +10,7 @@ extends Node2D
 @export var damage_font: Font
 @export var text_color: Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var outline_color: Color = Color(0.0, 0.0, 0.0, 1.0)
-@export_group("Debug")
+@export_group("디버그 미리보기 (에디터 전용)")
 @export var show_debug_preview_in_editor: bool = false:
 	set(value):
 		show_debug_preview_in_editor = value

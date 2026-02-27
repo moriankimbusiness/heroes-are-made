@@ -1,7 +1,7 @@
 @tool
 extends Area2D
 class_name EnemyRangeArea
-
+@export_group("범위 계산값 (final = (base + add) * scale)")
 @export_range(1.0, 9999.0, 0.1) var base_range: float = 64.0:
 	set(value):
 		base_range = value

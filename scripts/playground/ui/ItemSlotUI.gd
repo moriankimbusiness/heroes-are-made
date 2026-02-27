@@ -17,7 +17,7 @@ const SLOT_KIND_EQUIPMENT := "equipment"
 const FEEDBACK_NONE := 0
 const FEEDBACK_OK := 1
 const FEEDBACK_FAIL := 2
-
+@export_group("슬롯 설정")
 @export_enum("inventory", "equipment") var slot_kind: String = SLOT_KIND_INVENTORY
 @export var slot_index: int = -1
 @export var empty_label_text: String = ""

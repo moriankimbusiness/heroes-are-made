@@ -1,5 +1,5 @@
 extends Node
-
+@export_group("RoundSystem 의존성 경로")
 @export var round_manager_path: NodePath = NodePath("RoundManager")
 @export var enemy_spawn_controller_path: NodePath
 @export var spawn_timer_path: NodePath

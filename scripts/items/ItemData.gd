@@ -12,16 +12,18 @@ enum ItemTier {
 	EPIC,
 	LEGENDARY
 }
-
+@export_group("아이템 기본 정보")
 @export var item_id: StringName = &""
 @export var display_name: String = ""
 @export var item_type: int = ItemEnumsRef.ItemType.WEAPON
 @export var tier: int = ItemTier.COMMON
+@export_group("아이템 스탯 보너스")
 @export_range(-999, 999, 1) var strength_bonus: int = 0
 @export_range(-999, 999, 1) var agility_bonus: int = 0
 @export_range(-999, 999, 1) var intelligence_bonus: int = 0
 @export_range(-999.0, 9999.0, 0.1) var physical_attack_bonus: float = 0.0
 @export_range(-999.0, 9999.0, 0.1) var magic_attack_bonus: float = 0.0
+@export_group("강화")
 @export_range(0, MAX_ENHANCE_LEVEL, 1) var enhance_level: int = 0
 
 

@@ -1,7 +1,8 @@
 extends Control
-
+@export_group("노드 경로")
 @export var round_manager_path: NodePath
 @export var force_next_round_button_path: NodePath
+@export_group("디버그 표시")
 @export var debug_show_force_next_round_button: bool = false
 
 @onready var _round_manager: Node = get_node_or_null(round_manager_path)

@@ -1,5 +1,5 @@
 extends CanvasLayer
-
+@export_group("RoundManagerUI 노드 경로")
 @export var round_manager_path: NodePath
 @export var round_label_path: NodePath
 @export var alive_enemy_count_label_path: NodePath

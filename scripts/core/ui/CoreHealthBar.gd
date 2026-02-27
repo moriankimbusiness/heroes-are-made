@@ -1,6 +1,7 @@
 extends ProgressBar
-
+@export_group("노드 연결")
 @export var health_text_path: NodePath = NodePath("HealthText")
+@export_group("체력 색상 구간")
 @export var hp_color_high: Color = Color(0.25, 0.85, 0.35, 1.0)
 @export var hp_color_mid: Color = Color(0.95, 0.82, 0.20, 1.0)
 @export var hp_color_low: Color = Color(0.90, 0.20, 0.20, 1.0)

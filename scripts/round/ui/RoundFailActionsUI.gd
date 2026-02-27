@@ -1,8 +1,9 @@
 extends HBoxContainer
-
+@export_group("RoundFailActionsUI 노드 경로")
 @export var fail_actions_path: NodePath
 @export var retry_button_path: NodePath
 @export var quit_button_path: NodePath
+@export_group("디버그 표시")
 @export var debug_show_fail_actions: bool = false
 
 @onready var _fail_actions: Control = get_node_or_null(fail_actions_path) as Control

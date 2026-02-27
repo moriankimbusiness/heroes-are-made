@@ -3,7 +3,7 @@ class_name Core
 
 signal health_changed(current: float, max_value: float, ratio: float)
 signal destroyed(core: Area2D)
-
+@export_group("코어 체력")
 @export_range(1.0, 999999.0, 1.0) var base_max_health: float = 300.0
 
 var max_health: float = 300.0

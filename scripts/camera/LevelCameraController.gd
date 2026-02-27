@@ -1,9 +1,11 @@
 extends Camera2D
 
+@export_group("카메라 이동/줌 설정")
 @export_range(50.0, 3000.0, 10.0) var move_speed: float = 600.0
 @export_range(0.1, 4.0, 0.01) var zoom_min: float = 0.75
 @export_range(0.1, 4.0, 0.01) var zoom_max: float = 1.6
 @export_range(0.01, 1.0, 0.01) var zoom_step: float = 0.1
+@export_group("카메라 이동 경계 (사용 시)")
 @export var use_move_bounds: bool = false
 @export var move_bounds_center: Vector2 = Vector2.ZERO
 @export var move_bounds_extents: Vector2 = Vector2.ZERO

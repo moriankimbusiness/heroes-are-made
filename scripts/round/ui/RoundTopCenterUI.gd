@@ -1,11 +1,12 @@
 extends Control
-
+@export_group("RoundTopCenterUI 노드 경로")
 @export var round_countdown_label_path: NodePath
 @export var next_round_button_path: NodePath
 @export var pause_button_path: NodePath
 @export var speed_1x_button_path: NodePath
 @export var speed_2x_button_path: NodePath
 var _debug_show_next_round_button: bool = false
+@export_group("디버그 표시")
 @export var debug_show_next_round_button: bool:
 	set(value):
 		if _debug_show_next_round_button == value:

@@ -1,5 +1,5 @@
 extends Node2D
-
+@export_group("포탈 식별자")
 @export var portal_id: StringName = &"portal_01"
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 

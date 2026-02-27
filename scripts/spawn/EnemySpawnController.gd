@@ -1,17 +1,21 @@
 extends Node
 
+@export_group("라운드 기본 스폰")
 @export var enemy_scene: PackedScene
 @export var round_enemy_scenes: Array[PackedScene] = []
 @export var round_spawn_counts: Array[int] = []
 @export var round_enemy_health_multipliers: Array[float] = []
 @export_range(0.1, 10.0, 0.1) var level_hp_scale: float = 1.0
+@export_group("체력 공식 (테이블 이후)")
 @export var use_formula_after_table: bool = true
 @export_range(0.0, 1.0, 0.001) var formula_growth_rate: float = 0.08
 @export_range(0.0, 1.0, 0.001) var formula_softcap_rate: float = 0.015
 @export_range(0.0, 3.0, 0.01) var formula_softcap_power: float = 0.6
+@export_group("필수 노드 경로")
 @export var portal_path: NodePath
 @export var core_path: NodePath
 @export var spawn_timer_path: NodePath
+@export_group("런타임 제어")
 @export var max_spawn_count: int = 10
 @export_range(1, 999, 1) var current_round: int = 1
 
@@ -169,4 +173,3 @@ func _get_formula_health_multiplier_for_current_round() -> float:
 		softcap_factor = 1.0
 
 	return maxf(1.0, base_multiplier * growth_factor / softcap_factor)
-

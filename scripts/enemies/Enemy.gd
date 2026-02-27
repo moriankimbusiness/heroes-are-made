@@ -20,7 +20,7 @@ enum State {
 	HURT,
 	DEATH
 }
-
+@export_group("사망/기본 전투")
 @export var auto_free_on_death_end: bool = false
 @export_range(0.0, 30.0, 0.1) var death_fade_duration: float = 3.0
 @export var horizontal_flip_deadzone: float = 0.1
@@ -30,11 +30,13 @@ enum State {
 @export_range(0.1, 9999.0, 0.1) var attack_damage: float = 8.0
 @export_range(0.1, 20.0, 0.1) var attacks_per_second: float = 1.0
 
+@export_group("공격 사거리 시각화")
 @export var show_attack_range_on_select: bool = false
 @export var attack_range_color: Color = Color(1.0, 0.30, 0.30, 0.85)
 @export_range(0.5, 6.0, 0.1) var attack_range_line_width: float = 1.6
 @export_range(0.0, 1.0, 0.01) var attack_range_fill_alpha: float = 0.08
 
+@export_group("코어 연결 경로")
 @export var core_path: NodePath
 
 var state: State = State.WALK

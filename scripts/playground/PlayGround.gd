@@ -1,11 +1,13 @@
 extends Node2D
-
+@export_group("플레이그라운드 기본")
 @export var hero_scene: PackedScene
 @export_range(10.0, 2000.0, 1.0) var play_area_radius: float = 220.0
 @export var core_path: NodePath
+@export_group("LOS 판정 튜닝")
 @export_flags_2d_physics var los_collision_mask: int = 1
 @export_range(0.0, 64.0, 0.1) var los_probe_radius: float = 6.0
 @export_range(0.0, 64.0, 0.1) var los_hit_backoff: float = 2.0
+@export_group("디버그 표시")
 @export var enable_los_debug_draw: bool = false
 
 @onready var play_area_outline: Line2D = $PlayAreaOutline
