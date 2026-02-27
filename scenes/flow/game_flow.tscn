@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/flow/GameFlowController.gd" id="1_flow"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/battle_screen_host.tscn" id="2_battle_host"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/main_menu_screen.tscn" id="3_main_menu"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/chapter_prep_screen.tscn" id="4_chapter_prep"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/world_map_screen.tscn" id="5_world_map"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/node_resolve_screen.tscn" id="6_node_resolve"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/node_result_screen.tscn" id="7_node_result"]
+[ext_resource type="PackedScene" path="res://scenes/flow/screens/run_result_screen.tscn" id="8_run_result"]
+
+[node name="GameFlow" type="Node"]
+script = ExtResource("1_flow")
+
+[node name="BattleScreenHost" parent="." instance=ExtResource("2_battle_host")]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="MainMenuScreen" parent="UI" instance=ExtResource("3_main_menu")]
+
+[node name="ChapterPrepScreen" parent="UI" instance=ExtResource("4_chapter_prep")]
+
+[node name="WorldMapScreen" parent="UI" instance=ExtResource("5_world_map")]
+
+[node name="NodeResolveScreen" parent="UI" instance=ExtResource("6_node_resolve")]
+
+[node name="NodeResultScreen" parent="UI" instance=ExtResource("7_node_result")]
+
+[node name="RunResultScreen" parent="UI" instance=ExtResource("8_run_result")]

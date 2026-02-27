@@ -1,0 +1,87 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/flow/screens/WorldMapScreen.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/flow/WorldMapView.gd" id="2_map_view"]
+
+[node name="WorldMapScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="WorldTopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 14.0
+offset_right = -16.0
+offset_bottom = 62.0
+grow_horizontal = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="WorldTopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBoxContainer" type="HBoxContainer" parent="WorldTopBar/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="ChapterLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "챕터"
+
+[node name="GoldLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "골드"
+
+[node name="DepthLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "깊이"
+
+[node name="WorldStatusLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+text = "상태"
+
+[node name="WorldMapView" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 76.0
+offset_right = -16.0
+offset_bottom = -72.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_map_view")
+
+[node name="WorldHintLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -48.0
+offset_right = -16.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "-"
+horizontal_alignment = 1
+
+[node name="ExitRunButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1130.0
+offset_top = 16.0
+offset_right = 1256.0
+offset_bottom = 52.0
+text = "런 포기"

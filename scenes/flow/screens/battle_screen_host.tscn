@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/flow/screens/BattleScreenHost.gd" id="1_script"]
+
+[node name="BattleScreenHost" type="Node"]
+script = ExtResource("1_script")
+
+[node name="BattleRoot" type="Node" parent="."]
