@@ -37,6 +37,8 @@
 - [x] 코어 씬 분리: `level_base`의 `CoreRoot`를 `scenes/core/core_base.tscn` 인스턴스로 전환
 - [x] 원인 분석: 적은 현재 `hero` 그룹만 공격 대상으로 취급하여, 코어가 공격 사거리 안이어도 공격하지 않음
 - [x] 코어 체력 API 구현: `Core.gd` 추가(`apply_damage/is_dead/health_changed`) 및 `core_base.tscn` 연결
+- [x] 코어 체력 UI 구현: `core_base.tscn`에 월드 체력바(`HealthBar`) + 수치 텍스트(`HealthText`) 추가
+- [x] 코어 체력 UI 스크립트 구현: `CoreHealthBar.gd`에서 `Core.health_changed` 시그널 기반 갱신 연결
 - [x] 적 코어 공격 폴백 구현: 히어로 우선 유지 + 히어로 부재 시 공격 범위 내 코어(사각 충돌) 공격
 - [x] 히어로 이동 판정 Phase 2-1 구현: `PlayGround.resolve_los_safe_target` 추가 + 드래그 경로 LOS(Physics 레이어) 안전지점 보정
 - [x] `playground.tscn` LOS 편집값 반영: `los_collision_mask=1`, `los_probe_radius=6.0`, `los_hit_backoff=2.0`
@@ -66,6 +68,15 @@
 - [x] 노드 처리 로직 이관: 아이템/마을/이벤트 해소 로직을 `NodeResolveScreen.gd`로 이동
 - [x] 전투 오버레이 제거: `BattleOverlayPanel` 삭제, 전투 UI 표시는 전투 씬 자체 UI로 유지
 - [x] 저장 포맷 v2 전환: `user://run_state_v2.json`, `save_version=2`, v1 로더 제거
+- [x] 히어로 조작 전환: 드래그 이동 제거, `좌클릭 선택 + 우클릭 이동` RTS 방식으로 변경
+- [x] `Hero.gd` 이동 명령 API 추가: `issue_move_command(world_target)` + 이동 중 자동공격 보류
+- [x] `HeroHUD.gd` 우클릭 명령 연결: 선택된 히어로 1명에게 월드 좌표 이동 명령 전달
+- [x] `hero_base.tscn` 애니메이션 보강: `walk` 루프 애니메이션 추가
+- [x] `GAME_PLAN.md` v20 갱신: 히어로 이동 규칙을 RTS 우클릭 명령 기반으로 동기화
+- [x] 히어로 경로탐색 1차: `playground.tscn`에 `NavigationRegion2D` + `playground_navpolygon.tres` 추가
+- [x] 히어로 이동 경로 전환: `Hero.gd`를 `NavigationAgent2D` 기반 우클릭 경로 이동으로 변경
+- [x] 정적 장애물 우회 정책 적용: 코어 홀(사각 충돌) + 플레이영역 경계 내 경로탐색
+- [x] `GAME_PLAN.md` v21 갱신: 히어로 경로탐색/정적 장애물 우회 규칙 반영
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계
 - [ ] 챕터 준비 2차: 편성/장비관리 UI를 실제 히어로/인벤토리 데이터와 연결
 - [ ] 전투 실패 조건 정합화 2차: `alive_enemy_threshold` 임시 조건에서 코어HP/영웅전멸 기반으로 이관
@@ -85,3 +96,7 @@
 - [x] 성능/아키텍처 점검: 이동 판정은 드래그 이벤트에서 `evaluate_hero_move` 계산으로 수행(상시 폴링 추가 없음)
 - [x] 성능/아키텍처 점검: 화면 씬 분리 후 상태 전환은 `show_screen/hide_screen` 이벤트 호출 기반으로 처리(`_process` 폴링 추가 없음)
 - [x] 성능/아키텍처 점검: Enemy 추적/타깃 전환은 감지/공격 Area 시그널 + 기존 `_physics_process` 재사용(신규 `_process` 폴링 없음)
+- [x] 성능/아키텍처 점검: 히어로 이동 스텝 계산은 이동 명령 활성 중에만 `_physics_process` 동작(상시 프레임 루프 미사용)
+- [x] 성능/아키텍처 점검: 이동 명령 입력은 `HeroHUD._unhandled_input` 우클릭 이벤트 기반 처리(추가 폴링 없음)
+- [x] 성능/아키텍처 점검: 경로 계산은 `NavigationAgent2D` 내부 경로 쿼리 재사용, 이동 명령 활성 프레임에서만 스텝 적용
+- [x] 성능/아키텍처 점검: 코어 체력 표시는 `Core.health_changed` 이벤트 기반 갱신으로 구현(`_process` 폴링 없음)

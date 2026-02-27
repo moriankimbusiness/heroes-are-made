@@ -70,18 +70,36 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not status_root.visible and not enemy_status_root.visible:
-		return
 	if _slot_drag_in_progress:
 		return
 	if event is not InputEventMouseButton:
 		return
 	var mb := event as InputEventMouseButton
-	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
+	if not mb.pressed:
 		return
 	if _is_click_inside_ui(mb.position):
 		return
-	_clear_selection()
+	if mb.button_index == MOUSE_BUTTON_LEFT:
+		if status_root.visible or enemy_status_root.visible:
+			_clear_selection()
+		return
+	if mb.button_index != MOUSE_BUTTON_RIGHT:
+		return
+	if _selected_hero == null or not is_instance_valid(_selected_hero):
+		return
+	if not _selected_hero.has_method("issue_move_command"):
+		return
+	_selected_hero.call("issue_move_command", _get_world_mouse_position())
+	get_viewport().set_input_as_handled()
+
+
+func _get_world_mouse_position() -> Vector2:
+	if _playground != null:
+		return _playground.get_global_mouse_position()
+	var camera: Camera2D = get_viewport().get_camera_2d()
+	if camera != null:
+		return camera.get_global_mouse_position()
+	return get_viewport().get_mouse_position()
 
 
 func _setup_shared_inventory() -> void:

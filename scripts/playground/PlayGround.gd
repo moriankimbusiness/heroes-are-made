@@ -121,7 +121,12 @@ func resolve_los_safe_target(from: Vector2, to: Vector2, hero_radius: float) -> 
 	return clamped_to
 
 
-func evaluate_hero_move(from: Vector2, desired_to: Vector2, hero: Node) -> Dictionary:
+func evaluate_hero_move(
+	from: Vector2,
+	desired_to: Vector2,
+	hero: Node,
+	min_distance_sq: float = MOVE_MIN_DISTANCE_SQ
+) -> Dictionary:
 	var candidate: Vector2 = clamp_to_play_area(desired_to)
 	var hint: Vector2 = desired_to - from
 	candidate = resolve_overlaps_smooth(candidate, hero, hint)
@@ -152,7 +157,8 @@ func evaluate_hero_move(from: Vector2, desired_to: Vector2, hero: Node) -> Dicti
 		result["is_movable"] = false
 		result["reason"] = &"blocked_by_hero_path"
 		return result
-	if from.distance_squared_to(candidate) < MOVE_MIN_DISTANCE_SQ:
+	var required_min_distance_sq: float = maxf(0.0, min_distance_sq)
+	if from.distance_squared_to(candidate) < required_min_distance_sq:
 		result["is_movable"] = false
 		result["reason"] = &"too_close"
 		return result

@@ -16,9 +16,11 @@ signal health_changed(hero: Hero, current: float, max_value: float, ratio: float
 @onready var attack_range_shape: CollisionShape2D = $AttackRange/CollisionShape2D
 @onready var attack_timer: Timer = $AttackTimer
 @onready var status_anchor: Marker2D = $StatusAnchor
+@onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 
 enum State {
 	IDLE,
+	WALK,
 	ATTACK01
 }
 
@@ -36,13 +38,9 @@ enum TargetPriority {
 @export_range(0.1, 10.0, 0.01) var attack_range_scale: float = 1.0
 @export var target_priority: TargetPriority = TargetPriority.PATH_PROGRESS
 @export_range(0, 99, 1) var attack_hit_frame_index: int = 2
-@export var disable_attack_while_dragging: bool = true
 @export_range(0.0, 20.0, 0.1) var attack_flip_deadzone: float = 0.1
-@export var show_drag_collision_debug: bool = false
-@export var move_preview_can_color: Color = Color(0.25, 1.0, 0.35, 0.95)
-@export var move_preview_blocked_color: Color = Color(1.0, 0.2, 0.2, 0.95)
-@export_range(0.5, 8.0, 0.1) var move_preview_line_width: float = 2.0
-@export_range(2.0, 24.0, 0.5) var move_preview_marker_radius: float = 8.0
+@export_range(1.0, 500.0, 1.0) var move_speed: float = 160.0
+@export_range(0.1, 64.0, 0.1) var move_stop_distance: float = 6.0
 @export_range(-999, 999, 1) var base_strength: int = 2
 @export_range(-999, 999, 1) var base_agility: int = 2
 @export_range(-999, 999, 1) var base_intelligence: int = 1
@@ -61,33 +59,25 @@ enum TargetPriority {
 ]
 
 var state: State = State.IDLE
-static var _any_dragging: bool = false
 var _is_finished: bool = false
 var _is_dead: bool = false
-var _dragging: bool = false
-var _drag_offset: Vector2 = Vector2.ZERO
-var _drag_target: Vector2 = Vector2.ZERO
-var _last_nonzero_move: Vector2 = Vector2.RIGHT
-var _drag_press_mouse_world: Vector2 = Vector2.ZERO
-var _drag_preview_position: Vector2 = Vector2.ZERO
-var _drag_preview_valid: bool = false
+var _move_order_active: bool = false
+var _move_order_target: Vector2 = Vector2.ZERO
 var _targets_in_range: Array[Area2D] = []
 var _current_target: Area2D = null
 var _warned_invalid_target_ids: Dictionary = {}
 var _show_attack_range_preview: bool = false
-var _preview_state_before_press: bool = false
 var _attack01_base_duration_seconds: float = 0.5
 var _pending_attack_target: Area2D = null
 var _pending_attack_damage: float = 0.0
 var _pending_hit_frame_fired: bool = false
+var _warned_missing_walk_animation: bool = false
+var _warned_missing_navigation_agent: bool = false
 var playground: Node2D = null
 var _stats: HeroStats = HeroStats.new()
 var _equipment: EquipmentState = null
 var max_health: float = 100.0
 var current_health: float = 100.0
-
-const CLICK_SELECTION_DISTANCE_SQ: float = 25.0
-const MOVE_COMMIT_MIN_DISTANCE_SQ: float = 4.0
 
 
 func _ready() -> void:
@@ -105,7 +95,7 @@ func _ready() -> void:
 	if attack_timer != null:
 		attack_timer.one_shot = true
 		attack_timer.timeout.connect(_on_attack_timer_timeout)
-	set_process(false)
+	set_physics_process(false)
 	_play(State.IDLE, true)
 	if attack_enabled:
 		call_deferred("_attempt_auto_attack")
@@ -114,97 +104,126 @@ func _ready() -> void:
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
 	if _is_dead:
 		return
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
-			_dragging = true
-			_any_dragging = true
-			_preview_state_before_press = _show_attack_range_preview
-			_drag_press_mouse_world = get_global_mouse_position()
-			_drag_offset = global_position - get_global_mouse_position()
-			_drag_target = global_position
-			_drag_preview_position = global_position
-			_drag_preview_valid = false
-			_show_attack_range_preview = false
-			_update_drag_move_preview()
-			if disable_attack_while_dragging and attack_timer != null:
-				attack_timer.stop()
-			anim.material.set_shader_parameter(&"enabled", false)
-			_request_visual_redraw()
-			get_viewport().set_input_as_handled()
-
-
-func _input(event: InputEvent) -> void:
-	if not _dragging:
+	if event is not InputEventMouseButton:
 		return
-	if event is InputEventMouseMotion:
-		_drag_target = get_global_mouse_position() + _drag_offset
-		_update_drag_move_preview()
-		_request_visual_redraw()
-		get_viewport().set_input_as_handled()
-	elif event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed:
-			var release_mouse_world: Vector2 = get_global_mouse_position()
-			var was_click: bool = release_mouse_world.distance_squared_to(_drag_press_mouse_world) <= CLICK_SELECTION_DISTANCE_SQ
-			_dragging = false
-			_any_dragging = false
-			if was_click:
-				_show_attack_range_preview = not _preview_state_before_press
-				hero_clicked.emit(self)
-			else:
-				_commit_drag_move_if_valid()
-				_show_attack_range_preview = false
-			if attack_enabled and attack_timer != null and attack_timer.is_stopped():
-				_attempt_auto_attack()
-			anim.material.set_shader_parameter(&"enabled", false)
-			_clear_drag_preview()
-			_request_visual_redraw()
-			get_viewport().set_input_as_handled()
+	var mb := event as InputEventMouseButton
+	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
+		return
+	_show_attack_range_preview = not _show_attack_range_preview
+	hero_clicked.emit(self)
+	if anim.material != null:
+		anim.material.set_shader_parameter(&"enabled", false)
+	_request_visual_redraw()
+	get_viewport().set_input_as_handled()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _dragging:
-		return
 	if not _show_attack_range_preview:
 		return
-	if event is InputEventMouseButton:
-		var mb: InputEventMouseButton = event
-		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
-			_show_attack_range_preview = false
-			queue_redraw()
-
-
-func _process(_delta: float) -> void:
-	return
-
-
-func _update_drag_move_preview() -> void:
-	var desired: Vector2 = _clamp_to_play_area(_drag_target)
-	if playground != null:
-		if playground.has_method("evaluate_hero_move"):
-			var eval_result: Dictionary = playground.call("evaluate_hero_move", global_position, desired, self)
-			_drag_preview_position = Vector2(eval_result.get("final_position", desired))
-			_drag_preview_valid = bool(eval_result.get("is_movable", false))
-			return
-		desired = playground.resolve_overlaps_smooth(desired, self, _last_nonzero_move)
-	_drag_preview_position = desired
-	_drag_preview_valid = global_position.distance_squared_to(_drag_preview_position) >= MOVE_COMMIT_MIN_DISTANCE_SQ
-
-
-func _commit_drag_move_if_valid() -> void:
-	if not _drag_preview_valid:
+	if event is not InputEventMouseButton:
 		return
-	var move: Vector2 = _drag_preview_position - global_position
-	global_position = _drag_preview_position
-	if move.length_squared() > 0.0001:
-		_last_nonzero_move = move
+	var mb := event as InputEventMouseButton
+	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
+		return
+	_show_attack_range_preview = false
+	queue_redraw()
+
+
+func issue_move_command(world_target: Vector2) -> void:
+	if _is_dead:
+		return
+	_move_order_target = _clamp_to_play_area(world_target)
+	_show_attack_range_preview = false
+	_clear_pending_attack()
+	_current_target = null
+	if attack_timer != null:
+		attack_timer.stop()
+	if global_position.distance_to(_move_order_target) <= move_stop_distance:
+		_stop_move_order(true)
+		return
+	if navigation_agent != null:
+		navigation_agent.target_position = _move_order_target
+	elif not _warned_missing_navigation_agent:
+		_warned_missing_navigation_agent = true
+		push_warning("Hero: NavigationAgent2D is missing. Falling back to direct move.")
+	_move_order_active = true
+	set_physics_process(true)
+	_play(State.WALK, true)
+	_request_visual_redraw()
+
+
+func _physics_process(delta: float) -> void:
+	if _is_dead:
+		return
+	if not _move_order_active:
+		set_physics_process(false)
+		return
+	_step_move_order(delta)
+
+
+func _step_move_order(delta: float) -> void:
+	var to_target: Vector2 = _move_order_target - global_position
+	var remaining: float = to_target.length()
+	if remaining <= move_stop_distance:
+		_stop_move_order(true)
+		return
+	if move_speed <= 0.0:
+		_stop_move_order(true)
+		return
+
+	var max_step: float = move_speed * delta
+	if max_step <= 0.0:
+		return
+	var next_position: Vector2 = _resolve_next_move_position(max_step, to_target, remaining)
+
+	var move_vector: Vector2 = next_position - global_position
+	if move_vector.length_squared() <= 0.0001:
+		_stop_move_order(true)
+		return
+
+	global_position = next_position
+	_update_walk_facing(move_vector)
 	hero_moved.emit(self, global_position)
 
+	if global_position.distance_to(_move_order_target) <= move_stop_distance:
+		_stop_move_order(true)
 
-func _clear_drag_preview() -> void:
-	_drag_preview_position = global_position
-	_drag_preview_valid = false
+
+func _resolve_next_move_position(max_step: float, to_target: Vector2, remaining: float) -> Vector2:
+	if navigation_agent == null:
+		var fallback_step: Vector2 = global_position + to_target.normalized() * minf(max_step, remaining)
+		return _clamp_to_play_area(fallback_step)
+
+	navigation_agent.target_position = _move_order_target
+	if navigation_agent.is_navigation_finished():
+		return global_position
+	var path_next: Vector2 = navigation_agent.get_next_path_position()
+	if not path_next.is_finite():
+		return global_position
+
+	var to_next: Vector2 = path_next - global_position
+	if to_next.length_squared() <= 0.0001:
+		return global_position
+	var step_target: Vector2 = global_position + to_next.normalized() * minf(max_step, to_next.length())
+	return _clamp_to_play_area(step_target)
+
+
+func _stop_move_order(play_idle: bool) -> void:
+	_move_order_active = false
+	set_physics_process(false)
+	if _is_dead:
+		return
+	if play_idle:
+		_play(State.IDLE, true)
+	if attack_enabled and attack_timer != null and attack_timer.is_stopped():
+		_attempt_auto_attack()
+
+
+func _update_walk_facing(move: Vector2) -> void:
+	if move.x > attack_flip_deadzone:
+		anim.flip_h = false
+	elif move.x < -attack_flip_deadzone:
+		anim.flip_h = true
 
 
 func _clamp_to_play_area(point: Vector2) -> Vector2:
@@ -381,7 +400,7 @@ func _on_attack_timer_timeout() -> void:
 func _attempt_auto_attack() -> void:
 	if not attack_enabled or _is_dead:
 		return
-	if disable_attack_while_dragging and _dragging:
+	if _move_order_active:
 		return
 	_cleanup_targets()
 	if _targets_in_range.is_empty():
@@ -639,20 +658,6 @@ func _warn_invalid_target_once(target: Area2D, method_name: String) -> void:
 	push_warning("Hero: target '%s' is missing method '%s'." % [target.name, method_name])
 
 
-func _draw_capsule(color: Color, width: float = 1.0) -> void:
-	var cap: CapsuleShape2D = drag_shape.shape
-	var off: Vector2 = drag_shape.position
-	var r: float = cap.radius
-	var h: float = cap.height / 2.0 - r  # half-spine
-	# 상단 반원 (왼쪽→위→오른쪽)
-	draw_arc(off + Vector2(0, -h), r, PI, TAU, 32, color, width)
-	# 하단 반원 (오른쪽→아래→왼쪽)
-	draw_arc(off + Vector2(0, h), r, 0, PI, 32, color, width)
-	# 좌/우 직선
-	draw_line(off + Vector2(-r, -h), off + Vector2(-r, h), color, width)
-	draw_line(off + Vector2(r, -h), off + Vector2(r, h), color, width)
-
-
 func _draw_attack_range_preview() -> void:
 	var circle_shape: CircleShape2D = attack_range_shape.shape as CircleShape2D
 	if circle_shape == null:
@@ -663,53 +668,33 @@ func _draw_attack_range_preview() -> void:
 	draw_arc(center, radius, 0.0, TAU, 72, Color(0.35, 0.85, 1.0, 0.7), 1.6)
 
 
-func _draw_drag_move_preview() -> void:
-	if not _dragging:
-		return
-	var preview_local: Vector2 = to_local(_drag_preview_position)
-	var preview_color: Color = move_preview_can_color if _drag_preview_valid else move_preview_blocked_color
-	var marker_fill: Color = preview_color
-	marker_fill.a = 0.20
-	draw_circle(preview_local, move_preview_marker_radius, marker_fill)
-	draw_arc(preview_local, move_preview_marker_radius, 0.0, TAU, 48, preview_color, move_preview_line_width)
-
-
 func _request_visual_redraw() -> void:
-	if show_drag_collision_debug:
-		get_tree().call_group(&"hero", "queue_redraw")
-		return
 	queue_redraw()
 
 
 func _draw() -> void:
 	if _show_attack_range_preview:
 		_draw_attack_range_preview()
-	if _dragging:
-		_draw_drag_move_preview()
-	if not show_drag_collision_debug:
-		return
-	if not _any_dragging:
-		return
-	if _dragging:
-		_draw_capsule(Color(1.0, 1.0, 1.0, 0.6))
-	else:
-		_draw_capsule(Color(1.0, 1.0, 1.0, 0.25))
 
 
 func _on_mouse_entered() -> void:
-	if _is_dead or _any_dragging:
+	if _is_dead:
 		return
-	anim.material.set_shader_parameter(&"enabled", true)
+	if anim.material != null:
+		anim.material.set_shader_parameter(&"enabled", true)
 
 
 func _on_mouse_exited() -> void:
-	if _dragging:
-		return
-	anim.material.set_shader_parameter(&"enabled", false)
+	if anim.material != null:
+		anim.material.set_shader_parameter(&"enabled", false)
 
 
 func play_idle() -> void:
 	_play(State.IDLE, true)
+
+
+func play_walk() -> void:
+	_play(State.WALK, true)
 
 
 func play_attack01() -> void:
@@ -762,14 +747,12 @@ func _die() -> void:
 	if _is_dead:
 		return
 	_is_dead = true
-	_dragging = false
-	_any_dragging = false
-	_clear_drag_preview()
+	_move_order_active = false
 	_targets_in_range.clear()
 	_current_target = null
 	_clear_pending_attack()
 	_show_attack_range_preview = false
-	set_process(false)
+	set_physics_process(false)
 	input_pickable = false
 	if attack_timer != null:
 		attack_timer.stop()
@@ -789,13 +772,19 @@ func _play(new_state: State, force: bool = false) -> void:
 	_is_finished = false
 
 	var anim_name: StringName = _anim_name_from_state(state)
+	if state == State.WALK and (anim.sprite_frames == null or not anim.sprite_frames.has_animation(anim_name)):
+		if not _warned_missing_walk_animation:
+			_warned_missing_walk_animation = true
+			push_warning("Hero: walk animation is missing. Falling back to idle.")
+		anim_name = &"idle"
+
 	if anim.sprite_frames == null or not anim.sprite_frames.has_animation(anim_name):
 		push_warning("Missing animation for state: %s" % [anim_name])
 		return
-	if state == State.IDLE:
-		anim.speed_scale = 1.0
-	elif state == State.ATTACK01:
+	if state == State.ATTACK01:
 		_apply_attack_anim_speed_for_aps()
+	else:
+		anim.speed_scale = 1.0
 	if force and same_state:
 		anim.stop()
 	anim.play(anim_name)
@@ -806,6 +795,8 @@ func _on_animation_finished() -> void:
 		return
 
 	var anim_name: StringName = _anim_name_from_state(state)
+	if state == State.WALK and not anim.sprite_frames.has_animation(anim_name):
+		anim_name = &"idle"
 	if not anim.sprite_frames.has_animation(anim_name):
 		return
 	if anim.sprite_frames.get_animation_loop(anim_name):
@@ -822,7 +813,10 @@ func _on_animation_frame_changed() -> void:
 
 func _on_non_loop_finished() -> void:
 	_clear_pending_attack()
-	_play(State.IDLE, true)
+	if _move_order_active:
+		_play(State.WALK, true)
+	else:
+		_play(State.IDLE, true)
 
 
 func _emit_health_changed() -> void:
@@ -833,6 +827,8 @@ func _anim_name_from_state(target_state: State) -> StringName:
 	match target_state:
 		State.IDLE:
 			return &"idle"
+		State.WALK:
+			return &"walk"
 		State.ATTACK01:
 			return &"attack01"
 	return &"idle"

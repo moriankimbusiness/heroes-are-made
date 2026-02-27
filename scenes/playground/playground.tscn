@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://cj2sc2yvs26xr" path="res://scripts/playground/ui/HeroHUD.gd" id="2_hero_hud"]
 [ext_resource type="PackedScene" uid="uid://6d25jelm06ao" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
 [ext_resource type="Script" uid="uid://br6j1md20h47e" path="res://scripts/playground/ui/ItemSlotUI.gd" id="4_item_slot"]
+[ext_resource type="NavigationPolygon" path="res://assets/navigation/playground_navpolygon.tres" id="5_nav_polygon"]
 
 [node name="PlayGround" type="Node2D" unique_id=1971475998]
 script = ExtResource("1_playground")
@@ -17,6 +18,9 @@ los_hit_backoff = 2.0
 [node name="PlayAreaOutline" type="Line2D" parent="." unique_id=1806974366]
 width = 2.0
 default_color = Color(1, 1, 1, 0.35)
+
+[node name="HeroNavRegion" type="NavigationRegion2D" parent="." unique_id=1818077804]
+navigation_polygon = ExtResource("5_nav_polygon")
 
 [node name="HeroContainer" type="Node2D" parent="." unique_id=1063084318]
 y_sort_enabled = true

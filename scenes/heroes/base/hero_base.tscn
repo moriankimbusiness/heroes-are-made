@@ -106,6 +106,29 @@ animations = [{
 "loop": true,
 "name": &"idle",
 "speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0_5")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_drag"]
@@ -134,6 +157,11 @@ shape = SubResource("CapsuleShape2D_drag")
 
 [node name="StatusAnchor" type="Marker2D" parent="." unique_id=753297543]
 position = Vector2(69, -92)
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1139559729]
+path_desired_distance = 3.0
+target_desired_distance = 6.0
+avoidance_enabled = false
 
 [node name="AttackRange" type="Area2D" parent="." unique_id=1272016421]
 collision_layer = 0
