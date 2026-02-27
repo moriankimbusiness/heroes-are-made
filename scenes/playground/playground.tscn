@@ -8,9 +8,13 @@
 [node name="PlayGround" type="Node2D" unique_id=1971475998]
 script = ExtResource("1_playground")
 hero_scene = ExtResource("3_hero")
+play_area_radius = 220.0
+core_path = NodePath("../CoreRoot")
+los_collision_mask = 1
+los_probe_radius = 6.0
+los_hit_backoff = 2.0
 
-[node name="DiamondOutline" type="Line2D" parent="." unique_id=1806974366]
-points = PackedVector2Array(-170, 0, 0, -170, 170, 0, 0, 170, -170, 0)
+[node name="PlayAreaOutline" type="Line2D" parent="." unique_id=1806974366]
 width = 2.0
 default_color = Color(1, 1, 1, 0.35)
 
@@ -389,6 +393,10 @@ text = "민첩: -"
 [node name="IntelligenceLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=640720993]
 layout_mode = 2
 text = "지능: -"
+
+[node name="HeroHealthLabel" type="Label" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=1042289017]
+layout_mode = 2
+text = "체력: - / -"
 
 [node name="HSeparator" type="HSeparator" parent="HeroHUD/StatusRoot/StatusPanel/MarginContainer/HBoxContainer/StatsPanel" unique_id=1868212818]
 layout_mode = 2
