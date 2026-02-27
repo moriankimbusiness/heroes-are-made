@@ -3,9 +3,13 @@ extends CanvasLayer
 const ItemEnumsRef = preload("res://scripts/items/ItemEnums.gd")
 const ItemDataRef = preload("res://scripts/items/ItemData.gd")
 @export_group("HeroInterface 표시/상점 기본값")
+## `portrait_scale` 설정값.
 @export_range(1.0, 4.0, 0.1) var portrait_scale: float = 2.0
+## `card_hover_scale` 설정값.
 @export_range(1.0, 2.0, 0.05) var card_hover_scale: float = 1.3
+## `fallback_starting_gold` 설정값.
 @export_range(0, 99999, 1) var fallback_starting_gold: int = 100
+## `free_reroll_uses` 설정값.
 @export_range(0, 20, 1) var free_reroll_uses: int = 5
 
 @onready var hero_interface_root: Control = $HeroInterfaceRoot
@@ -197,9 +201,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _selected_hero == null or not is_instance_valid(_selected_hero):
 		return
+	if _selected_hero.has_method("is_dead") and bool(_selected_hero.call("is_dead")):
+		return
 	if not _selected_hero.has_method("issue_move_command"):
 		return
-	_selected_hero.call("issue_move_command", _get_world_mouse_position())
+	var world_target: Vector2 = _get_world_mouse_position()
+	_selected_hero.call("issue_move_command", world_target)
+	if _playground != null and _playground.has_method("show_move_command_marker"):
+		_playground.call("show_move_command_marker", world_target)
 	get_viewport().set_input_as_handled()
 
 

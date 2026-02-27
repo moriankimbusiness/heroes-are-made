@@ -1,13 +1,22 @@
 extends Node2D
 @export_group("플레이그라운드 기본")
+## `hero_scene` 설정값.
 @export var hero_scene: PackedScene
+## `play_area_radius` 설정값.
 @export_range(10.0, 2000.0, 1.0) var play_area_radius: float = 220.0
+## `core_path` 설정값.
 @export var core_path: NodePath
+## `move_command_marker_path` 설정값.
+@export var move_command_marker_path: NodePath
 @export_group("LOS 판정 튜닝")
+## `los_collision_mask` 설정값.
 @export_flags_2d_physics var los_collision_mask: int = 1
+## `los_probe_radius` 설정값.
 @export_range(0.0, 64.0, 0.1) var los_probe_radius: float = 6.0
+## `los_hit_backoff` 설정값.
 @export_range(0.0, 64.0, 0.1) var los_hit_backoff: float = 2.0
 @export_group("디버그 표시")
+## `enable_los_debug_draw` 설정값.
 @export var enable_los_debug_draw: bool = false
 
 @onready var play_area_outline: Line2D = $PlayAreaOutline
@@ -105,6 +114,16 @@ func clamp_to_play_area(point: Vector2) -> Vector2:
 	if recenter_distance > play_area_radius and recenter_distance > 0.0001:
 		clamped = center + recenter_offset / recenter_distance * play_area_radius
 	return clamped
+
+
+func show_move_command_marker(world_pos: Vector2) -> void:
+	var marker: Node = get_node_or_null(move_command_marker_path)
+	if marker == null:
+		return
+	if not marker.has_method("show_marker"):
+		return
+	var clamped_pos: Vector2 = clamp_to_play_area(world_pos)
+	marker.call("show_marker", clamped_pos)
 
 
 func is_inside_diamond(point: Vector2) -> bool:
