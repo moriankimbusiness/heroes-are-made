@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://bc8vvkbuc5mro"]
 
-[ext_resource type="Script" uid="uid://vhlaxs7p4jc0" path="res://scripts/debug/PathFollowDebug.gd" id="1_j1m2n"]
 [ext_resource type="PackedScene" uid="uid://dxy2tsd6es252" path="res://scenes/enemies/variants/enemy_orc.tscn" id="1_jfytv"]
 [ext_resource type="Script" uid="uid://cv7uu8u2bhiyl" path="res://scripts/spawn/EnemySpawnController.gd" id="2_7j7ff"]
 [ext_resource type="PackedScene" uid="uid://cy3xax8p7da1h" path="res://scenes/portal.tscn" id="3_o2tba"]
@@ -9,12 +8,6 @@
 [ext_resource type="PackedScene" path="res://scenes/playground/playground.tscn" id="6_playground"]
 [ext_resource type="Script" path="res://scripts/camera/LevelCameraController.gd" id="7_level_camera"]
 [ext_resource type="PackedScene" path="res://scenes/core/core_base.tscn" id="8_core_base"]
-
-[sub_resource type="Curve2D" id="Curve2D_rd3vj"]
-_data = {
-"points": PackedVector2Array(0, 0, 0, 0, -220, 0, 0, 0, 0, 0, 0, 220, 0, 0, 0, 0, 220, 0, 0, 0, 0, 0, 0, -220, 0, 0, 0, 0, -220, 0)
-}
-point_count = 5
 
 [node name="Level" type="Node2D" unique_id=867026977]
 
@@ -46,15 +39,6 @@ spawn_timer_path = NodePath("../SpawnTimer")
 [node name="RoundSystem" parent="." unique_id=1945532616 instance=ExtResource("5_scmn0")]
 enemy_spawn_controller_path = NodePath("../EnemySpawnController")
 spawn_timer_path = NodePath("../SpawnTimer")
-
-[node name="Path2D" type="Path2D" parent="." unique_id=1116065071]
-position = Vector2(635, 357)
-curve = SubResource("Curve2D_rd3vj")
-
-[node name="EnemyPathAgentTemplate" type="PathFollow2D" parent="Path2D" unique_id=1505150669]
-position = Vector2(-220, 0)
-rotates = false
-script = ExtResource("1_j1m2n")
 
 [node name="PlayGround" parent="." instance=ExtResource("6_playground")]
 position = Vector2(635, 357)
