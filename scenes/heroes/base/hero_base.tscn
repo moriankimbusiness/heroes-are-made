@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://n2jhiom70bwy" path="res://scripts/heroes/Hero.gd" id="1_hero"]
 [ext_resource type="Texture2D" uid="uid://dpvp507feuu68" path="res://assets/sprites/characters/Soldier.png" id="2_soldier"]
 [ext_resource type="Shader" uid="uid://cj2ur78opyjbh" path="res://assets/shaders/outline.gdshader" id="3_outline"]
-[ext_resource type="Script" path="res://scripts/heroes/ui/HeroHealthBar.gd" id="4_hero_health_bar"]
+[ext_resource type="Script" uid="uid://b6s473jelydno" path="res://scripts/heroes/ui/HeroHealthBar.gd" id="4_hero_health_bar"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_outline"]
 resource_local_to_scene = true
@@ -53,18 +53,6 @@ region = Rect2(200, 600, 100, 100)
 [sub_resource type="AtlasTexture" id="AtlasTexture_sj3pn"]
 atlas = ExtResource("2_soldier")
 region = Rect2(300, 600, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_6umde"]
-atlas = ExtResource("2_soldier")
-region = Rect2(100, 500, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_oe5r0"]
-atlas = ExtResource("2_soldier")
-region = Rect2(200, 500, 100, 100)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ypi58"]
-atlas = ExtResource("2_soldier")
-region = Rect2(300, 500, 100, 100)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0_0"]
 atlas = ExtResource("2_soldier")
@@ -208,9 +196,9 @@ position = Vector2(69, -92)
 
 [node name="HealthBar" type="ProgressBar" parent="." unique_id=380915427]
 offset_left = -12.0
-offset_top = -33.0
+offset_top = -18.0
 offset_right = 12.0
-offset_bottom = -28.0
+offset_bottom = -13.0
 show_percentage = false
 script = ExtResource("4_hero_health_bar")
 
