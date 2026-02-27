@@ -39,17 +39,14 @@ func hide_screen() -> void:
 
 func _configure_battle_scene(battle_scene: Node, payload: Dictionary) -> void:
 	var party_count: int = int(payload.get("party_count", 3))
+	var current_gold: int = int(payload.get("gold", 0))
 	var playground: Node = battle_scene.get_node_or_null("PlayGround")
 	if playground != null and playground.has_method("summon_hero"):
 		for _i in range(maxi(1, party_count)):
 			playground.call("summon_hero")
-
-	var summon_button: Button = battle_scene.get_node_or_null(
-		"PlayGround/HeroHUD/BottomCenterUI/ButtonsRow/SummonButton"
-	) as Button
-	if summon_button != null:
-		summon_button.visible = false
-		summon_button.disabled = true
+	var hero_ui: CanvasLayer = battle_scene.get_node_or_null("PlayGround/HeroHUD") as CanvasLayer
+	if hero_ui != null and hero_ui.has_method("set_starting_gold"):
+		hero_ui.call("set_starting_gold", current_gold)
 
 
 func _on_rounds_cleared() -> void:

@@ -506,6 +506,8 @@ func summon_hero() -> Hero:
 	var hero: Hero = hero_scene.instantiate()
 	hero.playground = self
 	hero_container.add_child(hero)
+	var hero_count: int = hero_container.get_child_count()
+	hero.hero_display_name = "용사 %d" % hero_count
 	hero.global_position = _find_spawn_position(hero)
 	return hero
 

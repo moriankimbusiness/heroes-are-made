@@ -9,6 +9,7 @@ signal hero_moved(hero: Hero, world_position: Vector2)
 signal hero_stats_changed(hero: Hero, stats: HeroStats)
 signal equipment_changed(hero: Hero, slot: int, item: ItemData)
 signal health_changed(hero: Hero, current: float, max_value: float, ratio: float)
+signal progression_changed(hero: Hero, level: int, current_exp: int, required_exp: int)
 
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var drag_shape: CollisionShape2D = $DragShape
@@ -49,11 +50,18 @@ enum TargetPriority {
 @export_range(0.0, 9999.0, 0.1) var base_magic_attack: float = 5.0
 @export_range(1.0, 9999.0, 1.0) var base_max_health: float = 100.0
 @export_range(0.1, 20.0, 0.1) var base_attacks_per_second: float = 1.2
+@export var hero_display_name: String = "용사"
+@export_range(1, 99, 1) var level: int = 1
+@export_range(0, 999999, 1) var current_exp: int = 0
+@export_range(1, 999999, 1) var required_exp: int = 60
 @export_range(0.0, 3.0, 0.01) var agility_attack_speed_factor: float = 0.03
 @export_range(0.01, 2.0, 0.01) var damage_flash_duration: float = 0.14
 @export var hover_outline_color: Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var damage_outline_color: Color = Color(1.0, 0.2, 0.2, 1.0)
 @export var damage_fill_color: Color = Color(1.0, 0.2, 0.2, 0.55)
+@export var selected_outline_color: Color = Color(0.3, 1.0, 0.4, 1.0)
+@export var selected_fill_color: Color = Color(0.3, 1.0, 0.4, 0.35)
+@export_range(0.0, 1.0, 0.01) var selected_fill_strength: float = 1.0
 @export var enhance_attack_multipliers: Array[float] = [
 	1.0, 1.12, 1.26, 1.42, 1.60, 1.80, 2.02, 2.26,
 	2.52, 2.80, 3.10, 3.42, 3.76, 4.12, 4.50, 4.90
@@ -79,6 +87,7 @@ var _pending_hit_frame_fired: bool = false
 var _warned_missing_walk_animation: bool = false
 var _warned_missing_navigation_agent: bool = false
 var _is_hovering: bool = false
+var _is_selected: bool = false
 var _is_damage_flash_active: bool = false
 var _damage_flash_tween: Tween = null
 var playground: Node2D = null
@@ -108,22 +117,24 @@ func _ready() -> void:
 		attack_timer.timeout.connect(_on_attack_timer_timeout)
 	set_physics_process(false)
 	_play(State.IDLE, true)
+	_emit_progression_changed()
 	if attack_enabled:
 		call_deferred("_attempt_auto_attack")
 
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
-	if _is_dead:
-		return
 	if event is not InputEventMouseButton:
 		return
 	var mb := event as InputEventMouseButton
 	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
 		return
-	_show_attack_range_preview = not _show_attack_range_preview
+	if _is_dead:
+		_show_attack_range_preview = false
+	else:
+		_show_attack_range_preview = not _show_attack_range_preview
 	hero_clicked.emit(self)
-	if not _is_damage_flash_active and anim.material != null:
-		anim.material.set_shader_parameter(&"enabled", false)
+	if not _is_damage_flash_active:
+		_apply_idle_outline_visual()
 	_request_visual_redraw()
 	get_viewport().set_input_as_handled()
 
@@ -255,6 +266,35 @@ func _setup_equipment_system() -> void:
 
 func get_current_stats() -> HeroStats:
 	return _stats.duplicate_state()
+
+
+func get_display_name() -> String:
+	if not hero_display_name.is_empty():
+		return hero_display_name
+	return String(name)
+
+
+func get_level() -> int:
+	return level
+
+
+func get_current_exp() -> int:
+	return current_exp
+
+
+func get_required_exp() -> int:
+	return required_exp
+
+
+func add_experience(amount: int) -> void:
+	if amount <= 0:
+		return
+	current_exp += amount
+	while current_exp >= required_exp:
+		current_exp -= required_exp
+		level += 1
+		required_exp = maxi(1, required_exp + 20)
+	_emit_progression_changed()
 
 
 func get_status_anchor_canvas_position() -> Vector2:
@@ -709,10 +749,13 @@ func _set_damage_fill_strength(value: float) -> void:
 
 
 func _apply_idle_outline_visual() -> void:
-	if _is_dead:
-		_set_outline_visual(false, hover_outline_color)
+	if _is_selected:
+		_set_outline_visual(true, selected_outline_color)
+		_set_damage_fill_color(selected_fill_color)
+		_set_damage_fill_strength(selected_fill_strength)
 		return
-	if _is_hovering:
+	_set_damage_fill_strength(0.0)
+	if _is_hovering and not _is_dead:
 		_set_outline_visual(true, hover_outline_color)
 	else:
 		_set_outline_visual(false, hover_outline_color)
@@ -746,19 +789,30 @@ func _play_damage_flash() -> void:
 
 
 func _on_mouse_entered() -> void:
-	if _is_dead:
-		return
 	_is_hovering = true
 	if _is_damage_flash_active:
 		return
-	_set_outline_visual(true, hover_outline_color)
+	_apply_idle_outline_visual()
 
 
 func _on_mouse_exited() -> void:
 	_is_hovering = false
 	if _is_damage_flash_active:
 		return
-	_set_outline_visual(false, hover_outline_color)
+	_apply_idle_outline_visual()
+
+
+func set_selected_visual(selected: bool) -> void:
+	if _is_selected == selected:
+		return
+	_is_selected = selected
+	if _is_damage_flash_active:
+		return
+	_apply_idle_outline_visual()
+
+
+func is_selected_visual() -> bool:
+	return _is_selected
 
 
 func play_idle() -> void:
@@ -830,12 +884,11 @@ func _die() -> void:
 	_clear_pending_attack()
 	_show_attack_range_preview = false
 	set_physics_process(false)
-	input_pickable = false
 	_cancel_damage_flash()
 	_set_damage_fill_strength(0.0)
 	if attack_timer != null:
 		attack_timer.stop()
-	_set_outline_visual(false, hover_outline_color)
+	_apply_idle_outline_visual()
 	modulate = Color(1.0, 1.0, 1.0, 0.45)
 	play_death()
 	_request_visual_redraw()
@@ -902,6 +955,13 @@ func _on_non_loop_finished() -> void:
 
 func _emit_health_changed() -> void:
 	health_changed.emit(self, current_health, max_health, get_health_ratio())
+
+
+func _emit_progression_changed() -> void:
+	level = maxi(1, level)
+	required_exp = maxi(1, required_exp)
+	current_exp = clampi(current_exp, 0, required_exp)
+	progression_changed.emit(self, level, current_exp, required_exp)
 
 
 func _anim_name_from_state(target_state: State) -> StringName:

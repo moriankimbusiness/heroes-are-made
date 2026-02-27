@@ -12,12 +12,23 @@
       "matk": 0.0
     },
     {
-      "id": "leather_helm",
-      "name": "가죽 투구",
-      "type": "HELMET",
+      "id": "war_axe",
+      "name": "전투 도끼",
+      "type": "WEAPON",
       "tier": "uncommon",
+      "str": 4,
+      "agi": -1,
+      "int": 0,
+      "patk": 12.0,
+      "matk": 0.0
+    },
+    {
+      "id": "leather_armor",
+      "name": "가죽 갑옷",
+      "type": "ARMOR",
+      "tier": "common",
       "str": 1,
-      "agi": 0,
+      "agi": 1,
       "int": 0,
       "patk": 0.0,
       "matk": 0.0
@@ -34,17 +45,6 @@
       "matk": 4.0
     },
     {
-      "id": "wooden_shield",
-      "name": "나무 방패",
-      "type": "SHIELD",
-      "tier": "uncommon",
-      "str": 1,
-      "agi": -1,
-      "int": 0,
-      "patk": 0.0,
-      "matk": 0.0
-    },
-    {
       "id": "light_boots",
       "name": "경량 부츠",
       "type": "BOOTS",
@@ -54,15 +54,26 @@
       "int": 0,
       "patk": 0.0,
       "matk": 0.0
+    },
+    {
+      "id": "swift_boots",
+      "name": "신속 장화",
+      "type": "BOOTS",
+      "tier": "uncommon",
+      "str": 0,
+      "agi": 5,
+      "int": 0,
+      "patk": 0.0,
+      "matk": 0.0
     }
   ],
   "pool": [
-    { "id": "rusty_sword", "w": 35.0 },
-    { "id": "leather_helm", "w": 20.0 },
-    { "id": "apprentice_robe", "w": 15.0 },
-    { "id": "wooden_shield", "w": 20.0 },
-    { "id": "light_boots", "w": 10.0 }
+    { "id": "rusty_sword", "w": 22.0 },
+    { "id": "war_axe", "w": 12.0 },
+    { "id": "leather_armor", "w": 22.0 },
+    { "id": "apprentice_robe", "w": 10.0 },
+    { "id": "light_boots", "w": 22.0 },
+    { "id": "swift_boots", "w": 12.0 }
   ],
-  "start": [
-  ]
+  "start": []
 }

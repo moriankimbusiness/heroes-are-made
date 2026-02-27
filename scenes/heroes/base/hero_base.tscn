@@ -180,6 +180,10 @@ collision_mask = 0
 script = ExtResource("1_hero")
 target_priority = 2
 base_strength = 3
+hero_display_name = "용사"
+level = 1
+current_exp = 0
+required_exp = 60
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=383494157]
 material = SubResource("ShaderMaterial_outline")

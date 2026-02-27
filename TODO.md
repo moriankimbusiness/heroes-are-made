@@ -87,6 +87,9 @@
 - [x] 히어로 진행도 임시 데이터 추가: `Hero.gd`에 `hero_display_name/level/current_exp/required_exp` + `progression_changed` 시그널 추가
 - [x] 전투 UI 골드 연동: `GameFlowController -> BattleScreenHost -> HeroInterface.set_starting_gold` payload 연결
 - [x] `GAME_PLAN.md` v26 갱신: 히어로 인터페이스 신규 규칙(실시간 미러 초상화/리롤 비용/전투 임시 레벨EXP) 반영
+- [x] 히어로 인터페이스 스탯 표기 보정: 변화치가 0일 때 `()` 생략 (`힘: 8`, `사거리: 35.0`)
+- [x] 선택 히어로 월드 표시 강화: 초록 윤곽선 + 반투명 초록 채움으로 선택 상태 시각 구분
+- [x] 사망 히어로 선택 허용: 사망 후에도 클릭 입력 유지, 상태창 열람 가능하도록 수정
 - [x] `GAME_PLAN.md` 스터디 및 도메인 분리 기준 확정 (컨셉/원정/플로우/전투/성장)
 - [x] 기획 문서 디렉토리 생성: `docs/planning/game_plan_domains/`
 - [x] 도메인 분리 문서 10종 작성 (코드/구현 경로 제외, 기획 내용만 정리)
@@ -120,3 +123,6 @@
 - [x] 성능/아키텍처 점검: `HeroInterface` 갱신은 히어로/적 선택 및 시그널(`hero_stats_changed`, `equipment_changed`, `progression_changed`) 이벤트 기반 처리
 - [x] 성능/아키텍처 점검: 카드/리롤/구매는 버튼 입력 이벤트 기반 처리(`_process`/`_physics_process` 신규 폴링 없음)
 - [x] 성능/아키텍처 점검: 초상화 미러링은 `AnimatedSprite2D` 프레임/애니메이션 신호 연결 기반 동기화(프레임 루프 폴링 없음)
+- [x] 성능/아키텍처 점검: 스탯 문자열 포맷 보정은 라벨 텍스트 조합만 변경(추가 폴링/노드 탐색 없음)
+- [x] 성능/아키텍처 점검: 선택 비주얼은 `set_selected_visual` 이벤트 호출 기반(상시 폴링 없음)
+- [x] 성능/아키텍처 점검: 사망 후 선택 허용은 입력 가드/플래그만 조정(신규 루프 없음)

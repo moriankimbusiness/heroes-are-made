@@ -59,10 +59,30 @@ func get_enhance_stat_multiplier(level: int) -> float:
 func roll_draw_item(rng: RandomNumberGenerator) -> ItemData:
 	if not _is_ready:
 		return null
-	if _draw_pool.is_empty():
+	return _roll_from_pool(_draw_pool, rng)
+
+
+func roll_draw_item_for_type(rng: RandomNumberGenerator, item_type: int) -> ItemData:
+	if not _is_ready:
+		return null
+	var filtered_pool: Array[Dictionary] = []
+	for entry: Dictionary in _draw_pool:
+		var item: ItemData = entry.get("item") as ItemData
+		if item == null:
+			continue
+		if item.item_type != item_type:
+			continue
+		filtered_pool.append(entry)
+	if filtered_pool.is_empty():
+		return null
+	return _roll_from_pool(filtered_pool, rng)
+
+
+func _roll_from_pool(pool: Array[Dictionary], rng: RandomNumberGenerator) -> ItemData:
+	if pool.is_empty():
 		return null
 	var total_weight: float = 0.0
-	for entry: Dictionary in _draw_pool:
+	for entry: Dictionary in pool:
 		total_weight += float(entry["weight"])
 	if total_weight <= 0.0:
 		return null
@@ -74,13 +94,13 @@ func roll_draw_item(rng: RandomNumberGenerator) -> ItemData:
 
 	var roll: float = picker.randf() * total_weight
 	var cumulative: float = 0.0
-	for entry: Dictionary in _draw_pool:
+	for entry: Dictionary in pool:
 		cumulative += float(entry["weight"])
 		if roll <= cumulative:
 			var selected: ItemData = entry["item"] as ItemData
 			return selected.duplicate_item() if selected != null else null
 
-	var fallback: ItemData = _draw_pool.back()["item"] as ItemData
+	var fallback: ItemData = pool.back()["item"] as ItemData
 	return fallback.duplicate_item() if fallback != null else null
 
 
@@ -255,12 +275,8 @@ func _resolve_item_type(item_type_name: String, context: String) -> int:
 	match item_type_name.strip_edges().to_upper():
 		"WEAPON":
 			return ItemEnumsRef.ItemType.WEAPON
-		"HELMET":
-			return ItemEnumsRef.ItemType.HELMET
 		"ARMOR":
 			return ItemEnumsRef.ItemType.ARMOR
-		"SHIELD":
-			return ItemEnumsRef.ItemType.SHIELD
 		"BOOTS":
 			return ItemEnumsRef.ItemType.BOOTS
 		_:

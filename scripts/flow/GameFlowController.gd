@@ -238,7 +238,8 @@ func _start_battle_for_node(node: Dictionary) -> void:
 
 	var party_state: Dictionary = _run_state.get("party_state", {}) as Dictionary
 	_battle_screen_host.call("show_screen", {
-		"party_count": int(party_state.get("selected_count", 3))
+		"party_count": int(party_state.get("selected_count", 3)),
+		"gold": int(_run_state.get("gold", 0))
 	})
 
 
