@@ -21,7 +21,8 @@ signal health_changed(hero: Hero, current: float, max_value: float, ratio: float
 enum State {
 	IDLE,
 	WALK,
-	ATTACK01
+	ATTACK01,
+	DEATH
 }
 
 enum TargetPriority {
@@ -49,6 +50,10 @@ enum TargetPriority {
 @export_range(1.0, 9999.0, 1.0) var base_max_health: float = 100.0
 @export_range(0.1, 20.0, 0.1) var base_attacks_per_second: float = 1.2
 @export_range(0.0, 3.0, 0.01) var agility_attack_speed_factor: float = 0.03
+@export_range(0.01, 2.0, 0.01) var damage_flash_duration: float = 0.14
+@export var hover_outline_color: Color = Color(1.0, 1.0, 1.0, 1.0)
+@export var damage_outline_color: Color = Color(1.0, 0.2, 0.2, 1.0)
+@export var damage_fill_color: Color = Color(1.0, 0.2, 0.2, 0.55)
 @export var enhance_attack_multipliers: Array[float] = [
 	1.0, 1.12, 1.26, 1.42, 1.60, 1.80, 2.02, 2.26,
 	2.52, 2.80, 3.10, 3.42, 3.76, 4.12, 4.50, 4.90
@@ -73,6 +78,9 @@ var _pending_attack_damage: float = 0.0
 var _pending_hit_frame_fired: bool = false
 var _warned_missing_walk_animation: bool = false
 var _warned_missing_navigation_agent: bool = false
+var _is_hovering: bool = false
+var _is_damage_flash_active: bool = false
+var _damage_flash_tween: Tween = null
 var playground: Node2D = null
 var _stats: HeroStats = HeroStats.new()
 var _equipment: EquipmentState = null
@@ -85,6 +93,9 @@ func _ready() -> void:
 	anim.frame_changed.connect(_on_animation_frame_changed)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+	_set_damage_fill_color(damage_fill_color)
+	_set_damage_fill_strength(0.0)
+	_apply_idle_outline_visual()
 	set_max_health(base_max_health)
 	_setup_equipment_system()
 	_attack01_base_duration_seconds = _get_animation_base_duration_seconds(&"attack01")
@@ -111,7 +122,7 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 		return
 	_show_attack_range_preview = not _show_attack_range_preview
 	hero_clicked.emit(self)
-	if anim.material != null:
+	if not _is_damage_flash_active and anim.material != null:
 		anim.material.set_shader_parameter(&"enabled", false)
 	_request_visual_redraw()
 	get_viewport().set_input_as_handled()
@@ -677,16 +688,77 @@ func _draw() -> void:
 		_draw_attack_range_preview()
 
 
+func _set_outline_visual(enabled: bool, color: Color) -> void:
+	if anim.material == null:
+		return
+	anim.material.set_shader_parameter(&"enabled", enabled)
+	if enabled:
+		anim.material.set_shader_parameter(&"outline_color", color)
+
+
+func _set_damage_fill_color(color: Color) -> void:
+	if anim.material == null:
+		return
+	anim.material.set_shader_parameter(&"damage_flash_color", color)
+
+
+func _set_damage_fill_strength(value: float) -> void:
+	if anim.material == null:
+		return
+	anim.material.set_shader_parameter(&"damage_flash", clampf(value, 0.0, 1.0))
+
+
+func _apply_idle_outline_visual() -> void:
+	if _is_dead:
+		_set_outline_visual(false, hover_outline_color)
+		return
+	if _is_hovering:
+		_set_outline_visual(true, hover_outline_color)
+	else:
+		_set_outline_visual(false, hover_outline_color)
+
+
+func _cancel_damage_flash() -> void:
+	if _damage_flash_tween != null and is_instance_valid(_damage_flash_tween):
+		_damage_flash_tween.kill()
+	_damage_flash_tween = null
+	_is_damage_flash_active = false
+
+
+func _on_damage_flash_finished() -> void:
+	_damage_flash_tween = null
+	_is_damage_flash_active = false
+	_set_damage_fill_strength(0.0)
+	_apply_idle_outline_visual()
+
+
+func _play_damage_flash() -> void:
+	if anim.material == null:
+		return
+	_cancel_damage_flash()
+	_is_damage_flash_active = true
+	_set_damage_fill_color(damage_fill_color)
+	_set_outline_visual(true, damage_outline_color)
+	_set_damage_fill_strength(1.0)
+	_damage_flash_tween = create_tween()
+	_damage_flash_tween.tween_method(Callable(self, "_set_damage_fill_strength"), 1.0, 0.0, maxf(0.01, damage_flash_duration))
+	_damage_flash_tween.finished.connect(_on_damage_flash_finished)
+
+
 func _on_mouse_entered() -> void:
 	if _is_dead:
 		return
-	if anim.material != null:
-		anim.material.set_shader_parameter(&"enabled", true)
+	_is_hovering = true
+	if _is_damage_flash_active:
+		return
+	_set_outline_visual(true, hover_outline_color)
 
 
 func _on_mouse_exited() -> void:
-	if anim.material != null:
-		anim.material.set_shader_parameter(&"enabled", false)
+	_is_hovering = false
+	if _is_damage_flash_active:
+		return
+	_set_outline_visual(false, hover_outline_color)
 
 
 func play_idle() -> void:
@@ -699,6 +771,10 @@ func play_walk() -> void:
 
 func play_attack01() -> void:
 	_play(State.ATTACK01, true)
+
+
+func play_death() -> void:
+	_play(State.DEATH, true)
 
 
 func is_state_finished() -> bool:
@@ -725,6 +801,7 @@ func apply_damage(amount: float) -> void:
 		return
 	current_health = maxf(0.0, current_health - amount)
 	_emit_health_changed()
+	_play_damage_flash()
 	if current_health <= 0.0:
 		_die()
 
@@ -754,16 +831,18 @@ func _die() -> void:
 	_show_attack_range_preview = false
 	set_physics_process(false)
 	input_pickable = false
+	_cancel_damage_flash()
+	_set_damage_fill_strength(0.0)
 	if attack_timer != null:
 		attack_timer.stop()
-	if anim.material != null:
-		anim.material.set_shader_parameter(&"enabled", false)
+	_set_outline_visual(false, hover_outline_color)
 	modulate = Color(1.0, 1.0, 1.0, 0.45)
+	play_death()
 	_request_visual_redraw()
 
 
 func _play(new_state: State, force: bool = false) -> void:
-	if _is_dead:
+	if _is_dead and new_state != State.DEATH:
 		return
 	var same_state: bool = new_state == state
 	if not force and same_state:
@@ -812,6 +891,8 @@ func _on_animation_frame_changed() -> void:
 
 
 func _on_non_loop_finished() -> void:
+	if state == State.DEATH:
+		return
 	_clear_pending_attack()
 	if _move_order_active:
 		_play(State.WALK, true)
@@ -831,4 +912,6 @@ func _anim_name_from_state(target_state: State) -> StringName:
 			return &"walk"
 		State.ATTACK01:
 			return &"attack01"
+		State.DEATH:
+			return &"death"
 	return &"idle"

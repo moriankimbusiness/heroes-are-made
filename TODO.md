@@ -78,6 +78,10 @@
 - [x] 히어로 이동 경로 전환: `Hero.gd`를 `NavigationAgent2D` 기반 우클릭 경로 이동으로 변경
 - [x] 정적 장애물 우회 정책 적용: 코어 홀(사각 충돌) + 플레이영역 경계 내 경로탐색
 - [x] `GAME_PLAN.md` v21 갱신: 히어로 경로탐색/정적 장애물 우회 규칙 반영
+- [x] `hero_base.tscn` 애니메이션 정리: `hurt` 제거, `death` 유지, 기본 `idle` 시작으로 보정
+- [x] 피격 연출 전환: `Hero.gd` + `outline.gdshader`에 빨간 윤곽선/내부 반투명 플래시 트리거 추가(`apply_damage` 이벤트 기반)
+- [x] 히어로 월드 체력바 UI 추가: `hero_base.tscn/HealthBar` + `HeroHealthBar.gd` (`health_changed` 시그널 연동)
+- [x] `GAME_PLAN.md` v25 갱신: 히어로 피격 연출(플래시) + 월드 체력바 규칙 반영
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계
 - [ ] 챕터 준비 2차: 편성/장비관리 UI를 실제 히어로/인벤토리 데이터와 연결
 - [ ] 전투 실패 조건 정합화 2차: `alive_enemy_threshold` 임시 조건에서 코어HP/영웅전멸 기반으로 이관
@@ -102,3 +106,5 @@
 - [x] 성능/아키텍처 점검: 경로 계산은 `NavigationAgent2D` 내부 경로 쿼리 재사용, 이동 명령 활성 프레임에서만 스텝 적용
 - [x] 성능/아키텍처 점검: 코어 체력 표시는 `Core.health_changed` 이벤트 기반 갱신으로 구현(`_process` 폴링 없음)
 - [x] 성능/아키텍처 점검: PathFollow 템플릿 제거 후 적 스폰은 기존 타이머 이벤트 + 포탈 좌표 단일 할당 유지(추가 폴링 없음)
+- [x] 성능/아키텍처 점검: 히어로 피격 플래시는 `apply_damage` 이벤트 + 트윈으로만 처리하고 `_process` 폴링 추가 없음
+- [x] 성능/아키텍처 점검: 히어로 월드 체력바는 `health_changed` 시그널 기반 갱신(`_process` 폴링 없음)
