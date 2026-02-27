@@ -11,6 +11,19 @@
 - [x] `GAME_PLAN.md` v5 갱신: 최초 시작 모험단 인원을 3명으로 확정
 - [x] `AGENTS.md` 규칙 갱신 반영
 - [x] `AGENTS.md` 규칙 갱신: `TODO.md`에 Godot CLI 검증결과를 기록하지 않도록 명시
+- [x] 전투 타일맵 1차 전환: `playground.tscn`에 `GroundTiles`/`BlockedTiles` 레이어 추가 + 기본 타일셋(`assets/tilesets/battle_tileset.tres`) 연결
+- [x] 코어 타일 점유 규칙 반영: `core_base.tscn` 충돌/비주얼을 `96x96`(3x3 타일)로 확장
+- [x] 히어로 이동 로직 전환: `PlayGround` 타일 A* 경로(`AStarGrid2D`) + `Hero.issue_move_command` 타일 중심 이동 적용
+- [x] 히어로 사거리 전환: 원형 `AttackRange` 제거, 클래스별 타일 사거리(전사/궁수/마법사/암살자) + 짝수→홀수 보정 적용
+- [x] 미사용 요소 제거: `hero_base.tscn`의 `NavigationAgent2D`/`AttackRange`, `playground.tscn`의 `PlayAreaOutline` 삭제
+- [x] UI 동기화: 우클릭 이동 마커를 스냅된 타일 목표로 표시, 히어로 상태창 사거리 표기를 `NxN 타일`로 변경
+- [x] 문서 동기화: `GAME_PLAN.md`, 도메인 문서(`04_battlefield_core_and_round_ui.md`, `05_hero_design.md`) 타일 전투 규칙으로 갱신
+- [x] 히어로 공격 재탐색 보강: 타겟 부재 시 `AttackTimer` 기반 주기 재탐색으로 자동공격 시작 복구
+- [x] 타일 사거리 기준 고정: 히어로 점유 타일이 바뀔 때만 공격 범위 중심 갱신(픽셀 단위 미끄럼 제거)
+- [x] 전장 레이어 정리: `GroundTiles.z_index=-100`, `BlockedTiles.z_index=-90`로 하위 렌더 순서 고정
+- [x] 사거리 표시 렌더 전환: `Hero._draw` 제거, `RangeOverlayFill/RangeOverlayBorder` TileMapLayer 기반 오버레이로 이관
+- [x] 오버레이 갱신 규칙 적용: 선택 토글/히어로 타일 변경 이벤트에서만 사거리 타일 셀 갱신(프레임 갱신 없음)
+- [x] 오버레이 채움 누락 수정: 오버레이 렌더 조건을 `GroundTiles 존재`에서 `전장 경계(rect)` 기준으로 변경해 `5x5` 내부 채움 보장
 - [x] 전투 씬 1차 구현(1.1~1.3, 1.5): `CoreRoot`(코어) 맵 중앙 배치
 - [x] 전투 씬 1차 구현(1.1~1.3, 1.5): `MainCamera` + `LevelCameraController` 추가 (WASD 이동, 휠 줌)
 - [x] 전투 씬 1차 구현(1.1~1.3, 1.5): 플레이영역을 코어 중심 원형 반경 `220`으로 전환
@@ -176,3 +189,8 @@
 - [x] 성능/아키텍처 점검: 줌 의미 정합은 카메라 export/휠 입력 부호 조정만 포함(추가 루프/노드 탐색 없음)
 - [x] 성능/아키텍처 점검: 설정 UI 갱신/저장은 버튼·슬라이더·체크박스 이벤트 기반으로 처리(`_process`/`_physics_process` 신규 폴링 없음)
 - [x] 성능/아키텍처 점검: 히어로 인터페이스 체력바/수치 갱신은 `health_changed` + 선택 이벤트 기반 처리(추가 `_process`/`_physics_process` 없음)
+- [x] 성능/아키텍처 점검: 히어로 타일 경로 계산은 우클릭 명령 시점에만 수행하고 상시 폴링 경로 재계산 없음
+- [x] 성능/아키텍처 점검: 공격 판정은 공격 시점(타이머 이벤트) 타일 포함 검사 기반으로 처리(`_process` 신규 폴링 없음)
+- [x] 성능/아키텍처 점검: 전장 타일 기본 채우기는 `PlayGround._ready` 1회 실행, 프레임 루프 동적 타일 생성 없음
+- [x] 성능/아키텍처 점검: 공격 재탐색은 `AttackTimer` 이벤트 루프로만 수행(신규 `_process`/`_physics_process` 폴링 없음)
+- [x] 성능/아키텍처 점검: 사거리 오버레이는 변경된 셀만 clear/set하는 이벤트 기반 갱신으로 유지(상시 타일 재페인트 없음)

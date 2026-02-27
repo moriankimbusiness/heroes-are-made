@@ -13,11 +13,8 @@ signal progression_changed(hero: Hero, level: int, current_exp: int, required_ex
 
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var drag_shape: CollisionShape2D = $DragShape
-@onready var attack_range: Area2D = $AttackRange
-@onready var attack_range_shape: CollisionShape2D = $AttackRange/CollisionShape2D
 @onready var attack_timer: Timer = $AttackTimer
 @onready var status_anchor: Marker2D = $StatusAnchor
-@onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 
 enum State {
 	IDLE,
@@ -31,6 +28,14 @@ enum TargetPriority {
 	LOWEST_HEALTH,
 	NEAREST
 }
+
+enum HeroClass {
+	WARRIOR,
+	ARCHER,
+	MAGE,
+	ASSASSIN
+}
+
 @export_group("공격 기본값")
 ## 자동 공격 동작 활성화 여부입니다.
 @export var attack_enabled: bool = true
@@ -38,23 +43,31 @@ enum TargetPriority {
 @export_range(0.1, 9999.0, 0.1) var attack_damage: float = 10.0
 ## 초당 공격 횟수(APS)입니다.
 @export_range(0.1, 20.0, 0.1) var attacks_per_second: float = 1.2
-## 공격 사거리 기본값입니다.
-@export_range(1.0, 9999.0, 0.1) var base_attack_range: float = 35.014282
-## 공격 사거리 가산값입니다.
-@export_range(-9999.0, 9999.0, 0.1) var attack_range_add: float = 0.0
-## 공격 사거리 배율값입니다.
-@export_range(0.1, 10.0, 0.01) var attack_range_scale: float = 1.0
 ## 공격 대상 우선순위 규칙입니다.
 @export var target_priority: TargetPriority = TargetPriority.PATH_PROGRESS
 ## 공격 애니메이션에서 실제 타격이 발생하는 프레임 인덱스입니다.
 @export_range(0, 99, 1) var attack_hit_frame_index: int = 2
 ## 공격 방향 반전 시 무시할 X축 데드존입니다.
 @export_range(0.0, 20.0, 0.1) var attack_flip_deadzone: float = 0.1
+
+@export_group("타일 전투 설정")
+## 히어로 클래스 타입입니다.
+@export var hero_class: HeroClass = HeroClass.WARRIOR
+## 전사 기본 공격 범위(타일)입니다.
+@export_range(1, 15, 1) var warrior_attack_tile_span: int = 4
+## 궁수 기본 공격 범위(타일)입니다.
+@export_range(1, 15, 1) var archer_attack_tile_span: int = 5
+## 마법사 기본 공격 범위(타일)입니다.
+@export_range(1, 15, 1) var mage_attack_tile_span: int = 5
+## 암살자 기본 공격 범위(타일)입니다.
+@export_range(1, 15, 1) var assassin_attack_tile_span: int = 3
+
 @export_group("이동")
 ## 이동 속도(px/s)입니다.
 @export_range(1.0, 500.0, 1.0) var move_speed: float = 160.0
 ## 이동 목표 도착으로 간주하는 거리(px)입니다.
 @export_range(0.1, 64.0, 0.1) var move_stop_distance: float = 6.0
+
 @export_group("기본 스탯")
 ## 기본 힘 스탯입니다.
 @export_range(-999, 999, 1) var base_strength: int = 2
@@ -70,6 +83,7 @@ enum TargetPriority {
 @export_range(1.0, 9999.0, 1.0) var base_max_health: float = 100.0
 ## 기본 초당 공격 횟수(APS)입니다.
 @export_range(0.1, 20.0, 0.1) var base_attacks_per_second: float = 1.2
+
 @export_group("성장/레벨")
 ## UI에 표시할 히어로 이름입니다.
 @export var hero_display_name: String = "용사"
@@ -81,6 +95,7 @@ enum TargetPriority {
 @export_range(1, 999999, 1) var required_exp: int = 60
 ## 민첩 1당 공격속도 가산 계수입니다.
 @export_range(0.0, 3.0, 0.01) var agility_attack_speed_factor: float = 0.03
+
 @export_group("피격/선택 비주얼")
 ## 피격 플래시 지속 시간(초)입니다.
 @export_range(0.01, 2.0, 0.01) var damage_flash_duration: float = 0.14
@@ -96,6 +111,7 @@ enum TargetPriority {
 @export var selected_fill_color: Color = Color(0.3, 1.0, 0.4, 0.35)
 ## 선택 상태 채움 강도(0~1)입니다.
 @export_range(0.0, 1.0, 0.01) var selected_fill_strength: float = 1.0
+
 @export_group("강화 계수 테이블")
 ## 강화 단계별 공격 배율 테이블입니다.
 @export var enhance_attack_multipliers: Array[float] = [
@@ -113,7 +129,8 @@ var _is_finished: bool = false
 var _is_dead: bool = false
 var _move_order_active: bool = false
 var _move_order_target: Vector2 = Vector2.ZERO
-var _targets_in_range: Array[Area2D] = []
+var _move_path_points: Array[Vector2] = []
+var _move_path_index: int = 0
 var _current_target: Area2D = null
 var _warned_invalid_target_ids: Dictionary = {}
 var _show_attack_range_preview: bool = false
@@ -122,7 +139,6 @@ var _pending_attack_target: Area2D = null
 var _pending_attack_damage: float = 0.0
 var _pending_hit_frame_fired: bool = false
 var _warned_missing_walk_animation: bool = false
-var _warned_missing_navigation_agent: bool = false
 var _is_hovering: bool = false
 var _is_selected: bool = false
 var _is_damage_flash_active: bool = false
@@ -132,6 +148,10 @@ var _stats: HeroStats = HeroStats.new()
 var _equipment: EquipmentState = null
 var max_health: float = 100.0
 var current_health: float = 100.0
+var _attack_origin_cell: Vector2i = Vector2i.ZERO
+var _attack_origin_cell_initialized: bool = false
+
+const ATTACK_SCAN_INTERVAL_SECONDS: float = 0.2
 
 
 func _ready() -> void:
@@ -145,10 +165,7 @@ func _ready() -> void:
 	set_max_health(base_max_health)
 	_setup_equipment_system()
 	_attack01_base_duration_seconds = _get_animation_base_duration_seconds(&"attack01")
-	_refresh_attack_range()
-	if attack_range != null:
-		attack_range.area_entered.connect(_on_attack_range_area_entered)
-		attack_range.area_exited.connect(_on_attack_range_area_exited)
+	_update_attack_origin_cell()
 	if attack_timer != null:
 		attack_timer.one_shot = true
 		attack_timer.timeout.connect(_on_attack_timer_timeout)
@@ -172,26 +189,45 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	get_viewport().set_input_as_handled()
 
 
-func issue_move_command(world_target: Vector2) -> void:
+func issue_move_command(world_target: Vector2) -> bool:
 	if _is_dead:
-		return
-	_move_order_target = _clamp_to_play_area(world_target)
+		return false
+
+	var path_points: Array[Vector2] = []
+	if playground != null and playground.has_method("build_world_path_to_target"):
+		var built_path = playground.call("build_world_path_to_target", global_position, world_target)
+		for point_variant in built_path:
+			path_points.append(Vector2(point_variant))
+	else:
+		path_points.append(world_target)
+
+	if path_points.is_empty():
+		return false
+
+	_move_path_points.clear()
+	for point: Vector2 in path_points:
+		if _move_path_points.is_empty() and global_position.distance_to(point) <= move_stop_distance:
+			continue
+		_move_path_points.append(point)
+	if _move_path_points.is_empty():
+		return false
+
+	_move_path_index = 0
+	_move_order_target = _move_path_points[_move_path_points.size() - 1]
 	_clear_pending_attack()
 	_current_target = null
 	if attack_timer != null:
 		attack_timer.stop()
-	if global_position.distance_to(_move_order_target) <= move_stop_distance:
-		_stop_move_order(true)
-		return
-	if navigation_agent != null:
-		navigation_agent.target_position = _move_order_target
-	elif not _warned_missing_navigation_agent:
-		_warned_missing_navigation_agent = true
-		push_warning("Hero: NavigationAgent2D is missing. Falling back to direct move.")
+
 	_move_order_active = true
 	set_physics_process(true)
 	_play(State.WALK, true)
 	_request_visual_redraw()
+	return true
+
+
+func get_move_order_target() -> Vector2:
+	return _move_order_target
 
 
 func _physics_process(delta: float) -> void:
@@ -204,26 +240,37 @@ func _physics_process(delta: float) -> void:
 
 
 func _step_move_order(delta: float) -> void:
-	var to_target: Vector2 = _move_order_target - global_position
-	var remaining: float = to_target.length()
-	if remaining <= move_stop_distance:
-		_stop_move_order(true)
-		return
 	if move_speed <= 0.0:
 		_stop_move_order(true)
+		return
+
+	while _move_path_index < _move_path_points.size() and global_position.distance_to(_move_path_points[_move_path_index]) <= move_stop_distance:
+		_move_path_index += 1
+
+	if _move_path_index >= _move_path_points.size():
+		_stop_move_order(true)
+		return
+
+	var waypoint: Vector2 = _move_path_points[_move_path_index]
+	var to_waypoint: Vector2 = waypoint - global_position
+	var remaining: float = to_waypoint.length()
+	if remaining <= move_stop_distance:
+		_move_path_index += 1
+		if _move_path_index >= _move_path_points.size():
+			_stop_move_order(true)
 		return
 
 	var max_step: float = move_speed * delta
 	if max_step <= 0.0:
 		return
-	var next_position: Vector2 = _resolve_next_move_position(max_step, to_target, remaining)
-
+	var next_position: Vector2 = global_position + to_waypoint.normalized() * minf(max_step, remaining)
 	var move_vector: Vector2 = next_position - global_position
 	if move_vector.length_squared() <= 0.0001:
 		_stop_move_order(true)
 		return
 
 	global_position = next_position
+	_update_attack_origin_cell()
 	_update_walk_facing(move_vector)
 	hero_moved.emit(self, global_position)
 
@@ -231,27 +278,10 @@ func _step_move_order(delta: float) -> void:
 		_stop_move_order(true)
 
 
-func _resolve_next_move_position(max_step: float, to_target: Vector2, remaining: float) -> Vector2:
-	if navigation_agent == null:
-		var fallback_step: Vector2 = global_position + to_target.normalized() * minf(max_step, remaining)
-		return _clamp_to_play_area(fallback_step)
-
-	navigation_agent.target_position = _move_order_target
-	if navigation_agent.is_navigation_finished():
-		return global_position
-	var path_next: Vector2 = navigation_agent.get_next_path_position()
-	if not path_next.is_finite():
-		return global_position
-
-	var to_next: Vector2 = path_next - global_position
-	if to_next.length_squared() <= 0.0001:
-		return global_position
-	var step_target: Vector2 = global_position + to_next.normalized() * minf(max_step, to_next.length())
-	return _clamp_to_play_area(step_target)
-
-
 func _stop_move_order(play_idle: bool) -> void:
 	_move_order_active = false
+	_move_path_points.clear()
+	_move_path_index = 0
 	set_physics_process(false)
 	if _is_dead:
 		return
@@ -268,16 +298,6 @@ func _update_walk_facing(move: Vector2) -> void:
 		anim.flip_h = true
 
 
-func _clamp_to_play_area(point: Vector2) -> Vector2:
-	if playground == null:
-		return point
-	if playground.has_method("clamp_to_play_area"):
-		return Vector2(playground.call("clamp_to_play_area", point))
-	if playground.has_method("clamp_to_diamond"):
-		return Vector2(playground.call("clamp_to_diamond", point))
-	return point
-
-
 func _setup_equipment_system() -> void:
 	_equipment = EquipmentStateRef.new()
 	_equipment.changed.connect(_on_equipment_state_changed)
@@ -292,6 +312,19 @@ func get_display_name() -> String:
 	if not hero_display_name.is_empty():
 		return hero_display_name
 	return String(name)
+
+
+func get_hero_class_name() -> String:
+	match hero_class:
+		HeroClass.WARRIOR:
+			return "전사"
+		HeroClass.ARCHER:
+			return "궁수"
+		HeroClass.MAGE:
+			return "마법사"
+		HeroClass.ASSASSIN:
+			return "암살자"
+	return "전사"
 
 
 func get_level() -> int:
@@ -386,29 +419,18 @@ func _recalculate_stats() -> void:
 
 	attack_damage = maxf(0.1, _stats.physical_attack)
 	attacks_per_second = _stats.attacks_per_second
-	_refresh_attack_range()
 	if state == State.ATTACK01:
 		_apply_attack_anim_speed_for_aps()
+	queue_redraw()
 	hero_stats_changed.emit(self, _stats.duplicate_state())
 
 
-func get_final_attack_range() -> float:
-	return _get_final_attack_range()
+func get_attack_range_tile_span() -> int:
+	return _normalize_tile_span(_get_base_tile_span_for_class())
 
 
-func _refresh_attack_range() -> void:
-	if attack_range_shape == null:
-		return
-	var circle_shape: CircleShape2D = attack_range_shape.shape as CircleShape2D
-	if circle_shape == null:
-		return
-	circle_shape.radius = _get_final_attack_range()
-	if _show_attack_range_preview:
-		queue_redraw()
-
-
-func _get_final_attack_range() -> float:
-	return maxf(1.0, (base_attack_range + attack_range_add) * attack_range_scale)
+func get_attack_range_tile_radius() -> int:
+	return get_attack_range_tile_span() / 2
 
 
 func get_max_enhance_level() -> int:
@@ -447,21 +469,24 @@ func _get_enhance_stat_multiplier(level: int) -> float:
 	return enhance_stat_multipliers[index]
 
 
-func _on_attack_range_area_entered(area: Area2D) -> void:
-	if not _is_valid_enemy_target(area):
-		return
-	if not _targets_in_range.has(area):
-		_targets_in_range.append(area)
-	if attack_enabled and attack_timer != null and attack_timer.is_stopped():
-		_attempt_auto_attack()
+func _get_base_tile_span_for_class() -> int:
+	match hero_class:
+		HeroClass.WARRIOR:
+			return warrior_attack_tile_span
+		HeroClass.ARCHER:
+			return archer_attack_tile_span
+		HeroClass.MAGE:
+			return mage_attack_tile_span
+		HeroClass.ASSASSIN:
+			return assassin_attack_tile_span
+	return warrior_attack_tile_span
 
 
-func _on_attack_range_area_exited(area: Area2D) -> void:
-	_targets_in_range.erase(area)
-	if _current_target == area:
-		_current_target = null
-	if attack_enabled and attack_timer != null and attack_timer.is_stopped():
-		_attempt_auto_attack()
+func _normalize_tile_span(value: int) -> int:
+	var span: int = maxi(1, value)
+	if span % 2 == 0:
+		span += 1
+	return span
 
 
 func _on_attack_timer_timeout() -> void:
@@ -473,17 +498,19 @@ func _attempt_auto_attack() -> void:
 		return
 	if _move_order_active:
 		return
-	_cleanup_targets()
-	if _targets_in_range.is_empty():
+	_update_attack_origin_cell()
+
+	var candidates: Array[Area2D] = _collect_attackable_targets()
+	if candidates.is_empty():
 		_current_target = null
+		_schedule_attack_scan()
 		return
 
-	_current_target = _pick_target()
+	_current_target = _pick_target(candidates)
 	if _current_target == null:
 		return
 	if not _current_target.has_method("apply_damage"):
 		_warn_invalid_target_once(_current_target, "apply_damage")
-		_targets_in_range.erase(_current_target)
 		_current_target = null
 		if attack_timer != null and attack_timer.is_stopped():
 			_attempt_auto_attack()
@@ -497,30 +524,47 @@ func _attempt_auto_attack() -> void:
 		attack_timer.start(_get_attack_cooldown_seconds())
 
 
-func _cleanup_targets() -> void:
-	for i: int in range(_targets_in_range.size() - 1, -1, -1):
-		var target: Area2D = _targets_in_range[i]
+func _schedule_attack_scan() -> void:
+	if attack_timer == null:
+		return
+	if _is_dead or not attack_enabled or _move_order_active:
+		return
+	if not attack_timer.is_stopped():
+		return
+	attack_timer.start(ATTACK_SCAN_INTERVAL_SECONDS)
+
+
+func _collect_attackable_targets() -> Array[Area2D]:
+	var candidates: Array[Area2D] = []
+	for node: Node in get_tree().get_nodes_in_group(&"enemy"):
+		if not is_instance_valid(node):
+			continue
+		var target: Area2D = node as Area2D
+		if target == null:
+			continue
 		if not _is_valid_enemy_target(target):
-			_targets_in_range.remove_at(i)
+			continue
+		if not _is_target_within_tile_attack_range(target):
+			continue
+		candidates.append(target)
+	return candidates
 
 
-func _pick_target() -> Area2D:
+func _pick_target(candidates: Array[Area2D]) -> Area2D:
 	match target_priority:
 		TargetPriority.LOWEST_HEALTH:
-			return _pick_target_by_lowest_health()
+			return _pick_target_by_lowest_health(candidates)
 		TargetPriority.NEAREST:
-			return _pick_target_by_nearest()
+			return _pick_target_by_nearest(candidates)
 		_:
-			return _pick_target_by_path_progress()
+			return _pick_target_by_path_progress(candidates)
 
 
-func _pick_target_by_path_progress() -> Area2D:
+func _pick_target_by_path_progress(candidates: Array[Area2D]) -> Area2D:
 	var best_target: Area2D = null
 	var best_progress: float = -INF
 	var best_distance_sq: float = INF
-	for target: Area2D in _targets_in_range:
-		if not _is_valid_enemy_target(target):
-			continue
+	for target: Area2D in candidates:
 		var progress: float = _get_enemy_path_progress(target)
 		var distance_sq: float = global_position.distance_squared_to(target.global_position)
 		if best_target == null:
@@ -540,14 +584,12 @@ func _pick_target_by_path_progress() -> Area2D:
 	return best_target
 
 
-func _pick_target_by_lowest_health() -> Area2D:
+func _pick_target_by_lowest_health(candidates: Array[Area2D]) -> Area2D:
 	var best_target: Area2D = null
 	var best_health: float = INF
 	var best_progress: float = -INF
 	var best_distance_sq: float = INF
-	for target: Area2D in _targets_in_range:
-		if not _is_valid_enemy_target(target):
-			continue
+	for target: Area2D in candidates:
 		var health: float = _get_enemy_current_health(target)
 		var progress: float = _get_enemy_path_progress(target)
 		var distance_sq: float = global_position.distance_squared_to(target.global_position)
@@ -577,13 +619,11 @@ func _pick_target_by_lowest_health() -> Area2D:
 	return best_target
 
 
-func _pick_target_by_nearest() -> Area2D:
+func _pick_target_by_nearest(candidates: Array[Area2D]) -> Area2D:
 	var best_target: Area2D = null
 	var best_distance_sq: float = INF
 	var best_progress: float = -INF
-	for target: Area2D in _targets_in_range:
-		if not _is_valid_enemy_target(target):
-			continue
+	for target: Area2D in candidates:
 		var distance_sq: float = global_position.distance_squared_to(target.global_position)
 		var progress: float = _get_enemy_path_progress(target)
 		if best_target == null:
@@ -618,6 +658,48 @@ func _get_enemy_path_progress(target: Area2D) -> float:
 	if parent is PathFollow2D:
 		return (parent as PathFollow2D).progress
 	return -1.0
+
+
+func _is_target_within_tile_attack_range(target: Area2D) -> bool:
+	if not _is_valid_enemy_target(target):
+		return false
+	var source_cell: Vector2i = _get_attack_origin_cell()
+	var target_cell: Vector2i = _world_to_cell(target.global_position)
+	var radius: int = get_attack_range_tile_radius()
+	return absi(target_cell.x - source_cell.x) <= radius and absi(target_cell.y - source_cell.y) <= radius
+
+
+func _get_attack_origin_cell() -> Vector2i:
+	if not _attack_origin_cell_initialized:
+		_update_attack_origin_cell()
+	return _attack_origin_cell
+
+
+func get_attack_origin_cell() -> Vector2i:
+	return _get_attack_origin_cell()
+
+
+func _update_attack_origin_cell() -> void:
+	var next_cell: Vector2i = _world_to_cell(global_position)
+	if _attack_origin_cell_initialized and next_cell == _attack_origin_cell:
+		return
+	_attack_origin_cell = next_cell
+	_attack_origin_cell_initialized = true
+	if _show_attack_range_preview:
+		_update_attack_range_overlay()
+
+
+func _world_to_cell(world_pos: Vector2) -> Vector2i:
+	if playground != null and playground.has_method("world_to_cell"):
+		return Vector2i(playground.call("world_to_cell", world_pos))
+	var tile_size: int = _get_tile_size_px()
+	return Vector2i(floori(world_pos.x / float(tile_size)), floori(world_pos.y / float(tile_size)))
+
+
+func _get_tile_size_px() -> int:
+	if playground != null and playground.has_method("get_tile_size_px"):
+		return int(playground.call("get_tile_size_px"))
+	return 32
 
 
 func _play_next_attack_animation() -> void:
@@ -693,6 +775,8 @@ func _execute_pending_attack() -> void:
 	_pending_hit_frame_fired = true
 	if not _is_valid_enemy_target(target):
 		return
+	if not _is_target_within_tile_attack_range(target):
+		return
 	if not target.has_method("apply_damage"):
 		_warn_invalid_target_once(target, "apply_damage")
 		return
@@ -729,23 +813,16 @@ func _warn_invalid_target_once(target: Area2D, method_name: String) -> void:
 	push_warning("Hero: target '%s' is missing method '%s'." % [target.name, method_name])
 
 
-func _draw_attack_range_preview() -> void:
-	var circle_shape: CircleShape2D = attack_range_shape.shape as CircleShape2D
-	if circle_shape == null:
-		return
-	var center: Vector2 = attack_range.position + attack_range_shape.position
-	var radius: float = circle_shape.radius
-	draw_circle(center, radius, Color(0.35, 0.85, 1.0, 0.08))
-	draw_arc(center, radius, 0.0, TAU, 72, Color(0.35, 0.85, 1.0, 0.7), 1.6)
-
-
 func _request_visual_redraw() -> void:
 	queue_redraw()
 
 
-func _draw() -> void:
-	if _show_attack_range_preview:
-		_draw_attack_range_preview()
+func _update_attack_range_overlay() -> void:
+	if playground == null:
+		return
+	if not playground.has_method("set_hero_attack_range_overlay"):
+		return
+	playground.call("set_hero_attack_range_overlay", self, _show_attack_range_preview)
 
 
 func _set_outline_visual(enabled: bool, color: Color) -> void:
@@ -839,7 +916,7 @@ func set_attack_range_preview_visible(visible: bool) -> void:
 	if _show_attack_range_preview == visible:
 		return
 	_show_attack_range_preview = visible
-	queue_redraw()
+	_update_attack_range_overlay()
 
 
 func play_idle() -> void:
@@ -906,7 +983,8 @@ func _die() -> void:
 		return
 	_is_dead = true
 	_move_order_active = false
-	_targets_in_range.clear()
+	_move_path_points.clear()
+	_move_path_index = 0
 	_current_target = null
 	_clear_pending_attack()
 	set_physics_process(false)
@@ -914,6 +992,8 @@ func _die() -> void:
 	_set_damage_fill_strength(0.0)
 	if attack_timer != null:
 		attack_timer.stop()
+	if _show_attack_range_preview:
+		set_attack_range_preview_visible(false)
 	_apply_idle_outline_visual()
 	modulate = Color(1.0, 1.0, 1.0, 0.45)
 	play_death()

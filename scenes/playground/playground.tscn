@@ -1,21 +1,45 @@
 [gd_scene format=3 uid="uid://dyskcnci6tlwd"]
 
 [ext_resource type="Script" uid="uid://mb6qpk3jg4p" path="res://scripts/playground/PlayGround.gd" id="1_playground"]
-[ext_resource type="Script" uid="uid://cp3n7y1ito2bp" path="res://scripts/playground/ui/HeroInterface.gd" id="2_hero_interface"]
 [ext_resource type="PackedScene" uid="uid://6d25jelm06ao" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
-[ext_resource type="Script" uid="uid://br6j1md20h47e" path="res://scripts/playground/ui/ItemSlotUI.gd" id="4_item_slot"]
+[ext_resource type="TileSet" path="res://assets/tilesets/battle_tileset.tres" id="4_battle_tileset"]
 [ext_resource type="NavigationPolygon" uid="uid://c4vx6cdbsqt3q" path="res://assets/navigation/playground_navpolygon.tres" id="5_nav_polygon"]
 [ext_resource type="Script" uid="uid://c0mo3u67brrlv" path="res://scripts/playground/ui/MoveCommandMarker.gd" id="6_move_marker"]
+[ext_resource type="PackedScene" uid="uid://bhq7xf3k2ypvn" path="res://scenes/playground/ui/hero_hud.tscn" id="7_hero_hud"]
 
 [node name="PlayGround" type="Node2D" unique_id=779650829]
 script = ExtResource("1_playground")
 hero_scene = ExtResource("3_hero")
 core_path = NodePath("../CoreRoot")
 move_command_marker_path = NodePath("MoveCommandMarker")
+ground_tiles_path = NodePath("GroundTiles")
+blocked_tiles_path = NodePath("BlockedTiles")
+range_overlay_fill_path = NodePath("RangeOverlayFill")
+range_overlay_border_path = NodePath("RangeOverlayBorder")
+walkable_source_id = 0
+walkable_atlas_coords = Vector2i(0, 0)
+range_overlay_source_id = 0
+range_overlay_fill_atlas_coords = Vector2i(0, 0)
+range_overlay_border_atlas_coords = Vector2i(1, 0)
 
-[node name="PlayAreaOutline" type="Line2D" parent="." unique_id=1862948357]
-width = 2.0
-default_color = Color(1, 1, 1, 0.35)
+[node name="GroundTiles" type="TileMapLayer" parent="." unique_id=1299124473]
+z_index = -100
+tile_set = ExtResource("4_battle_tileset")
+
+[node name="BlockedTiles" type="TileMapLayer" parent="." unique_id=144401721]
+z_index = -90
+tile_set = ExtResource("4_battle_tileset")
+modulate = Color(1, 0.35, 0.35, 0.65)
+
+[node name="RangeOverlayFill" type="TileMapLayer" parent="." unique_id=879321145]
+z_index = -80
+tile_set = ExtResource("4_battle_tileset")
+modulate = Color(0.2, 0.85, 1, 0.38)
+
+[node name="RangeOverlayBorder" type="TileMapLayer" parent="." unique_id=1743529219]
+z_index = -79
+tile_set = ExtResource("4_battle_tileset")
+modulate = Color(0.2, 0.95, 1, 0.78)
 
 [node name="HeroNavRegion" type="NavigationRegion2D" parent="." unique_id=582702591]
 navigation_polygon = ExtResource("5_nav_polygon")
@@ -30,295 +54,4 @@ script = ExtResource("6_move_marker")
 ring_radius = Vector2(5, 2)
 ring_line_width = 0.5
 
-[node name="HeroHUD" type="CanvasLayer" parent="." unique_id=1647066502]
-script = ExtResource("2_hero_interface")
-
-[node name="HeroInterfaceRoot" type="Control" parent="HeroHUD" unique_id=1962126755]
-visible = false
-layout_mode = 3
-anchor_top = 0.75
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="InterfacePanel" type="PanelContainer" parent="HeroHUD/HeroInterfaceRoot" unique_id=1220161060]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel" unique_id=406512662]
-layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
-
-[node name="MainRow" type="HBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer" unique_id=717361505]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="PortraitColumn" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1533797509]
-custom_minimum_size = Vector2(220, 0)
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="NameLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=1322349092]
-layout_mode = 2
-text = "히어로 미선택"
-horizontal_alignment = 1
-
-[node name="PortraitFrame" type="PanelContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=41888371]
-custom_minimum_size = Vector2(220, 120)
-layout_mode = 2
-
-[node name="PortraitCenter" type="CenterContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/PortraitFrame" unique_id=1711979040]
-layout_mode = 2
-
-[node name="PortraitSprite" type="AnimatedSprite2D" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/PortraitFrame/PortraitCenter" unique_id=1101367955]
-position = Vector2(110, 60)
-
-[node name="HeroHealthStatus" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=408324905]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="HeroHealthBar" type="ProgressBar" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus" unique_id=1972620152]
-custom_minimum_size = Vector2(220, 16)
-layout_mode = 2
-max_value = 100.0
-value = 100.0
-show_percentage = false
-
-[node name="HeroHealthLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus" unique_id=159027115]
-layout_mode = 2
-text = "-/-"
-horizontal_alignment = 1
-
-[node name="EquipColumn" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1955184883]
-custom_minimum_size = Vector2(130, 0)
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="EquipTitle" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn" unique_id=1983421312]
-layout_mode = 2
-text = "장비"
-
-[node name="EquipSlots" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn" unique_id=1745664121]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="WeaponSlot" type="PanelContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots" unique_id=1799756978]
-custom_minimum_size = Vector2(120, 58)
-layout_mode = 2
-script = ExtResource("4_item_slot")
-slot_kind = "equipment"
-slot_index = 0
-empty_label_text = "무기"
-
-[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot" unique_id=140795151]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot/MarginContainer" unique_id=1358864208]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="NameLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot/MarginContainer/VBoxContainer" unique_id=1975556333]
-layout_mode = 2
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="LevelLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot/MarginContainer/VBoxContainer" unique_id=1693956710]
-layout_mode = 2
-horizontal_alignment = 1
-
-[node name="ArmorSlot" type="PanelContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots" unique_id=1728984234]
-custom_minimum_size = Vector2(120, 58)
-layout_mode = 2
-script = ExtResource("4_item_slot")
-slot_kind = "equipment"
-slot_index = 1
-empty_label_text = "방어구"
-
-[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot" unique_id=2693756]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot/MarginContainer" unique_id=1119978696]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="NameLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot/MarginContainer/VBoxContainer" unique_id=610500724]
-layout_mode = 2
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="LevelLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot/MarginContainer/VBoxContainer" unique_id=1652274742]
-layout_mode = 2
-horizontal_alignment = 1
-
-[node name="BootsSlot" type="PanelContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots" unique_id=2003654276]
-custom_minimum_size = Vector2(120, 58)
-layout_mode = 2
-script = ExtResource("4_item_slot")
-slot_kind = "equipment"
-slot_index = 2
-empty_label_text = "신발"
-
-[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot" unique_id=1536353695]
-layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot/MarginContainer" unique_id=389695172]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="NameLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot/MarginContainer/VBoxContainer" unique_id=137510944]
-layout_mode = 2
-horizontal_alignment = 1
-autowrap_mode = 2
-
-[node name="LevelLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot/MarginContainer/VBoxContainer" unique_id=1331398223]
-layout_mode = 2
-horizontal_alignment = 1
-
-[node name="StatColumn" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=596624159]
-custom_minimum_size = Vector2(250, 0)
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="LevelRow" type="HBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=724834621]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="LevelLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn/LevelRow" unique_id=2017818006]
-layout_mode = 2
-text = "Level -"
-
-[node name="ExpBar" type="TextureProgressBar" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn/LevelRow" unique_id=549089974]
-custom_minimum_size = Vector2(140, 20)
-layout_mode = 2
-size_flags_horizontal = 3
-max_value = 60.0
-
-[node name="ExpLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn/LevelRow" unique_id=1486953693]
-layout_mode = 2
-text = "0/60"
-
-[node name="StrengthLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=1325598240]
-layout_mode = 2
-text = "힘: -"
-
-[node name="AgilityLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=2126522684]
-layout_mode = 2
-text = "민첩: -"
-
-[node name="IntelligenceLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=75542803]
-layout_mode = 2
-text = "지능: -"
-
-[node name="RangeLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=1537799590]
-layout_mode = 2
-text = "사거리: -"
-
-[node name="ShopColumn" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1343199708]
-custom_minimum_size = Vector2(470, 0)
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="ShopTitle" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn" unique_id=604558608]
-layout_mode = 2
-text = "장비 아이템 뽑기 카드"
-
-[node name="GoldLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn" unique_id=1947450725]
-layout_mode = 2
-text = "골드: 0"
-
-[node name="CardsRow" type="HBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn" unique_id=183002726]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="WeaponCard" type="Button" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn/CardsRow" unique_id=378460698]
-custom_minimum_size = Vector2(145, 120)
-layout_mode = 2
-text = "무기"
-
-[node name="ArmorCard" type="Button" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn/CardsRow" unique_id=413856377]
-custom_minimum_size = Vector2(145, 120)
-layout_mode = 2
-text = "방어구"
-
-[node name="BootsCard" type="Button" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn/CardsRow" unique_id=1262440705]
-custom_minimum_size = Vector2(145, 120)
-layout_mode = 2
-text = "신발"
-
-[node name="RerollColumn" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=630497077]
-custom_minimum_size = Vector2(150, 0)
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="RerollTitle" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=1846946725]
-layout_mode = 2
-text = "리롤"
-
-[node name="RerollButton" type="Button" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=399446321]
-custom_minimum_size = Vector2(140, 40)
-layout_mode = 2
-text = "카드 리롤"
-
-[node name="RerollCountLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=1574613097]
-layout_mode = 2
-text = "무료 리롤: 5/5"
-
-[node name="RerollCostLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=533123699]
-layout_mode = 2
-text = "현재 비용: 무료"
-
-[node name="EnemyStatusRoot" type="Control" parent="HeroHUD" unique_id=596775370]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_left = 12.0
-offset_top = 12.0
-offset_right = 202.0
-offset_bottom = 98.0
-
-[node name="EnemyStatusPanel" type="PanelContainer" parent="HeroHUD/EnemyStatusRoot" unique_id=683000803]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="HeroHUD/EnemyStatusRoot/EnemyStatusPanel" unique_id=444333651]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 8
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HeroHUD/EnemyStatusRoot/EnemyStatusPanel/MarginContainer" unique_id=1593622286]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="EnemyStatusTitle" type="Label" parent="HeroHUD/EnemyStatusRoot/EnemyStatusPanel/MarginContainer/VBoxContainer" unique_id=430152837]
-layout_mode = 2
-text = "Enemy"
-
-[node name="EnemyHealthLabel" type="Label" parent="HeroHUD/EnemyStatusRoot/EnemyStatusPanel/MarginContainer/VBoxContainer" unique_id=66116318]
-layout_mode = 2
-text = "체력: - / -"
+[node name="HeroHUD" parent="." instance=ExtResource("7_hero_hud")]

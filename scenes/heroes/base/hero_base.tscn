@@ -206,11 +206,8 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_drag"]
-radius = 6.0
-height = 18.0
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_attack_range"]
-radius = 35.014282
+radius = 8.0
+height = 22.0
 
 [node name="HeroBase" type="Area2D" unique_id=1631851130 groups=["hero"]]
 collision_layer = 8
@@ -243,19 +240,6 @@ offset_bottom = -20.0
 show_percentage = false
 script = ExtResource("4_hero_health_bar")
 metadata/_edit_use_anchors_ = true
-
-[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1139559729]
-path_desired_distance = 1.0
-target_desired_distance = 1.0
-
-[node name="AttackRange" type="Area2D" parent="." unique_id=1272016421]
-visible = false
-position = Vector2(0, -7)
-collision_layer = 0
-input_pickable = false
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange" unique_id=948138958]
-shape = SubResource("CircleShape2D_attack_range")
 
 [node name="AttackTimer" type="Timer" parent="." unique_id=2133531099]
 wait_time = 0.8

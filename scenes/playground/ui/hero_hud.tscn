@@ -1,0 +1,356 @@
+[gd_scene format=3 uid="uid://bhq7xf3k2ypvn"]
+
+[ext_resource type="Script" uid="uid://5nlk4npa11wy" path="res://scripts/playground/ui/HeroHUD.gd" id="1_hero_hud"]
+[ext_resource type="Script" uid="uid://br6j1md20h47e" path="res://scripts/playground/ui/ItemSlotUI.gd" id="2_item_slot"]
+[ext_resource type="Script" uid="uid://b5er4txdndlg1" path="res://scripts/playground/ui/HeroInfoPanel.gd" id="3_hero_info_panel"]
+[ext_resource type="Script" uid="uid://7qo3udqf162b" path="res://scripts/playground/ui/ShopPanel.gd" id="4_shop_panel"]
+[ext_resource type="Script" uid="uid://b8gnrdcee6q0y" path="res://scripts/playground/ui/EnemyStatusPanel.gd" id="5_enemy_status_panel"]
+[ext_resource type="PackedScene" path="res://scenes/playground/ui/item_tooltip.tscn" id="6_item_tooltip"]
+
+[node name="HeroHUD" type="CanvasLayer" unique_id=814339716]
+script = ExtResource("1_hero_hud")
+
+[node name="HeroInterfaceRoot" type="Control" parent="." unique_id=2020349439]
+layout_mode = 3
+anchor_top = 0.75
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -33.0
+offset_bottom = -33.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InterfacePanel" type="PanelContainer" parent="HeroInterfaceRoot" unique_id=1684956172]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_hero_info_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroInterfaceRoot/InterfacePanel" unique_id=405812466]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="MainRow" type="HBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer" unique_id=1051968728]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="PortraitColumn" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=346461443]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.18
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=1894200692]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "히어로 미선택"
+horizontal_alignment = 1
+
+[node name="RaceBadge" type="HBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=556775217]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="RaceIcon" type="TextureRect" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/RaceBadge" unique_id=317495896]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+
+[node name="ClassIcon" type="TextureRect" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/RaceBadge" unique_id=1212332066]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+
+[node name="PortraitFrame" type="PanelContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=1516759793]
+custom_minimum_size = Vector2(220, 120)
+layout_mode = 2
+
+[node name="PortraitCenter" type="CenterContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/PortraitFrame" unique_id=2129851320]
+layout_mode = 2
+
+[node name="PortraitSprite" type="AnimatedSprite2D" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/PortraitFrame/PortraitCenter" unique_id=464444329]
+position = Vector2(110, 60)
+
+[node name="HeroHealthStatus" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=125706673]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HeroHealthBar" type="ProgressBar" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus" unique_id=1637742909]
+custom_minimum_size = Vector2(220, 16)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="HeroHealthLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus" unique_id=999441478]
+layout_mode = 2
+text = "-/-"
+horizontal_alignment = 1
+
+[node name="EquipColumn" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=140774440]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.12
+theme_override_constants/separation = 8
+
+[node name="EquipTitle" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn" unique_id=1169018017]
+layout_mode = 2
+text = "장비"
+
+[node name="EquipSlots" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn" unique_id=212830975]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="WeaponSlot" type="PanelContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots" unique_id=1568695991]
+custom_minimum_size = Vector2(120, 58)
+layout_mode = 2
+script = ExtResource("2_item_slot")
+slot_kind = "equipment"
+slot_index = 0
+empty_label_text = "무기"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot" unique_id=1122593632]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot/MarginContainer" unique_id=1383057228]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot/MarginContainer/VBoxContainer" unique_id=75688008]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot/MarginContainer/VBoxContainer" unique_id=1287687469]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="ArmorSlot" type="PanelContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots" unique_id=2073059035]
+custom_minimum_size = Vector2(120, 58)
+layout_mode = 2
+script = ExtResource("2_item_slot")
+slot_kind = "equipment"
+slot_index = 1
+empty_label_text = "방어구"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot" unique_id=1511620691]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot/MarginContainer" unique_id=432722074]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot/MarginContainer/VBoxContainer" unique_id=526874150]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot/MarginContainer/VBoxContainer" unique_id=1596838549]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="BootsSlot" type="PanelContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots" unique_id=1468092437]
+custom_minimum_size = Vector2(120, 58)
+layout_mode = 2
+script = ExtResource("2_item_slot")
+slot_kind = "equipment"
+slot_index = 2
+empty_label_text = "신발"
+
+[node name="MarginContainer" type="MarginContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot" unique_id=2078780870]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot/MarginContainer" unique_id=162419016]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot/MarginContainer/VBoxContainer" unique_id=966808920]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LevelLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/BootsSlot/MarginContainer/VBoxContainer" unique_id=163833926]
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="StatusEffectsRow" type="HFlowContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn" unique_id=2029653944]
+visible = false
+layout_mode = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="StatColumn" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1114294800]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.2
+theme_override_constants/separation = 6
+
+[node name="LevelRow" type="HBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=533340853]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LevelLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn/LevelRow" unique_id=798556461]
+layout_mode = 2
+text = "Level -"
+
+[node name="ExpBar" type="TextureProgressBar" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn/LevelRow" unique_id=1330713372]
+custom_minimum_size = Vector2(140, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 60.0
+
+[node name="ExpLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn/LevelRow" unique_id=250188888]
+layout_mode = 2
+text = "0/60"
+
+[node name="StrengthLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=367560211]
+layout_mode = 2
+text = "힘: -"
+
+[node name="AgilityLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=113852177]
+layout_mode = 2
+text = "민첩: -"
+
+[node name="IntelligenceLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=829741290]
+layout_mode = 2
+text = "지능: -"
+
+[node name="RangeLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=536805603]
+layout_mode = 2
+text = "사거리: -"
+
+[node name="ShopColumn" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1546277264]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.38
+theme_override_constants/separation = 8
+script = ExtResource("4_shop_panel")
+
+[node name="ShopTitle" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn" unique_id=1272049633]
+layout_mode = 2
+text = "장비 아이템 뽑기 카드"
+
+[node name="GoldLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn" unique_id=797158223]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "골드: 0"
+
+[node name="CardsRow" type="HBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn" unique_id=985619904]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="WeaponCard" type="Button" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn/CardsRow" unique_id=1046610179]
+custom_minimum_size = Vector2(145, 120)
+layout_mode = 2
+text = "무기"
+
+[node name="ArmorCard" type="Button" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn/CardsRow" unique_id=350877655]
+custom_minimum_size = Vector2(145, 120)
+layout_mode = 2
+text = "방어구"
+
+[node name="BootsCard" type="Button" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn/CardsRow" unique_id=10504960]
+custom_minimum_size = Vector2(145, 120)
+layout_mode = 2
+text = "신발"
+
+[node name="RerollColumn" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1875222089]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.12
+theme_override_constants/separation = 8
+
+[node name="RerollTitle" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=258069848]
+layout_mode = 2
+text = "리롤"
+
+[node name="RerollButton" type="Button" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=447123013]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+text = "카드 리롤"
+
+[node name="RerollCountLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=864433072]
+layout_mode = 2
+text = "무료 리롤: 5/5"
+
+[node name="RerollCostLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/RerollColumn" unique_id=625539280]
+layout_mode = 2
+text = "현재 비용: 무료"
+
+[node name="EnemyStatusRoot" type="Control" parent="." unique_id=1439311153]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 202.0
+offset_bottom = 98.0
+script = ExtResource("5_enemy_status_panel")
+
+[node name="EnemyStatusPanel" type="PanelContainer" parent="EnemyStatusRoot" unique_id=876224647]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="EnemyStatusRoot/EnemyStatusPanel" unique_id=1415386742]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EnemyStatusRoot/EnemyStatusPanel/MarginContainer" unique_id=1300289065]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EnemyNameLabel" type="Label" parent="EnemyStatusRoot/EnemyStatusPanel/MarginContainer/VBoxContainer" unique_id=1399574673]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Enemy"
+
+[node name="EnemyHealthBar" type="ProgressBar" parent="EnemyStatusRoot/EnemyStatusPanel/MarginContainer/VBoxContainer" unique_id=2048980042]
+custom_minimum_size = Vector2(170, 14)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
+[node name="EnemyHealthLabel" type="Label" parent="EnemyStatusRoot/EnemyStatusPanel/MarginContainer/VBoxContainer" unique_id=1138101981]
+layout_mode = 2
+text = "체력: - / -"
+
+[node name="TooltipLayer" type="Control" parent="." unique_id=1320959329]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ItemTooltip" parent="TooltipLayer" unique_id=864375220 instance=ExtResource("6_item_tooltip")]
+layout_mode = 0
