@@ -78,6 +78,38 @@ region = Rect2(400, 0, 100, 100)
 atlas = ExtResource("2_soldier")
 region = Rect2(500, 0, 100, 100)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_kdkpt"]
+atlas = ExtResource("2_soldier")
+region = Rect2(0, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6umde"]
+atlas = ExtResource("2_soldier")
+region = Rect2(100, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oe5r0"]
+atlas = ExtResource("2_soldier")
+region = Rect2(200, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ypi58"]
+atlas = ExtResource("2_soldier")
+region = Rect2(300, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_85h7k"]
+atlas = ExtResource("2_soldier")
+region = Rect2(400, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7kqwv"]
+atlas = ExtResource("2_soldier")
+region = Rect2(500, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s5kmu"]
+atlas = ExtResource("2_soldier")
+region = Rect2(600, 100, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tp125"]
+atlas = ExtResource("2_soldier")
+region = Rect2(700, 100, 100, 100)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_hero"]
 animations = [{
 "frames": [{
@@ -145,22 +177,28 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0_0")
+"texture": SubResource("AtlasTexture_kdkpt")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0_1")
+"texture": SubResource("AtlasTexture_6umde")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0_2")
+"texture": SubResource("AtlasTexture_oe5r0")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0_3")
+"texture": SubResource("AtlasTexture_ypi58")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0_4")
+"texture": SubResource("AtlasTexture_85h7k")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_0_5")
+"texture": SubResource("AtlasTexture_7kqwv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s5kmu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tp125")
 }],
 "loop": true,
 "name": &"walk",
@@ -179,38 +217,39 @@ collision_layer = 8
 collision_mask = 0
 script = ExtResource("1_hero")
 target_priority = 2
+move_speed = 40.0
+move_stop_distance = 1.0
 base_strength = 3
-hero_display_name = "용사"
-level = 1
-current_exp = 0
-required_exp = 60
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=383494157]
 material = SubResource("ShaderMaterial_outline")
+position = Vector2(0, -7)
 sprite_frames = SubResource("SpriteFrames_hero")
-animation = &"idle"
+animation = &"walk"
 autoplay = "idle"
 
 [node name="DragShape" type="CollisionShape2D" parent="." unique_id=240656232]
-position = Vector2(0, -2)
+position = Vector2(0, -9)
 shape = SubResource("CapsuleShape2D_drag")
 
 [node name="StatusAnchor" type="Marker2D" parent="." unique_id=753297543]
-position = Vector2(69, -92)
+position = Vector2(69, -99)
 
 [node name="HealthBar" type="ProgressBar" parent="." unique_id=380915427]
 offset_left = -12.0
-offset_top = -18.0
+offset_top = -25.0
 offset_right = 12.0
-offset_bottom = -13.0
+offset_bottom = -20.0
 show_percentage = false
 script = ExtResource("4_hero_health_bar")
+metadata/_edit_use_anchors_ = true
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1139559729]
-path_desired_distance = 3.0
-target_desired_distance = 6.0
+path_desired_distance = 1.0
+target_desired_distance = 1.0
 
 [node name="AttackRange" type="Area2D" parent="." unique_id=1272016421]
+position = Vector2(0, -7)
 collision_layer = 0
 input_pickable = false
 

@@ -4,23 +4,24 @@
 [ext_resource type="Script" uid="uid://cv7uu8u2bhiyl" path="res://scripts/spawn/EnemySpawnController.gd" id="2_7j7ff"]
 [ext_resource type="PackedScene" uid="uid://cy3xax8p7da1h" path="res://scenes/portal.tscn" id="3_o2tba"]
 [ext_resource type="PackedScene" uid="uid://jg52hv41yh4p" path="res://scenes/enemies/variants/enemy_orc2.tscn" id="4_h5f3e"]
-[ext_resource type="PackedScene" path="res://scenes/round/round_system.tscn" id="5_scmn0"]
-[ext_resource type="PackedScene" path="res://scenes/playground/playground.tscn" id="6_playground"]
-[ext_resource type="Script" path="res://scripts/camera/LevelCameraController.gd" id="7_level_camera"]
-[ext_resource type="PackedScene" path="res://scenes/core/core_base.tscn" id="8_core_base"]
+[ext_resource type="PackedScene" uid="uid://cfax4dxuvrhrw" path="res://scenes/round/round_system.tscn" id="5_scmn0"]
+[ext_resource type="PackedScene" uid="uid://dyskcnci6tlwd" path="res://scenes/playground/playground.tscn" id="6_playground"]
+[ext_resource type="Script" uid="uid://d2fdwyd03ff2y" path="res://scripts/camera/LevelCameraController.gd" id="7_level_camera"]
+[ext_resource type="PackedScene" uid="uid://bqjtq5n4vls2j" path="res://scenes/core/core_base.tscn" id="8_core_base"]
 
 [node name="Level" type="Node2D" unique_id=867026977]
 
-[node name="CoreRoot" parent="." instance=ExtResource("8_core_base")]
+[node name="CoreRoot" parent="." unique_id=838351356 instance=ExtResource("8_core_base")]
 position = Vector2(635, 357)
 
-[node name="MainCamera" type="Camera2D" parent="."]
+[node name="MainCamera" type="Camera2D" parent="." unique_id=346123080]
 position = Vector2(635, 357)
 script = ExtResource("7_level_camera")
-enabled = true
+zoom_max = 3.0
+zoom_step = 0.2
 
 [node name="Portal" parent="." unique_id=665752176 groups=["spawn_portal"] instance=ExtResource("3_o2tba")]
-position = Vector2(348, 357)
+position = Vector2(35, 355)
 
 [node name="SpawnTimer" type="Timer" parent="." unique_id=562782423]
 wait_time = 1.5
@@ -31,7 +32,6 @@ enemy_scene = ExtResource("1_jfytv")
 round_enemy_scenes = Array[PackedScene]([ExtResource("1_jfytv"), ExtResource("4_h5f3e")])
 round_spawn_counts = Array[int]([10, 12, 14, 16, 18, 20, 22, 24, 26, 28])
 round_enemy_health_multipliers = Array[float]([1.0, 1.06, 1.13, 1.2, 1.28, 1.36, 1.44, 1.53, 1.63, 1.74, 1.85, 1.97, 2.1, 2.23, 2.38, 2.53, 2.69, 2.86, 3.04, 3.24, 3.44, 3.66, 3.89, 4.14, 4.4, 4.68, 4.98, 5.29, 5.63, 5.99])
-level_hp_scale = 1.0
 portal_path = NodePath("../Portal")
 core_path = NodePath("../CoreRoot")
 spawn_timer_path = NodePath("../SpawnTimer")
@@ -40,5 +40,5 @@ spawn_timer_path = NodePath("../SpawnTimer")
 enemy_spawn_controller_path = NodePath("../EnemySpawnController")
 spawn_timer_path = NodePath("../SpawnTimer")
 
-[node name="PlayGround" parent="." instance=ExtResource("6_playground")]
+[node name="PlayGround" parent="." unique_id=1815264340 instance=ExtResource("6_playground")]
 position = Vector2(635, 357)

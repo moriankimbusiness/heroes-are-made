@@ -195,14 +195,17 @@ radius = 16.0
 script = ExtResource("1_md0e3")
 auto_free_on_death_end = true
 death_fade_duration = 1.0
-move_speed = 40.0
+base_max_health = 10.0
+move_speed = 20.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1489677892]
+position = Vector2(0, -7)
 sprite_frames = SubResource("SpriteFrames_md0e3")
 animation = &"attack"
 autoplay = "walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=999267602]
+position = Vector2(0, -7)
 shape = SubResource("CircleShape2D_md0e3")
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=945646126]
@@ -210,6 +213,7 @@ path_desired_distance = 4.0
 target_desired_distance = 8.0
 
 [node name="HeroDetectArea" type="Area2D" parent="." unique_id=388737988]
+position = Vector2(0, -7)
 collision_mask = 8
 script = ExtResource("5_enemy_range_area")
 
@@ -217,6 +221,7 @@ script = ExtResource("5_enemy_range_area")
 shape = SubResource("CircleShape2D_hero_detect")
 
 [node name="AttackRange" type="Area2D" parent="." unique_id=1848079617]
+position = Vector2(0, -7)
 collision_layer = 0
 collision_mask = 8
 input_pickable = false
@@ -239,6 +244,7 @@ offset_right = 11.0
 offset_bottom = -22.0
 show_percentage = false
 script = ExtResource("3_t4rps")
+metadata/_edit_use_anchors_ = true
 
 [node name="DamageTextLayer" type="Node2D" parent="." unique_id=1152780511]
 z_index = 10

@@ -29,7 +29,7 @@ extends Node2D
 const MIN_RING_SEGMENTS: int = 24
 
 var _draw_alpha: float = 1.0
-var _bounce_offset_y: float = 0.0
+var _arrow_bounce_offset_y: float = 0.0
 var _bounce_tween: Tween = null
 var _life_tween: Tween = null
 var _fill_polygon: PackedVector2Array = PackedVector2Array()
@@ -45,7 +45,7 @@ func show_marker(world_pos: Vector2) -> void:
 	_rebuild_ring_geometry()
 	global_position = world_pos
 	_draw_alpha = 1.0
-	_bounce_offset_y = 0.0
+	_arrow_bounce_offset_y = 0.0
 	visible = true
 	_restart_bounce()
 	_restart_life()
@@ -54,7 +54,7 @@ func show_marker(world_pos: Vector2) -> void:
 
 func hide_marker(immediate: bool = false) -> void:
 	_kill_tweens()
-	_bounce_offset_y = 0.0
+	_arrow_bounce_offset_y = 0.0
 	if immediate:
 		_draw_alpha = 0.0
 	visible = false
@@ -68,7 +68,7 @@ func _draw() -> void:
 	if alpha <= 0.0:
 		return
 
-	var center: Vector2 = Vector2(0.0, _bounce_offset_y)
+	var center: Vector2 = Vector2.ZERO
 	var fill: Color = fill_color
 	fill.a *= alpha
 	var ring: Color = ring_color
@@ -81,7 +81,7 @@ func _draw() -> void:
 	draw_polyline(_ring_polyline, ring, ring_line_width, true)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-	var tip: Vector2 = center + Vector2(0.0, -ring_radius.y - arrow_gap)
+	var tip: Vector2 = center + Vector2(0.0, -ring_radius.y - arrow_gap + _arrow_bounce_offset_y)
 	var left: Vector2 = tip + Vector2(-arrow_size.x * 0.5, -arrow_size.y)
 	var right: Vector2 = tip + Vector2(arrow_size.x * 0.5, -arrow_size.y)
 	draw_colored_polygon(PackedVector2Array([tip, left, right]), arrow)
@@ -96,9 +96,9 @@ func _restart_bounce() -> void:
 		_bounce_tween.kill()
 	_bounce_tween = create_tween()
 	_bounce_tween.set_loops()
-	_bounce_tween.tween_method(Callable(self, "_set_bounce_offset"), 0.0, -bounce_height, bounce_duration * 0.5)\
+	_bounce_tween.tween_method(Callable(self, "_set_arrow_bounce_offset"), 0.0, -bounce_height, bounce_duration * 0.5)\
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_bounce_tween.tween_method(Callable(self, "_set_bounce_offset"), -bounce_height, 0.0, bounce_duration * 0.5)\
+	_bounce_tween.tween_method(Callable(self, "_set_arrow_bounce_offset"), -bounce_height, 0.0, bounce_duration * 0.5)\
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 
@@ -111,8 +111,8 @@ func _restart_life() -> void:
 	_life_tween.finished.connect(_on_life_tween_finished)
 
 
-func _set_bounce_offset(value: float) -> void:
-	_bounce_offset_y = value
+func _set_arrow_bounce_offset(value: float) -> void:
+	_arrow_bounce_offset_y = value
 	queue_redraw()
 
 
