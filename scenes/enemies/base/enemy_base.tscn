@@ -197,6 +197,8 @@ auto_free_on_death_end = true
 death_fade_duration = 1.0
 base_max_health = 10.0
 move_speed = 20.0
+attack_damage = 3.0
+attacks_per_second = 0.5
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1489677892]
 position = Vector2(0, -7)

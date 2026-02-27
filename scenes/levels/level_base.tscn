@@ -17,8 +17,12 @@ position = Vector2(635, 357)
 [node name="MainCamera" type="Camera2D" parent="." unique_id=346123080]
 position = Vector2(635, 357)
 script = ExtResource("7_level_camera")
+zoom_min = 1.0
 zoom_max = 3.0
 zoom_step = 0.2
+use_move_bounds = true
+move_bounds_center = Vector2(635, 357)
+move_bounds_extents = Vector2(640, 360)
 
 [node name="Portal" parent="." unique_id=665752176 groups=["spawn_portal"] instance=ExtResource("3_o2tba")]
 position = Vector2(35, 355)
