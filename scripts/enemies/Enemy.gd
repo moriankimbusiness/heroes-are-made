@@ -48,6 +48,7 @@ var current_health: float = 100.0
 var _core_target: Node2D = null
 var _detected_targets: Array[Area2D] = []
 var _attack_targets: Array[Area2D] = []
+var _chase_target: Area2D = null
 var _current_target: Area2D = null
 var _is_attacking_core: bool = false
 
@@ -70,6 +71,7 @@ func _ready() -> void:
 		attack_timer.one_shot = true
 		attack_timer.timeout.connect(_on_attack_timer_timeout)
 	_resolve_core_target()
+	call_deferred("_sync_targets_from_overlaps")
 	_play(State.WALK, true)
 
 
@@ -96,8 +98,16 @@ func _physics_process(delta: float) -> void:
 
 	_is_attacking_core = false
 	_cleanup_targets()
-	if _current_target == null:
-		_current_target = _pick_target()
+	_refresh_chase_target()
+
+	if _chase_target != null:
+		if _is_target_attackable(_chase_target):
+			_current_target = _chase_target
+			_handle_attack_state()
+			return
+		_current_target = null
+		_move_toward_target(_chase_target.global_position, delta)
+		return
 
 	if _current_target != null:
 		_handle_attack_state()
@@ -288,6 +298,31 @@ func _move_toward_core(delta: float) -> void:
 		_play(State.WALK)
 
 
+func _move_toward_target(target_position: Vector2, delta: float) -> void:
+	var next_position: Vector2 = target_position
+	if navigation_agent != null:
+		navigation_agent.target_position = target_position
+		var path_next: Vector2 = navigation_agent.get_next_path_position()
+		if path_next.is_finite():
+			var direct_to_target: float = global_position.distance_to(target_position)
+			var next_to_target: float = path_next.distance_to(target_position)
+			if next_to_target <= direct_to_target + 16.0:
+				next_position = path_next
+
+	var direction: Vector2 = next_position - global_position
+	if direction.length_squared() <= 0.0001:
+		direction = target_position - global_position
+	if direction.length_squared() <= 0.0001:
+		if state != State.WALK:
+			_play(State.WALK)
+		return
+
+	_face_toward(target_position)
+	global_position += direction.normalized() * move_speed * delta
+	if state != State.WALK:
+		_play(State.WALK)
+
+
 func _get_core_approach_position(from_position: Vector2) -> Vector2:
 	if _core_target == null:
 		return from_position
@@ -327,10 +362,14 @@ func _on_hero_detect_area_entered(area: Area2D) -> void:
 		return
 	if not _detected_targets.has(area):
 		_detected_targets.append(area)
+	_refresh_chase_target()
 
 
 func _on_hero_detect_area_exited(area: Area2D) -> void:
 	_detected_targets.erase(area)
+	if _chase_target == area:
+		_chase_target = null
+	_refresh_chase_target()
 	if _current_target == area and not _is_target_attackable(area):
 		_current_target = null
 		_play(State.WALK)
@@ -341,8 +380,6 @@ func _on_attack_range_area_entered(area: Area2D) -> void:
 		return
 	if not _attack_targets.has(area):
 		_attack_targets.append(area)
-	if _current_target == null:
-		_current_target = _pick_target()
 
 
 func _on_attack_range_area_exited(area: Area2D) -> void:
@@ -354,11 +391,16 @@ func _on_attack_range_area_exited(area: Area2D) -> void:
 
 func _on_attack_timer_timeout() -> void:
 	_cleanup_targets()
-	if _current_target == null:
-		_current_target = _pick_target()
-	if _current_target != null:
-		_perform_attack()
+	_refresh_chase_target()
+	if _chase_target != null:
+		if _is_target_attackable(_chase_target):
+			_current_target = _chase_target
+			_perform_attack()
+		else:
+			_current_target = null
+			_play(State.WALK)
 		return
+	_current_target = null
 	if _is_core_attackable():
 		_perform_core_attack()
 		return
@@ -374,21 +416,43 @@ func _cleanup_targets() -> void:
 		var target: Area2D = _attack_targets[i]
 		if not _is_valid_hero_target(target):
 			_attack_targets.remove_at(i)
+	if _chase_target != null and not _is_target_detected(_chase_target):
+		_chase_target = null
 	if _current_target != null and not _is_target_attackable(_current_target):
 		_current_target = null
 
 
-func _pick_target() -> Area2D:
+func _pick_chase_target() -> Area2D:
 	var best_target: Area2D = null
 	var best_distance_sq: float = INF
-	for target: Area2D in _attack_targets:
-		if not _is_target_attackable(target):
+	for target: Area2D in _detected_targets:
+		if not _is_target_detected(target):
 			continue
 		var distance_sq: float = global_position.distance_squared_to(target.global_position)
 		if best_target == null or distance_sq < best_distance_sq:
 			best_target = target
 			best_distance_sq = distance_sq
 	return best_target
+
+
+func _refresh_chase_target() -> void:
+	_chase_target = _pick_chase_target()
+
+
+func _sync_targets_from_overlaps() -> void:
+	if hero_detect_area != null:
+		for area: Area2D in hero_detect_area.get_overlapping_areas():
+			if not _is_valid_hero_target(area):
+				continue
+			if not _detected_targets.has(area):
+				_detected_targets.append(area)
+	if attack_range != null:
+		for area: Area2D in attack_range.get_overlapping_areas():
+			if not _is_valid_hero_target(area):
+				continue
+			if not _attack_targets.has(area):
+				_attack_targets.append(area)
+	_refresh_chase_target()
 
 
 func _resolve_core_target() -> void:
@@ -406,6 +470,10 @@ func _resolve_core_target() -> void:
 func _update_facing() -> void:
 	if _current_target != null and _is_target_attackable(_current_target):
 		_face_toward(_current_target.global_position)
+		_prev_global_x = global_position.x
+		return
+	if _chase_target != null and _is_target_detected(_chase_target):
+		_face_toward(_chase_target.global_position)
 		_prev_global_x = global_position.x
 		return
 	if _is_attacking_core and _core_target != null and is_instance_valid(_core_target):
@@ -488,6 +556,7 @@ func _die() -> void:
 	current_health = 0.0
 	_emit_health_changed()
 	_current_target = null
+	_chase_target = null
 	_detected_targets.clear()
 	_attack_targets.clear()
 	if attack_timer != null:
@@ -561,6 +630,14 @@ func _is_target_attackable(target: Area2D) -> bool:
 	if not _detected_targets.has(target):
 		return false
 	if not _attack_targets.has(target):
+		return false
+	return true
+
+
+func _is_target_detected(target: Area2D) -> bool:
+	if not _is_valid_hero_target(target):
+		return false
+	if not _detected_targets.has(target):
 		return false
 	return true
 
