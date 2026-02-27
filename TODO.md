@@ -1,15 +1,78 @@
 # TODO
 
-## 현재 트랙 (2026-02-26, 목)
-- [x] 전일 완료/검증 목록 이관: `docs/todo/2026-02-4w/2026-02-25.md`
+## 현재 트랙 (2026-02-27, 금)
+- [x] 전일 완료/검증 목록 이관: `docs/todo/2026-02-4w/2026-02-26.md`
+- [x] `GAME_PLAN.md` v3 갱신: 모험단 선형 원정/수레 코어/히어로 체력/적 타깃 우선 규칙 반영
+- [x] 전투 시스템 개편안 1~5를 새 컨셉 기준으로 재정의
+- [x] `GAME_PLAN.md` v4 갱신: `모험가 뽑기` 제거 + 메인화면/게임월드(경로 선택)/전투 화면 흐름 반영
+- [x] 월드 노드 1차 정의 추가: 일반 전투, 중간보스, 아이템 획득, 마을, 이벤트(`?`)
+- [x] `GAME_PLAN.md` v5 갱신: 히어로 이동을 수레 중심 방어영역 + 선분 경로 장애물 판정 방식으로 변경
+- [x] `GAME_PLAN.md` v5 갱신: 이동 목표 지점 히어로 점유 영역 미리보기 규칙 추가
+- [x] `GAME_PLAN.md` v5 갱신: 최초 시작 모험단 인원을 3명으로 확정
+- [x] `AGENTS.md` 규칙 갱신 반영
+- [x] `AGENTS.md` 규칙 갱신: `TODO.md`에 Godot CLI 검증결과를 기록하지 않도록 명시
+- [x] 전투 씬 1차 구현(1.1~1.3, 1.5): `CoreRoot`(코어) 맵 중앙 배치
+- [x] 전투 씬 1차 구현(1.1~1.3, 1.5): `MainCamera` + `LevelCameraController` 추가 (WASD 이동, 휠 줌)
+- [x] 전투 씬 1차 구현(1.1~1.3, 1.5): 플레이영역을 코어 중심 원형 반경 `220`으로 전환
+- [x] 전투 씬 1차 구현(1.1~1.3, 1.5): Hero 드래그 클램프를 원형 플레이영역 기준으로 변경
+- [x] `GAME_PLAN.md` v6 갱신: 코어 맵 중앙 배치/카메라 입력/WASD+휠/원형 반경 220 반영
+- [x] 전투 씬 2차 구현(1.6): 적 이동을 코어 목표 `NavigationAgent2D` 경로 기반으로 전환
+- [x] 전투 씬 2차 구현(1.7): `enemy_base`/`enemy_orc2` 공격 애니메이션(`attack`) 상태 연결
+- [x] 전투 씬 2차 구현(1.8): 히어로 감지 범위 진입 시 적 우선 공격 + 주기 피해 적용
+- [x] `Hero.gd` 체력 API 추가: `set_max_health/apply_damage/is_dead` (적 공격 연동)
+- [x] `GAME_PLAN.md` v7 갱신: 적 이동/공격 구현 상태 반영
+- [x] 카메라 줌 방향 반전: `휠 업=축소`, `휠 다운=확대`
+- [x] `GAME_PLAN.md` v8 갱신: 카메라 줌 방향 명시
+- [x] `enemy_base.tscn` 편집값 반영: `HeroDetectArea.collision_mask = 8` (히어로 감지 우선 공격 복구)
+- [x] `playground.tscn`/`HeroHUD.gd` 반영: 선택 히어로 상태창에 `체력: 현재/최대` 표시 + `health_changed` 이벤트 연동
+- [x] `GAME_PLAN.md` v9 갱신: 히어로 개별 체력 UI/적 감지 마스크 반영 상태 동기화
+- [x] 적 사거리 구조 분리: `HeroDetectArea`(감지) + `AttackRange`(공격) 이원화
+- [x] 적 클릭 시 공격 사거리 원 표시: `HeroHUD` 선택/해제 이벤트와 `Enemy.set_attack_range_preview_visible` 연동
+- [x] 히어로/적 사거리 계산식 반영: `base + add` 이후 `scale` 적용 구조로 export 노출
+- [x] 코어 충돌 사각형 반영: `CoreRoot`를 `RectangleShape2D`로 전환, 영웅/적 코어 내부 진입 보정
+- [x] `GAME_PLAN.md` v10 갱신: 코어 사각 충돌/사거리 계산식/적 클릭 사거리 표시 규칙 반영
+- [x] `GAME_PLAN.md` v11 갱신: 히어로 이동/범위 기획 상세화 (현재 구현 기준 + LOS 2단계 로드맵 + 미리보기 규칙)
+- [x] Enemy 범위 책임 분리 리팩터링: 감지/공격 수치 소유를 루트(`Enemy.gd`)에서 각 노드(`HeroDetectArea`, `AttackRange`) 스크립트로 이관
+- [x] 에디터 즉시 반영 개선: `EnemyRangeArea.gd`를 `@tool` + export setter 기반으로 변경(수치 변경 시 반경 즉시 재적용)
+- [x] 코어 씬 분리: `level_base`의 `CoreRoot`를 `scenes/core/core_base.tscn` 인스턴스로 전환
+- [x] 원인 분석: 적은 현재 `hero` 그룹만 공격 대상으로 취급하여, 코어가 공격 사거리 안이어도 공격하지 않음
+- [x] 코어 체력 API 구현: `Core.gd` 추가(`apply_damage/is_dead/health_changed`) 및 `core_base.tscn` 연결
+- [x] 적 코어 공격 폴백 구현: 히어로 우선 유지 + 히어로 부재 시 공격 범위 내 코어(사각 충돌) 공격
+- [x] 히어로 이동 판정 Phase 2-1 구현: `PlayGround.resolve_los_safe_target` 추가 + 드래그 경로 LOS(Physics 레이어) 안전지점 보정
+- [x] `playground.tscn` LOS 편집값 반영: `los_collision_mask=1`, `los_probe_radius=6.0`, `los_hit_backoff=2.0`
+- [x] `level_01.tscn` 보정: `PlayGround.core_path`를 `../CoreRoot`로 복구
+- [x] 히어로 이동 UX 전환: 드래그 중 실시간 이동 제거 + LOS 선/목표 마커 프리뷰 + 드롭 시 1회 이동 적용
+- [x] 히어로 이동 가능성 색상 규칙 반영: 가능(초록), 불가(빨강)
+- [x] 코어 시각/충돌 범위 정합화: `CoreVisual` 폴리곤을 `CollisionShape2D(Rectangle 64x64)`와 동일 크기로 조정
+- [x] LOS 레이캐스트에서 코어 제외: `PlayGround._query_los_hit`에 코어 RID 제외 적용 (코어 진입 차단은 충돌 보정 유지)
+- [x] 이동 판정 규칙 개편: 레이캐스트 관통 + 목적지(적/히어로/코어) 충돌 차단 + 경로 스윕(적/히어로) 차단
+- [x] 히어로끼리 겹침 금지 강화: 이동 가능 판정에 히어로 목적지/경로 충돌 검사를 명시적으로 추가
+- [x] 이동 프리뷰 단순화: 드래그 선 제거, 최종 이동 마커만 표시
 
-## 오늘 완료 (2026-02-26, 목)
-- [x] 화면 상단 중앙 라운드 타이머 우측에 게임 속도 제어 UI 추가 (`일시정지`, `1x`, `2x`)
-- [x] `RoundTopCenterUI`에 배속 전환 로직 추가 (`Engine.time_scale`: `0.0/1.0/2.0`)
-- [x] 씬 종료 시 배속 `1x` 복원 처리 추가 (`_exit_tree`)
+## 다음 작업 (2026-02-27, 금)
+- [x] 씬 전환 플로우 상세 스펙 확정(v13): 메인화면 -> 챕터 준비 -> 월드맵 -> 노드 전용 화면 -> 월드맵
+- [x] 월드맵 노드 데이터 모델 상세 설계(v13): 사다리형 분기/Depth 규칙/노드&엣지 계약
+- [x] 전투 진입/복귀 결과 반영 이벤트 상세 설계(v13): `run_started`, `battle_started`, `battle_finished`, `world_node_resolved` 포함
+- [x] 비전투 진행 상세 기획 확정(v13): 챕터 단위 런/실패 시 재도전 불가/메타 제외
+- [x] 월드맵 생성기 구현(1차): `D0~D7`, `D1~D6=1~3 랜덤`, `D4 중간보스 1개`, `D2~D5 마을 최소 1개`
+- [x] 노드 전용 화면 1차 구현: 아이템(3선택1), 마을(회복/강화/상점), 이벤트(?) 공통 결과 요약
+- [x] 런 상태 저장/복구 최소 구현: `RunState`, `ChapterState`, `NodeResolutionResult` 저장 타이밍 연결
+- [x] 플로우 런타임 1차 구현: `scenes/flow/game_flow.tscn` + `GameFlowController` + `WorldMapView`
+- [x] 실행 진입점 전환: `project.godot run/main_scene -> res://scenes/flow/game_flow.tscn`
+- [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계
+- [ ] 챕터 준비 2차: 편성/장비관리 UI를 실제 히어로/인벤토리 데이터와 연결
+- [ ] 전투 실패 조건 정합화 2차: `alive_enemy_threshold` 임시 조건에서 코어HP/영웅전멸 기반으로 이관
 
-## 성능/아키텍처 & 검증 (2026-02-26, 목)
-- [x] 속도 제어 UI 이벤트 기반 처리 유지 (버튼 `pressed` 시그널, `_process` 신규 추가 없음)
-- [x] Inspector/Scene 기반 UI 구조(authoritative) 유지 (`round_system.tscn` 노드/NodePath 연결)
-- [x] Godot CLI 검증 통과
-- [x] 명령어: `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
+## 성능/아키텍처 체크 (2026-02-27, 금)
+- [x] 문서 반영 단계에서는 런타임 폴링 추가 없음 (기획/아키텍처 정리만 수행)
+- [x] 책임 분리 원칙 유지: 엔티티 전투 로직 vs UI 표시 로직 분리 방향 명시
+- [x] Editor-authoritative 원칙 유지: 데이터/리소스는 에디터 및 테이블 중심으로 유지
+- [x] 성능/아키텍처 점검: 히어로 체력 UI 갱신은 `health_changed` 이벤트 기반 유지 (`_process` 추가 없음)
+- [x] 성능/아키텍처 점검: 적 사거리 원 표시 토글은 선택 이벤트 기반 처리 (`_process` 폴링 추가 없음)
+- [x] 성능/아키텍처 점검: 코어 공격 판정은 기존 `Enemy._physics_process` 흐름 재사용(추가 `_process`/폴링 없음)
+- [x] v13 문서 반영 점검: 전투 외 진행 플로우/월드맵/데이터 계약은 이벤트 기반 구조 유지(추가 폴링 루프 없음)
+- [x] 성능/아키텍처 점검: LOS 계산은 기존 Hero 드래그 `_process` 흐름 재사용(추가 전역 폴링 루프 없음)
+- [x] 성능/아키텍처 점검: 히어로 드래그 이동을 `_process` 연속 이동에서 입력 이벤트 기반 프리뷰+드롭 커밋 방식으로 전환
+- [x] 성능/아키텍처 점검: 월드맵/노드 해소/UI 전환은 버튼/시그널 이벤트 기반 처리(`_process` 폴링 루프 신규 추가 없음)
+- [x] 성능/아키텍처 점검: 코어 제외 처리는 LOS 쿼리 `exclude`만 추가, 추가 폴링/노드 탐색 루프 없음
+- [x] 성능/아키텍처 점검: 이동 판정은 드래그 이벤트에서 `evaluate_hero_move` 계산으로 수행(상시 폴링 추가 없음)

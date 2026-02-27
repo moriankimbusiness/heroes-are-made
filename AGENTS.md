@@ -80,7 +80,7 @@ Before implementing any new feature, confirm these design constraints first.
 - Performance structure is reviewed (frame-loop necessity, event-driven alternatives, hot-path cost).
 - `TODO.md` is updated.
 - Regression check points are documented.
-- Godot CLI validation is executed and result is recorded.
+- Godot CLI validation is executed and result is recorded in the response **only when the task includes Godot development changes** (scene/script/resource/project files).
 
 ## Godot Performance & Architecture Review Gate (Mandatory)
 
@@ -102,12 +102,15 @@ For every gameplay/UI/script change, run a lightweight performance/architecture 
 
 - Feature works functionally.
 - Performance/architecture checklist reviewed and recorded.
-- Godot CLI validation executed and result recorded.
-- `TODO.md` updated with review and validation outcome.
+- Godot CLI validation executed and result recorded in the response (only for Godot development changes).
+- `TODO.md` updated with work/review outcome (CLI 검증 결과 값은 `TODO.md`에 기록하지 않는다).
 
 ## Godot CLI Validation (Mandatory)
 
-- After every code/scene change, run Godot CLI validation before completion.
+- Run Godot CLI validation before completion **only when the task includes Godot development changes**.
+- Godot development changes include updates to `.tscn`, `.tres`, `.res`, `.gd`, `project.godot`, gameplay/UI/runtime logic, or other in-engine runtime assets/settings.
+- Documentation-only changes (for example `AGENTS.md`, `GAME_PLAN.md`, `TODO.md`, `README.md`, design notes) do not require CLI validation.
+- Do not write Godot CLI validation outcomes to `TODO.md`; report them only in the assistant response.
 - Preferred command (WSL path):
   - `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
 - If needed, use explicit project path:
