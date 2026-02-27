@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cp3n7y1ito2bp" path="res://scripts/playground/ui/HeroInterface.gd" id="2_hero_interface"]
 [ext_resource type="PackedScene" uid="uid://6d25jelm06ao" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
 [ext_resource type="Script" uid="uid://br6j1md20h47e" path="res://scripts/playground/ui/ItemSlotUI.gd" id="4_item_slot"]
-[ext_resource type="NavigationPolygon" path="res://assets/navigation/playground_navpolygon.tres" id="5_nav_polygon"]
+[ext_resource type="NavigationPolygon" uid="uid://c4vx6cdbsqt3q" path="res://assets/navigation/playground_navpolygon.tres" id="5_nav_polygon"]
 [ext_resource type="Script" uid="uid://c0mo3u67brrlv" path="res://scripts/playground/ui/MoveCommandMarker.gd" id="6_move_marker"]
 
 [node name="PlayGround" type="Node2D" unique_id=779650829]
@@ -81,9 +81,20 @@ layout_mode = 2
 [node name="PortraitSprite" type="AnimatedSprite2D" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/PortraitFrame/PortraitCenter" unique_id=1101367955]
 position = Vector2(110, 60)
 
-[node name="PortraitScaleHint" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=408324905]
+[node name="HeroHealthStatus" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn" unique_id=408324905]
 layout_mode = 2
-text = "모션 미러 x2"
+theme_override_constants/separation = 4
+
+[node name="HeroHealthBar" type="ProgressBar" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus" unique_id=1972620152]
+custom_minimum_size = Vector2(220, 16)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="HeroHealthLabel" type="Label" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus" unique_id=159027115]
+layout_mode = 2
+text = "-/-"
 horizontal_alignment = 1
 
 [node name="EquipColumn" type="VBoxContainer" parent="HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1955184883]

@@ -15,6 +15,8 @@ const ItemDataRef = preload("res://scripts/items/ItemData.gd")
 @onready var hero_interface_root: Control = $HeroInterfaceRoot
 @onready var hero_name_label: Label = $HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/NameLabel
 @onready var portrait_sprite: AnimatedSprite2D = $HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/PortraitFrame/PortraitCenter/PortraitSprite
+@onready var hero_health_bar: ProgressBar = $HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus/HeroHealthBar
+@onready var hero_health_label: Label = $HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/PortraitColumn/HeroHealthStatus/HeroHealthLabel
 
 @onready var weapon_slot: ItemSlotUI = $HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/WeaponSlot
 @onready var armor_slot: ItemSlotUI = $HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/EquipColumn/EquipSlots/ArmorSlot
@@ -244,7 +246,7 @@ func _on_hero_stats_changed(hero: Hero, _stats: HeroStats) -> void:
 func _on_hero_health_changed(hero: Hero, _current: float, _max_value: float, _ratio: float) -> void:
 	if hero != _selected_hero:
 		return
-	_refresh_stat_labels()
+	_refresh_hero_health_status()
 
 
 func _on_hero_progression_changed(hero: Hero, _level: int, _current_exp: int, _required_exp: int) -> void:
@@ -558,6 +560,7 @@ func _on_card_mouse_exited(slot: int) -> void:
 
 func _refresh_all_ui() -> void:
 	_refresh_hero_header()
+	_refresh_hero_health_status()
 	_refresh_progression_labels()
 	_refresh_stat_labels()
 	_refresh_equipment_slots()
@@ -587,6 +590,21 @@ func _refresh_progression_labels() -> void:
 	exp_bar.max_value = maxi(1, required_exp)
 	exp_bar.value = clampi(current_exp, 0, required_exp)
 	exp_label.text = "%d/%d" % [current_exp, required_exp]
+
+
+func _refresh_hero_health_status() -> void:
+	if _selected_hero == null or not is_instance_valid(_selected_hero):
+		hero_health_bar.max_value = 1.0
+		hero_health_bar.value = 0.0
+		hero_health_label.text = "-/-"
+		return
+	var current: float = _selected_hero.get_current_health()
+	var max_value: float = _selected_hero.get_max_health()
+	var clamped_max: float = maxf(1.0, max_value)
+	var clamped_current: float = clampf(current, 0.0, clamped_max)
+	hero_health_bar.max_value = clamped_max
+	hero_health_bar.value = clamped_current
+	hero_health_label.text = "%d/%d" % [roundi(clamped_current), roundi(clamped_max)]
 
 
 func _refresh_stat_labels() -> void:
