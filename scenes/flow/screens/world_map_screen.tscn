@@ -1,10 +1,9 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://k48pk6x55s85"]
 
-[ext_resource type="Script" path="res://scripts/flow/screens/WorldMapScreen.gd" id="1_script"]
-[ext_resource type="Script" path="res://scripts/flow/WorldMapView.gd" id="2_map_view"]
+[ext_resource type="Script" uid="uid://cxmmwhfs4gbwl" path="res://scripts/flow/screens/WorldMapScreen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bqdxvri0cvkh3" path="res://scripts/flow/WorldMapView.gd" id="2_map_view"]
 
-[node name="WorldMapScreen" type="Control"]
-visible = false
+[node name="WorldMapScreen" type="Control" unique_id=699607316]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="WorldTopBar" type="PanelContainer" parent="."]
+[node name="WorldTopBar" type="PanelContainer" parent="." unique_id=515589034]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -23,34 +22,34 @@ offset_right = -16.0
 offset_bottom = 62.0
 grow_horizontal = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="WorldTopBar"]
+[node name="MarginContainer" type="MarginContainer" parent="WorldTopBar" unique_id=1405033712]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 6
 
-[node name="HBoxContainer" type="HBoxContainer" parent="WorldTopBar/MarginContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="WorldTopBar/MarginContainer" unique_id=1480540303]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="ChapterLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+[node name="ChapterLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer" unique_id=1018043427]
 layout_mode = 2
 text = "챕터"
 
-[node name="GoldLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+[node name="GoldLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer" unique_id=1078583238]
 layout_mode = 2
 text = "골드"
 
-[node name="DepthLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+[node name="DepthLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer" unique_id=1083618023]
 layout_mode = 2
 text = "깊이"
 
-[node name="WorldStatusLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer"]
+[node name="WorldStatusLabel" type="Label" parent="WorldTopBar/MarginContainer/HBoxContainer" unique_id=1351300531]
 layout_mode = 2
 text = "상태"
 
-[node name="WorldMapView" type="Control" parent="."]
+[node name="WorldMapView" type="Control" parent="." unique_id=1630299753]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,7 +62,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_map_view")
 
-[node name="WorldHintLabel" type="Label" parent="."]
+[node name="WorldHintLabel" type="Label" parent="." unique_id=676675373]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -78,7 +77,7 @@ grow_vertical = 0
 text = "-"
 horizontal_alignment = 1
 
-[node name="ExitRunButton" type="Button" parent="."]
+[node name="ExitRunButton" type="Button" parent="." unique_id=2079130806]
 layout_mode = 0
 offset_left = 1130.0
 offset_top = 16.0

@@ -1,9 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cigqgh2grbb8o"]
 
-[ext_resource type="Script" path="res://scripts/flow/screens/MainMenuScreen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://bxmilwwgm1ka7" path="res://scripts/flow/screens/MainMenuScreen.gd" id="1_script"]
 
-[node name="MainMenuScreen" type="PanelContainer"]
-visible = false
+[node name="MainMenuScreen" type="PanelContainer" unique_id=807711156]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -17,40 +16,40 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=857767992]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1609597545]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=862674408]
 layout_mode = 2
 text = "Heroes Are Made"
 horizontal_alignment = 1
 
-[node name="SubtitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="SubtitleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1159620183]
 layout_mode = 2
 text = "Tower Defense + Roguelike"
 horizontal_alignment = 1
 
-[node name="StartRunButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="StartRunButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1926554122]
 layout_mode = 2
 text = "새 런 시작"
 
-[node name="ContinueRunButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="ContinueRunButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=2034129539]
 layout_mode = 2
 text = "이어하기"
 
-[node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="QuitButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=474093265]
 layout_mode = 2
 text = "게임 종료"
 
-[node name="SaveInfoLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="SaveInfoLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=405421311]
 layout_mode = 2
 text = "-"
 horizontal_alignment = 1

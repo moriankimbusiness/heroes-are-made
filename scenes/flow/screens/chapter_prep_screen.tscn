@@ -1,9 +1,8 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cqwnsgap37a06"]
 
-[ext_resource type="Script" path="res://scripts/flow/screens/ChapterPrepScreen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://wejslgvxim1" path="res://scripts/flow/screens/ChapterPrepScreen.gd" id="1_script"]
 
-[node name="ChapterPrepScreen" type="PanelContainer"]
-visible = false
+[node name="ChapterPrepScreen" type="PanelContainer" unique_id=1876507475]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -17,31 +16,31 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=670959080]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1944214408]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="ChapterPrepLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="ChapterPrepLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=2041187465]
 layout_mode = 2
 text = "챕터 출정 준비"
 horizontal_alignment = 1
 
-[node name="PartyLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="PartyLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=513878769]
 layout_mode = 2
 text = "-"
 horizontal_alignment = 1
 
-[node name="StartExpeditionButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="StartExpeditionButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=651666294]
 layout_mode = 2
 text = "출정 시작"
 
-[node name="BackToMenuButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="BackToMenuButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1661347962]
 layout_mode = 2
 text = "메인으로"
