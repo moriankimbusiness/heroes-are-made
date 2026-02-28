@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Research MD"
+  short_description: "Create docs/tasks research.md files"
+  default_prompt: "Use $task-research-md to create docs/tasks/<task-name>/research.md from this request."

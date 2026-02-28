@@ -14,6 +14,9 @@
 - [x] `AGENTS.md` 통합 정리 실행: 규칙군 단일 정본(R1~R7)으로 재구성, 길이 `238 -> 145` 축약
 - [x] 운영 참고 분리: `docs/reference/godot_cli_validation.md` 생성 후 `AGENTS.md`에서 링크 참조
 - [x] 실행 산출물 기록: `docs/tasks/agents-md-governance-review-2026-02-28/result.md`에 인벤토리/회귀/체크리스트 결과 정리
+- [x] 프로젝트 스킬 추가: `skills/task-research-md`, `skills/task-plan-md` 생성 (`docs/tasks/<task>/research.md`, `plan.md` 워크플로우)
+- [x] `task-research-md` 강화: 리서치 깊이/세부사항/근거 검증 기준(Research Depth Standard) 규칙 추가
+- [x] `task-plan-md` 강화: 계획 깊이/세부 태스크/검증 체크포인트 기준(Planning Depth Standard) 규칙 추가
 
 ## 다음 작업
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계

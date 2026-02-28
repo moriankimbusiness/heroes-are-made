@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Plan MD"
+  short_description: "Create docs/tasks plan.md files"
+  default_prompt: "Use $task-plan-md to create docs/tasks/<task-name>/plan.md from this request."
