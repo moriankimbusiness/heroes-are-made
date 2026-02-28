@@ -244,6 +244,8 @@
 - 카드 리롤은 무료 5회 후 유료로 전환한다.
 - 유료 리롤 비용은 `10, 20, 30...` 선형 증가하고, 전투(레벨) 재진입 시 초기화한다.
 - 카드 구매/리롤은 버튼 이벤트 기반 처리로 유지한다(폴링 루프 추가 없음).
+- 전투 골드/리롤 도메인 상태(`현재 골드`, `무료 리롤 잔여`, `유료 리롤 단계`)는 `BattleEconomy`가 소유하고 `ShopPanel`은 입력/표시만 담당한다.
+- 전투 종료 요약의 `gold_end` 수집은 UI 깊은 경로 의존 대신 `PlayGround.get_current_gold()` API를 경유한다.
 
 ---
 
@@ -256,8 +258,10 @@
 - 공통 타일셋은 `Grass + Plant + Props + Shadow + Shadow Plant` 아틀라스 소스를 함께 제공한다.
 - 전투 맵 데이터의 단일 소스는 `BattleMap` 씬으로 고정한다(`Ground/Blocked/Deco/RangeOverlay` 포함).
 - `PlayGround`는 타일 데이터를 소유하지 않고, `BattleMap` API를 통해 경로/좌표/오버레이를 사용한다.
+- `PlayGround`의 히어로 스폰 셀 탐색 책임은 `HeroSpawnResolver` 도메인 객체로 분리한다.
 - `level_base`는 `BattleMapSlot`으로 맵 변형 씬을 주입받는 구조를 사용한다.
 - `BattleScreenHost`는 전투 진입 시 맵 변형 배열에서 1개를 선택해 `BattleMapSlot`에 인스턴스한다(랜덤 인카운트 확장 준비).
+- `BattleScreenHost`는 전투 시작 시 `PlayGround`를 `visible=true`로 보정해 씬 인스턴스 override로 인한 히어로 비표시 회귀를 방지한다.
 - 맵 변형 기본 아트 규칙:
 - `battle_map_01`: 중앙 3타일 폭 stone lane + 상/하 식생/바위/그림자 분포.
 - `battle_map_02`: 완만한 굴곡 stone lane + 맵01과 다른 식생/바위 분포.
@@ -269,6 +273,7 @@
 - 이동 명령이 활성화된 동안 자동공격은 보류하고, 이동 종료 시 자동공격 로직으로 복귀한다.
 - 우클릭 목표는 클릭한 타일의 중심 좌표로 스냅한다.
 - 히어로 이동 경로는 타일 A*(`AStarGrid2D`)로 계산하고, 실제 이동은 경로점을 따라 연속 이동한다.
+- 히어로 이동 경로는 `BattleMap` 타일 데이터 기반 A*를 단일 경로 소스로 사용하며, 별도 `NavigationRegion2D` 의존은 두지 않는다.
 - 바닥 레이어는 오브젝트 하단 렌더를 위해 `GroundTiles.z_index=-100`, `BlockedTiles.z_index=-90`으로 고정한다.
 - 이동 적용 순서는 아래를 따른다.
 - 1) 우클릭 월드 좌표를 타일 좌표로 변환

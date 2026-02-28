@@ -11,6 +11,7 @@ signal enemy_deselected()
 @onready var hero_info_panel: PanelContainer = $HeroInterfaceRoot/InterfacePanel
 @onready var shop_panel: VBoxContainer = $HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn
 @onready var enemy_status_panel: Control = $EnemyStatusRoot
+@onready var _battle_economy: Node = $BattleEconomy
 
 var _playground: Node2D = null
 var _selected_hero: Hero = null
@@ -29,6 +30,7 @@ func _ready() -> void:
 	_connect_scene_tree_for_enemies()
 	_connect_shop_preview_signals()
 	_connect_range_stat_hover_signal()
+	_bind_shop_economy()
 
 
 func _connect_shop_preview_signals() -> void:
@@ -66,6 +68,24 @@ func _on_range_stat_hover_changed(hovered: bool) -> void:
 func set_starting_gold(value: int) -> void:
 	if shop_panel != null and shop_panel.has_method("set_gold"):
 		shop_panel.call("set_gold", value)
+
+
+func get_current_gold() -> int:
+	if _battle_economy != null and _battle_economy.has_method("get_gold"):
+		return int(_battle_economy.call("get_gold"))
+	if shop_panel != null and shop_panel.has_method("get_gold"):
+		return int(shop_panel.call("get_gold"))
+	return -1
+
+
+func _bind_shop_economy() -> void:
+	if _battle_economy == null:
+		return
+	if shop_panel == null:
+		return
+	if not shop_panel.has_method("bind_economy"):
+		return
+	shop_panel.call("bind_economy", _battle_economy)
 
 
 # -- Entity registration ------------------------------------------------------

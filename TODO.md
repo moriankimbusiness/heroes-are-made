@@ -20,6 +20,13 @@
 - [x] 전투 리소스 소유권 교정: `EnemySpawnController` 적 스폰 부모를 레벨 루트로 전환해 전투 종료 시 적 노드가 함께 해제되도록 보장
 - [x] 전투 UI 등록 경로 보강: `HeroHUD` 적 등록 훅을 `SceneTree.node_added` 기반으로 전환해 부모 구조 변경과 무관하게 동작하도록 수정
 - [x] 전투 종료 경로 정합성 반영: `BattleScreenHost`의 미사용 `game_failed` 연결 제거 및 `GAME_PLAN.md` 종료 판정 근거 문구 동기화
+- [x] 전투 경제 도메인 분리 1차: `BattleEconomy` 서비스 도입, `ShopPanel`의 골드/리롤 상태 소유 제거
+- [x] 요약 수집 결합 완화: `BattleSummaryCollector.collect_gold_end`를 UI 깊은 경로 조회에서 `PlayGround.get_current_gold` API 호출로 전환
+- [x] `PlayGround` 책임 분리 1차: 히어로 스폰 셀 탐색 로직을 `HeroSpawnResolver`로 이관
+- [x] 경로 참조 내성 보강: `BattleScreenHost`/`BattleSummaryCollector`에 `Playground`/`PlayGround` 후보 경로 fallback 추가
+- [x] 문서 동기화: `GAME_PLAN.md`, `docs/tasks/playground-role-2026-02-28/plan.md`에 리팩토링 반영 내용 업데이트
+- [x] 미사용 노드 정리: `playground.tscn`의 `HeroNavRegion(NavigationRegion2D)` 및 `playground_navpolygon` ext_resource 제거
+- [x] 전투 표시 회귀 수정: `level_01.tscn`의 `PlayGround.visible=false` override 제거 + `BattleScreenHost` 전투 시작 시 `PlayGround.visible=true` 강제
 
 ## 다음 작업
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계
@@ -30,3 +37,7 @@
 - [x] 드로우 데이터는 셀 배열 전달 기반이며 프레임 루프에서 리소스 로드/노드 탐색 반복 없음
 - [x] 선 렌더는 1px/무-AA 고정, 좌표 스냅으로 서브픽셀 블러를 방지
 - [x] 중심 타일 제외는 오버레이 셀 빌드 단계 조건 분기로 처리(추가 프레임 루프/노드 탐색 없음)
+- [x] 전투 경제 상태 갱신은 `BattleEconomy` 시그널(`gold_changed`, `reroll_state_changed`) 기반으로 처리(신규 폴링 루프 없음)
+- [x] `BattleSummaryCollector` 골드 수집은 단일 API 호출(`PlayGround.get_current_gold`)로 단순화되어 UI 트리 탐색 비용/결합을 축소
+- [x] `HeroSpawnResolver` 분리 후에도 스폰 셀 탐색은 소환 시점 1회 계산만 수행(상시 프레임 연산 추가 없음)
+- [x] `HeroNavRegion` 제거는 현재 A*(`BattleMap`) 이동 경로와 독립적이라 런타임 경로 계산 루프/비용에 영향 없음

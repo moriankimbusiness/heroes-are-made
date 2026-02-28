@@ -198,9 +198,9 @@ radius = 16.0
 script = ExtResource("1_md0e3")
 auto_free_on_death_end = true
 death_fade_duration = 1.0
-base_max_health = 10.0
+base_max_health = 300.0
 move_speed = 20.0
-attack_damage = 3.0
+attack_damage = 100.0
 attacks_per_second = 0.5
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1489677892]
@@ -259,11 +259,11 @@ damage_font_size = 15
 show_debug_preview_in_editor = true
 debug_preview_amount = 423.0
 
-[node name="EnemyAnimator" type="Node" parent="."]
+[node name="EnemyAnimator" type="Node" parent="." unique_id=1008964046]
 script = ExtResource("6_animator")
 
-[node name="EnemyTargetSelector" type="Node" parent="."]
+[node name="EnemyTargetSelector" type="Node" parent="." unique_id=510516212]
 script = ExtResource("7_target_selector")
 
-[node name="EnemyAttackController" type="Node" parent="."]
+[node name="EnemyAttackController" type="Node" parent="." unique_id=342196181]
 script = ExtResource("8_atk_ctrl")

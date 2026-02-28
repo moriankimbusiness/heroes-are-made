@@ -1,6 +1,8 @@
 class_name BattleSummaryCollector
 extends RefCounted
 
+const PLAYGROUND_NODE_CANDIDATE_PATHS: Array[NodePath] = [NodePath("Playground"), NodePath("PlayGround")]
+
 var _scene_tree: SceneTree
 var _battle_instance: Node
 var _battle_payload: Dictionary
@@ -103,12 +105,12 @@ func collect_party_snapshots() -> Array[Dictionary]:
 func collect_gold_end() -> int:
 	if _battle_instance == null or not is_instance_valid(_battle_instance):
 		return -1
-	var shop_panel: Node = _battle_instance.get_node_or_null("PlayGround/HeroHUD/HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/ShopColumn")
-	if shop_panel == null:
+	var playground: Node = _find_playground_node()
+	if playground == null:
 		return -1
-	if not shop_panel.has_method("get_gold"):
+	if not playground.has_method("get_current_gold"):
 		return -1
-	return int(shop_panel.call("get_gold"))
+	return int(playground.call("get_current_gold"))
 
 
 func collect_core_state() -> Dictionary:
@@ -127,3 +129,13 @@ func collect_core_state() -> Dictionary:
 		"max_health": max_health,
 		"current_health": current_health
 	}
+
+
+func _find_playground_node() -> Node:
+	if _battle_instance == null or not is_instance_valid(_battle_instance):
+		return null
+	for path: NodePath in PLAYGROUND_NODE_CANDIDATE_PATHS:
+		var node: Node = _battle_instance.get_node_or_null(path)
+		if node != null:
+			return node
+	return null

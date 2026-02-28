@@ -7,6 +7,8 @@ const DEFAULT_BATTLE_MAP_VARIANTS: Array[PackedScene] = [
 	preload("res://scenes/maps/variants/battle_map_01.tscn"),
 	preload("res://scenes/maps/variants/battle_map_02.tscn")
 ]
+const PLAYGROUND_NODE_CANDIDATE_PATHS: Array[NodePath] = [NodePath("Playground"), NodePath("PlayGround")]
+const HERO_HUD_CHILD_PATH: NodePath = NodePath("HeroHUD")
 
 @export_group("전투 맵 변형")
 ## 전투 진입 시 선택할 맵 변형 목록입니다.
@@ -60,7 +62,9 @@ func _configure_battle_scene(battle_scene: Node, payload: Dictionary) -> void:
 	var current_gold: int = int(payload.get("gold", 0))
 	var party_snapshots: Array = payload.get("party_snapshots", [])
 	_apply_map_variant(battle_scene, payload)
-	var playground: Node = battle_scene.get_node_or_null("PlayGround")
+	var playground: Node = _find_playground_node(battle_scene)
+	if playground is CanvasItem:
+		(playground as CanvasItem).visible = true
 	if playground != null and playground.has_method("summon_hero"):
 		if party_snapshots.is_empty():
 			for _i in range(maxi(1, party_count)):
@@ -75,7 +79,7 @@ func _configure_battle_scene(battle_scene: Node, payload: Dictionary) -> void:
 						hero.call_deferred("apply_run_state", snapshot_var)
 					else:
 						hero.call("apply_run_state", snapshot_var)
-	var hero_ui: CanvasLayer = battle_scene.get_node_or_null("PlayGround/HeroHUD") as CanvasLayer
+	var hero_ui: CanvasLayer = _find_hero_ui_layer(battle_scene)
 	if hero_ui != null and hero_ui.has_method("set_starting_gold"):
 		hero_ui.call("set_starting_gold", current_gold)
 	_apply_core_state(payload)
@@ -120,7 +124,7 @@ func _apply_map_variant(battle_scene: Node, payload: Dictionary) -> void:
 	battle_map_instance.name = "BattleMap"
 	battle_map_slot.add_child(battle_map_instance)
 
-	var playground: Node = battle_scene.get_node_or_null("PlayGround")
+	var playground: Node = _find_playground_node(battle_scene)
 	if playground != null and playground.has_method("set_battle_map"):
 		playground.call("set_battle_map", battle_map_instance)
 
@@ -140,6 +144,23 @@ func _pick_variant_index(seed_value: int, node_id: int, variant_count: int) -> i
 	var mixed_seed: int = seed_value * 1103515245 + node_id * 12345 + variant_count * 265443576
 	rng.seed = int(absi(mixed_seed))
 	return int(rng.randi() % variant_count)
+
+
+func _find_playground_node(battle_scene: Node) -> Node:
+	if battle_scene == null:
+		return null
+	for path: NodePath in PLAYGROUND_NODE_CANDIDATE_PATHS:
+		var node: Node = battle_scene.get_node_or_null(path)
+		if node != null:
+			return node
+	return null
+
+
+func _find_hero_ui_layer(battle_scene: Node) -> CanvasLayer:
+	var playground: Node = _find_playground_node(battle_scene)
+	if playground == null:
+		return null
+	return playground.get_node_or_null(HERO_HUD_CHILD_PATH) as CanvasLayer
 
 
 func _on_rounds_cleared() -> void:

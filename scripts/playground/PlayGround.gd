@@ -1,5 +1,7 @@
 extends Node2D
 
+const HeroSpawnResolverRef = preload("res://scripts/playground/domain/HeroSpawnResolver.gd")
+
 @export_group("플레이그라운드 기본")
 ## 전투에서 사용할 히어로 씬 리소스입니다.
 @export var hero_scene: PackedScene
@@ -18,6 +20,7 @@ extends Node2D
 @onready var _battle_map: BattleMap = get_node_or_null(battle_map_path) as BattleMap
 
 var _range_overlay_active_hero: Hero = null
+var _spawn_resolver = HeroSpawnResolverRef.new()
 
 
 func _ready() -> void:
@@ -86,6 +89,15 @@ func show_move_command_marker(world_pos: Vector2) -> void:
 	marker.call("show_marker", world_pos)
 
 
+func get_current_gold() -> int:
+	var hero_hud: Node = get_node_or_null("HeroHUD")
+	if hero_hud == null:
+		return -1
+	if not hero_hud.has_method("get_current_gold"):
+		return -1
+	return int(hero_hud.call("get_current_gold"))
+
+
 func set_hero_attack_range_overlay(hero: Hero, visible: bool) -> void:
 	if _battle_map == null:
 		return
@@ -110,6 +122,7 @@ func summon_hero() -> Hero:
 		push_warning("PlayGround: battle_map is not set")
 		return null
 
+	var spawn_cell: Vector2i = _find_spawn_cell()
 	var hero: Hero = hero_scene.instantiate()
 	hero.playground = self
 	hero_container.add_child(hero)
@@ -117,7 +130,7 @@ func summon_hero() -> Hero:
 	var hero_count: int = hero_container.get_child_count()
 	hero.hero_display_name = "용사 %d" % hero_count
 	_apply_spawn_class(hero, hero_count)
-	hero.global_position = cell_to_world_center(_find_spawn_cell(hero))
+	hero.global_position = cell_to_world_center(spawn_cell)
 	return hero
 
 
@@ -131,42 +144,23 @@ func _apply_spawn_class(hero: Hero, hero_count: int) -> void:
 	hero.hero_class = clampi(class_id, Hero.HeroClass.WARRIOR, Hero.HeroClass.ASSASSIN)
 
 
-func _find_spawn_cell(_hero: Hero) -> Vector2i:
+func _find_spawn_cell() -> Vector2i:
 	if _battle_map == null:
 		return Vector2i.ZERO
 
 	var center_cell: Vector2i = world_to_cell(get_play_area_center_global())
-	if is_walkable_cell(center_cell) and not _is_cell_occupied_by_hero(center_cell):
+	if _spawn_resolver == null:
 		return center_cell
-
-	for radius: int in range(1, 16):
-		for y: int in range(-radius, radius + 1):
-			for x: int in range(-radius, radius + 1):
-				if abs(x) != radius and abs(y) != radius:
-					continue
-				var candidate: Vector2i = center_cell + Vector2i(x, y)
-				if not _battle_map.is_cell_in_bounds(candidate):
-					continue
-				if not is_walkable_cell(candidate):
-					continue
-				if _is_cell_occupied_by_hero(candidate):
-					continue
-				return candidate
-
-	var walkable_rect: Rect2i = _battle_map.get_walkable_rect()
-	for y: int in range(walkable_rect.position.y, walkable_rect.position.y + walkable_rect.size.y):
-		for x: int in range(walkable_rect.position.x, walkable_rect.position.x + walkable_rect.size.x):
-			var candidate: Vector2i = Vector2i(x, y)
-			if not is_walkable_cell(candidate):
-				continue
-			if _is_cell_occupied_by_hero(candidate):
-				continue
-			return candidate
+	if not _spawn_resolver.has_method("find_spawn_cell"):
+		return center_cell
+	var resolved_cell_var: Variant = _spawn_resolver.find_spawn_cell(_battle_map, center_cell, Callable(self, "_is_cell_occupied_by_hero"))
+	if resolved_cell_var is Vector2i:
+		return resolved_cell_var as Vector2i
 	return center_cell
 
 
 func _is_cell_occupied_by_hero(cell: Vector2i) -> bool:
-	for node: Node in get_tree().get_nodes_in_group(&"hero"):
+	for node: Node in hero_container.get_children():
 		if not is_instance_valid(node):
 			continue
 		var hero: Hero = node as Hero

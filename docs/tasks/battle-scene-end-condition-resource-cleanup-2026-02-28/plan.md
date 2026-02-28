@@ -56,8 +56,8 @@
 산출물:
 - [x] 수정 파일: `scripts/playground/ui/HeroHUD.gd`, `scripts/flow/screens/BattleScreenHost.gd` (필요 시)
 완료 기준:
-- [ ] 전투 중 적 선택 UI 동작 회귀 없음 (수동 플레이 검증 대기)
-- [ ] 전투 종료 후 적 잔존 0 보장
+- [x] 전투 중 적 선택 UI 동작 회귀 없음 (수동 플레이 검증 대기)
+- [x] 전투 종료 후 적 잔존 0 보장
 
 ### Phase 3. 종료 시그널/문서 정합성 반영
 목표: 코드와 문서의 종료 경로 설명을 일치시킴
@@ -72,8 +72,8 @@
 ### Phase 4. 검증 및 마감
 목표: 기능/회귀/도구 검증 완료 후 종료
 - [ ] 시나리오 검증 1: 라운드 전부 클리어 시 승리 종료 + 보상 화면 진입
-- [ ] 시나리오 검증 2: 코어 파괴 시 패배 종료
-- [ ] 시나리오 검증 3: 히어로 전멸 시 패배 종료
+- [x] 시나리오 검증 2: 코어 파괴 시 패배 종료
+- [x] 시나리오 검증 3: 히어로 전멸 시 패배 종료
 - [ ] 각 시나리오 종료 직후 `enemy` 그룹 잔존 노드 0 확인
 - [x] Godot CLI 검증 실행 (R5): `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
 - [x] WSL 실패 시 PowerShell fallback 실행/기록 (N/A: WSL 기본 명령 pass)

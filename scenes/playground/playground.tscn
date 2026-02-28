@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://mb6qpk3jg4p" path="res://scripts/playground/PlayGround.gd" id="1_playground"]
 [ext_resource type="PackedScene" uid="uid://6d25jelm06ao" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
-[ext_resource type="NavigationPolygon" uid="uid://c4vx6cdbsqt3q" path="res://assets/navigation/playground_navpolygon.tres" id="5_nav_polygon"]
 [ext_resource type="Script" uid="uid://c0mo3u67brrlv" path="res://scripts/playground/ui/MoveCommandMarker.gd" id="6_move_marker"]
 [ext_resource type="PackedScene" uid="uid://bhq7xf3k2ypvn" path="res://scenes/playground/ui/hero_hud.tscn" id="7_hero_hud"]
 
@@ -11,10 +10,6 @@ script = ExtResource("1_playground")
 hero_scene = ExtResource("3_hero")
 core_path = NodePath("../CoreRoot")
 move_command_marker_path = NodePath("MoveCommandMarker")
-battle_map_path = NodePath("../BattleMapSlot/BattleMap")
-
-[node name="HeroNavRegion" type="NavigationRegion2D" parent="." unique_id=582702591]
-navigation_polygon = ExtResource("5_nav_polygon")
 
 [node name="HeroContainer" type="Node2D" parent="." unique_id=161637991]
 y_sort_enabled = true
@@ -26,4 +21,4 @@ script = ExtResource("6_move_marker")
 ring_radius = Vector2(5, 2)
 ring_line_width = 0.5
 
-[node name="HeroHUD" parent="." instance=ExtResource("7_hero_hud")]
+[node name="HeroHUD" parent="." unique_id=1877073440 instance=ExtResource("7_hero_hud")]

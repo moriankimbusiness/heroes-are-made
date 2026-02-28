@@ -6,9 +6,13 @@
 [ext_resource type="Script" uid="uid://7qo3udqf162b" path="res://scripts/playground/ui/ShopPanel.gd" id="4_shop_panel"]
 [ext_resource type="Script" uid="uid://b8gnrdcee6q0y" path="res://scripts/playground/ui/EnemyStatusPanel.gd" id="5_enemy_status_panel"]
 [ext_resource type="PackedScene" path="res://scenes/playground/ui/item_tooltip.tscn" id="6_item_tooltip"]
+[ext_resource type="Script" path="res://scripts/playground/domain/BattleEconomy.gd" id="7_battle_economy"]
 
 [node name="HeroHUD" type="CanvasLayer" unique_id=814339716]
 script = ExtResource("1_hero_hud")
+
+[node name="BattleEconomy" type="Node" parent="."]
+script = ExtResource("7_battle_economy")
 
 [node name="HeroInterfaceRoot" type="Control" parent="." unique_id=2020349439]
 layout_mode = 3

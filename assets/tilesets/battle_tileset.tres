@@ -1,11 +1,11 @@
 [gd_resource type="TileSet" format=3 uid="uid://cyaw780441nb"]
 
-[ext_resource type="Texture2D" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Tileset Grass.png" id="1_grass"]
-[ext_resource type="Texture2D" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Tileset Stone Ground.png" id="2_stone"]
-[ext_resource type="Texture2D" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Plant.png" id="3_plant"]
-[ext_resource type="Texture2D" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Props.png" id="4_props"]
-[ext_resource type="Texture2D" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Shadow.png" id="5_shadow"]
-[ext_resource type="Texture2D" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Shadow Plant.png" id="6_shadow_plant"]
+[ext_resource type="Texture2D" uid="uid://jucwfo16j3o0" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Tileset Grass.png" id="1_grass"]
+[ext_resource type="Texture2D" uid="uid://cqe3nj5lk1cs1" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Tileset Stone Ground.png" id="2_stone"]
+[ext_resource type="Texture2D" uid="uid://dcb883vso258l" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Plant.png" id="3_plant"]
+[ext_resource type="Texture2D" uid="uid://d3e4jurosomaq" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Props.png" id="4_props"]
+[ext_resource type="Texture2D" uid="uid://bwa8yrvwpwtu3" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Shadow.png" id="5_shadow"]
+[ext_resource type="Texture2D" uid="uid://coluasb3pkw0h" path="res://assets/tilesets/Pixel Art Top Down - Basic v1.2.3/Texture/TX Shadow Plant.png" id="6_shadow_plant"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_grass"]
 texture = ExtResource("1_grass")

@@ -13,10 +13,6 @@ signal card_hover_ended()
 @export_group("ShopPanel 상점/리롤 설정")
 ## 상점 카드 호버 시 확대 배율입니다.
 @export_range(1.0, 2.0, 0.05) var card_hover_scale: float = 1.3
-## 초기 골드 입력이 없을 때 사용할 기본값입니다.
-@export_range(0, 99999, 1) var fallback_starting_gold: int = 100
-## 무료 리롤 가능 횟수입니다.
-@export_range(0, 20, 1) var free_reroll_uses: int = 5
 
 @onready var gold_label: Label = $GoldLabel
 @onready var weapon_card: Button = $CardsRow/WeaponCard
@@ -28,13 +24,10 @@ signal card_hover_ended()
 
 var _bound_hero: Hero = null
 var _draw_rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var _economy: Node = null
 
 var _card_buttons: Dictionary = {}
 var _shop_cards: Dictionary = {}
-
-var _current_gold: int = 0
-var _free_reroll_remaining: int = 0
-var _paid_reroll_count: int = 0
 
 
 func _ready() -> void:
@@ -46,8 +39,7 @@ func _ready() -> void:
 	}
 	_connect_card_signals()
 	reroll_button.pressed.connect(_on_reroll_button_pressed)
-	_current_gold = fallback_starting_gold
-	_reset_shop_state()
+	_generate_shop_cards()
 	_refresh_all()
 
 
@@ -61,15 +53,35 @@ func unbind_hero() -> void:
 	_refresh_all()
 
 
-func set_gold(amount: int) -> void:
-	_current_gold = maxi(0, amount)
-	_reset_shop_state()
+func bind_economy(economy: Node) -> void:
+	_disconnect_economy_signals()
+	_economy = economy
+	if _economy != null:
+		var on_gold_changed: Callable = Callable(self, "_on_economy_gold_changed")
+		if _economy.has_signal("gold_changed") and not _economy.is_connected("gold_changed", on_gold_changed):
+			_economy.connect("gold_changed", on_gold_changed)
+		var on_reroll_state_changed: Callable = Callable(self, "_on_economy_reroll_state_changed")
+		if _economy.has_signal("reroll_state_changed") and not _economy.is_connected("reroll_state_changed", on_reroll_state_changed):
+			_economy.connect("reroll_state_changed", on_reroll_state_changed)
+	_generate_shop_cards()
 	_refresh_all()
-	gold_changed.emit(_current_gold)
+
+
+func set_gold(amount: int) -> void:
+	if _economy != null and _economy.has_method("set_starting_gold"):
+		_economy.call("set_starting_gold", amount)
+	else:
+		gold_changed.emit(maxi(0, amount))
+	_generate_shop_cards()
+	_refresh_all()
 
 
 func get_gold() -> int:
-	return _current_gold
+	if _economy == null:
+		return 0
+	if not _economy.has_method("get_gold"):
+		return 0
+	return int(_economy.call("get_gold"))
 
 
 func _connect_card_signals() -> void:
@@ -80,10 +92,28 @@ func _connect_card_signals() -> void:
 		button.mouse_exited.connect(_on_card_mouse_exited.bind(slot))
 
 
-func _reset_shop_state() -> void:
-	_free_reroll_remaining = free_reroll_uses
-	_paid_reroll_count = 0
-	_generate_shop_cards()
+func _disconnect_economy_signals() -> void:
+	if _economy == null:
+		return
+	var on_gold_changed: Callable = Callable(self, "_on_economy_gold_changed")
+	if _economy.has_signal("gold_changed") and _economy.is_connected("gold_changed", on_gold_changed):
+		_economy.disconnect("gold_changed", on_gold_changed)
+	var on_reroll_state_changed: Callable = Callable(self, "_on_economy_reroll_state_changed")
+	if _economy.has_signal("reroll_state_changed") and _economy.is_connected("reroll_state_changed", on_reroll_state_changed):
+		_economy.disconnect("reroll_state_changed", on_reroll_state_changed)
+
+
+func _on_economy_gold_changed(new_amount: int) -> void:
+	gold_changed.emit(new_amount)
+	_refresh_all()
+
+
+func _on_economy_reroll_state_changed(_free_remaining: int, _free_total: int, _current_cost: int) -> void:
+	_refresh_all()
+
+
+func _exit_tree() -> void:
+	_disconnect_economy_signals()
 
 
 func _generate_shop_cards() -> void:
@@ -151,40 +181,46 @@ func _on_shop_card_pressed(slot: int) -> void:
 	if item == null:
 		return
 	var cost: int = int(card.get("cost", 0))
-	if _current_gold < cost:
+	if _economy == null:
+		return
+	if not _economy.has_method("can_afford"):
+		return
+	if not bool(_economy.call("can_afford", cost)):
 		_flash_gold_insufficient()
 		return
 	if not _bound_hero.can_equip_item(slot, item):
 		return
 	if not _bound_hero.equip_item(slot, item):
 		return
-	_current_gold -= cost
+	if not _economy.has_method("try_spend_gold"):
+		return
+	if not bool(_economy.call("try_spend_gold", cost)):
+		_flash_gold_insufficient()
+		return
 	card["purchased"] = true
 	_shop_cards[slot] = card
 	item_purchased.emit(_bound_hero, slot, item, cost)
-	gold_changed.emit(_current_gold)
 	_refresh_all()
 
 
 func _on_reroll_button_pressed() -> void:
-	var reroll_cost: int = _get_current_reroll_cost()
-	if reroll_cost > 0:
-		if _current_gold < reroll_cost:
-			_flash_gold_insufficient()
-			return
-		_current_gold -= reroll_cost
-		_paid_reroll_count += 1
-	else:
-		_free_reroll_remaining = maxi(0, _free_reroll_remaining - 1)
+	if _economy == null:
+		return
+	if not _economy.has_method("try_consume_reroll"):
+		return
+	if not bool(_economy.call("try_consume_reroll")):
+		_flash_gold_insufficient()
+		return
 	_generate_shop_cards()
-	gold_changed.emit(_current_gold)
 	_refresh_all()
 
 
 func _get_current_reroll_cost() -> int:
-	if _free_reroll_remaining > 0:
+	if _economy == null:
 		return 0
-	return 10 * (_paid_reroll_count + 1)
+	if not _economy.has_method("get_current_reroll_cost"):
+		return 0
+	return int(_economy.call("get_current_reroll_cost"))
 
 
 func _on_card_mouse_entered(slot: int) -> void:
@@ -214,14 +250,23 @@ func _refresh_all() -> void:
 
 
 func _refresh_gold_and_reroll_labels() -> void:
-	gold_label.text = "골드: %d" % _current_gold
+	var current_gold: int = get_gold()
+	gold_label.text = "골드: %d" % current_gold
 	gold_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
-	reroll_count_label.text = "무료 리롤: %d/%d" % [_free_reroll_remaining, free_reroll_uses]
+	var free_remaining: int = 0
+	var free_total: int = 0
+	if _economy != null:
+		if _economy.has_method("get_free_reroll_remaining"):
+			free_remaining = int(_economy.call("get_free_reroll_remaining"))
+		if _economy.has_method("get_free_reroll_uses"):
+			free_total = int(_economy.call("get_free_reroll_uses"))
+	reroll_count_label.text = "무료 리롤: %d/%d" % [free_remaining, free_total]
 	var reroll_cost: int = _get_current_reroll_cost()
 	if reroll_cost <= 0:
 		reroll_cost_label.text = "현재 비용: 무료"
 	else:
 		reroll_cost_label.text = "현재 비용: %dG" % reroll_cost
+	reroll_button.disabled = _economy == null
 
 
 func _refresh_card_buttons() -> void:
@@ -249,7 +294,7 @@ func _refresh_card_buttons() -> void:
 			cost
 		]
 		var hero_dead: bool = _bound_hero != null and is_instance_valid(_bound_hero) and _bound_hero.has_method("is_dead") and bool(_bound_hero.call("is_dead"))
-		button.disabled = purchased or _bound_hero == null or not is_instance_valid(_bound_hero) or hero_dead
+		button.disabled = purchased or _economy == null or _bound_hero == null or not is_instance_valid(_bound_hero) or hero_dead
 
 
 func _flash_gold_insufficient() -> void:
