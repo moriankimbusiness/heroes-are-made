@@ -1,4 +1,4 @@
-# GAME PLAN (업데이트: 2026-02-28 v44)
+# GAME PLAN (업데이트: 2026-02-28 v45)
 
 ---
 
@@ -31,12 +31,14 @@
 
 - 챕터 시작 시 해당 챕터 전용 런 상태를 생성한다.
 - 전투 패배 시 해당 챕터 런은 즉시 종료한다.
+- 코어 생존 승리라도 전투 종료 시 모든 히어로가 전투 불능이면 런을 즉시 종료한다.
 - 실패한 노드 재도전은 허용하지 않는다.
 - 메타 진행(영구 성장/영구 해금)은 이번 범위에서 제외한다.
 
 ## 상태 전이 (전투 외 중심)
 
 - `메인화면` -> `챕터 시작 준비 화면` -> `게임월드(경로 선택)` -> `노드 전용 화면` -> `노드 결과 요약` -> `게임월드(경로 선택)` 순환.
+- 전투 노드 승리 시 `전투 보상 선택` -> `노드 결과 요약` -> `게임월드(경로 선택)` 순서로 복귀한다.
 - `챕터 최종보스 클리어` -> `챕터 결과 화면` -> `다음 챕터 시작 준비` 또는 `런 성공 결과 화면`.
 - `전투 패배` -> `런 실패 결과 화면` -> `메인화면` 또는 `새 런 시작`.
 
@@ -93,6 +95,7 @@
 ## 노드 전용 화면 규칙
 
 - 전투 계열 노드(일반/중간보스/최종보스)는 전투 플레이화면으로 전환한다.
+- 전투 승리 후에는 전용 보상 선택 화면에서 3개 중 1개를 확정한다.
 - 아이템 획득 노드는 보상 `3개 제시, 1개 선택`을 기본 규칙으로 사용한다.
 - 마을 노드는 `회복`, `강화`, `상점`, `정비완료` UI 흐름으로 처리한다.
 - 이벤트 노드는 선택지 처리 후 결과를 확정한다.
@@ -111,7 +114,10 @@
 
 ## 월드/런 데이터 모델 계약
 
-- `RunState`: `run_id`, `chapter_index`, `gold`, `party_state`, `inventory_state`, `relics`, `seed`
+- `RunState`: `run_id`, `chapter_index`, `gold`, `party_state`, `core_state`, `inventory_state`, `relics`, `seed`
+- `PartyState`: `selected_count`, `max_count`, `heroes[]`
+- `HeroRunSnapshot`: `hero_display_name`, `class_id`, `level`, `current_exp`, `required_exp`, `max_health`, `current_health`, `is_dead`
+- `CoreState`: `max_health`, `current_health`
 - `ChapterState`: `chapter_id`, `world_graph`, `current_node_id`, `visited_nodes`, `is_chapter_cleared`
 - `WorldNodeData`: `node_id`, `depth`, `node_type`, `position`, `reward_profile`, `flags`
 - `WorldEdgeData`: `from_node_id`, `to_node_id`
@@ -132,19 +138,21 @@
 ## 구현 반영 (v18, 진행 플로우 2차)
 
 - 실행 진입 씬은 `scenes/flow/game_flow.tscn`이며, 루트는 화면 오케스트레이션만 담당한다.
-- 화면 씬을 7개로 분리했다.
-- `main_menu_screen`, `chapter_prep_screen`, `world_map_screen`, `node_resolve_screen`, `node_result_screen`, `run_result_screen`, `battle_screen_host`.
+- 화면 씬을 8개로 분리했다.
+- `main_menu_screen`, `chapter_prep_screen`, `world_map_screen`, `node_resolve_screen`, `battle_reward_screen`, `node_result_screen`, `run_result_screen`, `battle_screen_host`.
 - `scripts/flow/GameFlowController.gd`는 화면 전환/런 상태/저장 라우팅만 담당한다.
 - `NodeResolveScreen.gd`가 아이템/마을/이벤트 노드 처리 로직을 담당하고 `node_resolved` 결과를 컨트롤러에 전달한다.
-- 상태 전이는 `메인화면` -> `챕터 시작 준비` -> `게임월드(경로 선택)` -> `노드 전용 화면` -> `노드 결과 요약` -> `게임월드`로 유지한다.
+- 전투 상태(`영웅 체력/레벨/사망`, `코어 HP`, `전투 골드`)는 `battle_finished.summary`를 통해 런 상태로 반영한다.
+- 상태 전이는 `메인화면` -> `챕터 시작 준비` -> `게임월드(경로 선택)` -> `노드 전용 화면` -> (`전투 노드`: 보상 선택) -> `노드 결과 요약` -> `게임월드`로 유지한다.
 - 월드맵 생성은 `scripts/flow/WorldMapGenerator.gd`에서 처리한다.
 - 규칙 반영: `D0=1`, `D1~D6=1~3 랜덤`, `D4 중간보스 1개`, `D7 최종보스 1개`, `D2~D5 마을 최소 1개`.
 - 월드맵 UI는 `WorldMapScreen` 내부 `WorldMapView`로 노드/연결을 시각화하고, 연결된 다음 노드만 선택 가능하게 제한한다.
 - `BattleOverlayPanel`은 제거했고, 전투 중 상태 라벨을 별도 오버레이로 유지하지 않는다.
-- 저장 포맷은 `save_version=2` 기반 `user://run_state_v2.json`으로 전환했다 (v1 마이그레이션 미지원).
+- 저장 포맷은 `save_version=3` 기반 `user://run_state_v3.json`을 사용한다.
 - 노드 선택 확정 시 저장, 노드 해소 확정 시 저장.
 - 전투 노드는 기존 `scenes/levels/level_01.tscn`을 재사용한다.
-- `RoundManager`(`all_rounds_cleared`, `game_failed`)와 코어 `destroyed` 신호는 `BattleScreenHost`를 통해 `battle_finished`/`run_failed` 흐름으로 연결한다.
+- `RoundManager.all_rounds_cleared`, 코어 `destroyed`, `PlayGround.all_heroes_dead` 신호는 `BattleScreenHost`를 통해 `battle_finished`/`run_failed` 흐름으로 연결한다.
+- 기존 `alive_enemy_threshold` 기반 패배는 제거하고, 전투 패배는 `코어 파괴` 또는 `영웅 전멸`로 고정한다.
 - 설정 시스템은 `scripts/core/AppSettings.gd` 오토로드로 관리하고, `MainMenuScreen -> SettingsScreen` 진입/복귀 흐름을 추가했다.
 
 ---
@@ -225,8 +233,9 @@
 - 레벨 행은 `Level`, EXP 게이지, `현재/필요` 숫자를 함께 표시한다.
 - 레벨/EXP는 이번 단계에서 전투 임시값으로 운영한다(런 저장 연동 제외).
 - 사망한 히어로도 클릭 선택을 허용하며, 상태창 정보 열람이 가능하다.
-- 히어로 공격 범위 표시는 수동 토글이 아니라 `선택 상태`를 기준으로 유지한다.
-- 선택된 히어로는 이동 명령 중에도 공격 범위 원형을 계속 표시하고, 선택 해제 시 숨긴다.
+- 히어로 공격 범위 표시는 수동 토글이 아니라 `HeroInterface > 사거리` 스탯 라벨 hover 상태를 기준으로 유지한다.
+- 히어로 클릭 선택만으로는 공격 범위를 표시하지 않고, 선택된 히어로의 `사거리` 라벨 hover 중에만 표시한다.
+- hover 종료 또는 선택 해제 시 공격 범위를 숨긴다.
 - 우클릭 이동 명령 시 월드 좌표에 스타크래프트식 `타원형 + ▼` 이동 마커를 표시한다.
 - 이동 마커는 최근 1개만 유지하고, 타원 링은 고정한 채 `▼` 화살표만 위아래 바운스한 뒤 짧은 시간 내 자동 페이드아웃한다.
 - 장비 카드 상점은 타입별 3장(`무기`, `방어구`, `신발`)을 동시에 제공한다.
@@ -276,14 +285,18 @@
 
 ### 범위(사거리) 규칙
 
-- 히어로 선택 시 실제 공격 사거리 타일 사각형(`NxN`)을 표시한다.
+- 히어로 선택 시 `HeroInterface`를 표시하고, 실제 공격 사거리 타일 사각형(`NxN`)은 `사거리` 라벨 hover 중에만 표시한다.
 - 클래스별 기본 타일 범위:
 - 전사 `4x4`, 궁수 `5x5`, 마법사 `5x5`, 암살자 `3x3`
 - 중심 타일 정렬을 위해 짝수 범위는 내부 판정에서 홀수로 보정한다(예: 전사 `4x4` -> `5x5`).
 - 공격 대상 판정은 충돌 Area 오버랩이 아니라 타일 좌표 포함 여부로 처리한다.
 - 사거리 중심 타일은 히어로 점유 타일이 바뀔 때만 갱신한다(픽셀 단위 연속 이동 중 사거리 미끄럼 없음).
 - 타깃 부재 상태에서는 `AttackTimer` 기반 주기 재탐색으로 자동공격 시작을 복구한다.
-- 사거리 표시는 히어로 로컬 드로우가 아닌 타일맵 오버레이(`RangeOverlayFill`, `RangeOverlayBorder`)에 테두리/채움으로 렌더한다.
+- 사거리 표시는 타일 텍스처 오버레이가 아닌 전용 드로우 노드(`RangeOverlayDraw`)에서 셀 단위로 직접 렌더한다.
+- 사거리 오버레이는 `무채색 반투명 채움 + 흰색 격자/윤곽선`으로 표시한다.
+- 격자/윤곽선은 픽셀아트 기준 `1px` 두께, 안티앨리어싱 없이 렌더한다.
+- 히어로가 점유한 중심 타일은 사거리 채움에서 제외한다.
+- 오버레이는 `GroundTiles` 바로 위(`z_index=-110`, 그라운드와 동일 레벨)에서 렌더하고, 장식/오브젝트 레이어보다 아래에 둔다.
 - 오버레이 갱신은 선택 토글 및 히어로 점유 타일 변경 이벤트에서만 수행한다.
 - 오버레이 셀 렌더 범위는 `GroundTiles` 존재 여부가 아니라 전장 타일 경계(rect) 기준으로 처리해 `5x5` 내부가 비지 않게 유지한다.
 

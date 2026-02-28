@@ -236,6 +236,7 @@ text = "지능: -"
 
 [node name="RangeLabel" type="Label" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow/StatColumn" unique_id=536805603]
 layout_mode = 2
+mouse_filter = 0
 text = "사거리: -"
 
 [node name="ShopColumn" type="VBoxContainer" parent="HeroInterfaceRoot/InterfacePanel/MarginContainer/MainRow" unique_id=1546277264]

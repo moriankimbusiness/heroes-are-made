@@ -4,6 +4,8 @@ extends PanelContainer
 
 const ItemEnumsRef = preload("res://scripts/items/ItemEnums.gd")
 
+signal range_stat_hover_changed(hovered: bool)
+
 @export_group("HeroInfoPanel 표시 설정")
 ## 히어로 초상화 표시 배율입니다.
 @export_range(1.0, 4.0, 0.1) var portrait_scale: float = 2.0
@@ -29,6 +31,7 @@ var _bound_hero: Hero = null
 var _portrait_source_anim: AnimatedSprite2D = null
 var _equipment_slots: Dictionary = {}
 var _item_tooltip: Node = null
+var _is_range_stat_hovered: bool = false
 
 
 func _ready() -> void:
@@ -39,6 +42,7 @@ func _ready() -> void:
 	}
 	portrait_sprite.scale = Vector2.ONE * portrait_scale
 	_connect_slot_tooltip_signals()
+	_connect_range_stat_hover_signals()
 	_clear_display()
 
 
@@ -47,6 +51,13 @@ func _connect_slot_tooltip_signals() -> void:
 		var slot_ui: ItemSlotUI = _equipment_slots[slot]
 		slot_ui.slot_hover_started.connect(_on_slot_hover_started.bind(slot_ui))
 		slot_ui.slot_hover_ended.connect(_on_slot_hover_ended)
+
+
+func _connect_range_stat_hover_signals() -> void:
+	if range_label == null:
+		return
+	range_label.mouse_entered.connect(_on_range_label_mouse_entered)
+	range_label.mouse_exited.connect(_on_range_label_mouse_exited)
 
 
 func _find_item_tooltip() -> Node:
@@ -116,6 +127,7 @@ func unbind_hero() -> void:
 	_bound_hero = null
 	modulate = Color.WHITE
 	_clear_display()
+	_set_range_stat_hovered(false)
 
 
 # -- Signal callbacks ----------------------------------------------------------
@@ -382,3 +394,22 @@ func _format_preview_line(label: String, current: int, preview: int) -> String:
 	if diff > 0:
 		return "%s: %d → %d(%d▲)" % [label, current, preview, diff]
 	return "%s: %d → %d(%d▼)" % [label, current, preview, absi(diff)]
+
+
+func is_range_stat_hovered() -> bool:
+	return _is_range_stat_hovered
+
+
+func _on_range_label_mouse_entered() -> void:
+	_set_range_stat_hovered(true)
+
+
+func _on_range_label_mouse_exited() -> void:
+	_set_range_stat_hovered(false)
+
+
+func _set_range_stat_hovered(hovered: bool) -> void:
+	if _is_range_stat_hovered == hovered:
+		return
+	_is_range_stat_hovered = hovered
+	range_stat_hover_changed.emit(hovered)

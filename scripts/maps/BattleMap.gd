@@ -16,6 +16,8 @@ class_name BattleMap
 @export var range_overlay_fill_path: NodePath = NodePath("RangeOverlayFill")
 ## 사거리 테두리 오버레이 레이어 경로입니다.
 @export var range_overlay_border_path: NodePath = NodePath("RangeOverlayBorder")
+## 사거리 드로우 오버레이 노드 경로입니다.
+@export var range_overlay_draw_path: NodePath = NodePath("RangeOverlayDraw")
 
 @export_group("맵 규칙")
 ## 타일 한 칸 크기(px)입니다.
@@ -52,6 +54,7 @@ class_name BattleMap
 @onready var _deco_props_tiles: TileMapLayer = get_node_or_null(deco_props_tiles_path) as TileMapLayer
 @onready var _range_overlay_fill_tiles: TileMapLayer = get_node_or_null(range_overlay_fill_path) as TileMapLayer
 @onready var _range_overlay_border_tiles: TileMapLayer = get_node_or_null(range_overlay_border_path) as TileMapLayer
+@onready var _range_overlay_draw: Node2D = get_node_or_null(range_overlay_draw_path) as Node2D
 
 var _astar: AStarGrid2D = AStarGrid2D.new()
 var _walkable_rect: Rect2i = Rect2i()
@@ -180,10 +183,11 @@ func rebuild_navigation() -> void:
 
 
 func set_range_overlay(fill_cells: Array[Vector2i], border_cells: Array[Vector2i]) -> void:
-	if not _has_range_overlay_layers():
+	if not _has_range_overlay_draw() and not _has_legacy_range_overlay_layers():
 		return
-	_clear_cells(_range_overlay_fill_tiles, _range_overlay_fill_cells)
-	_clear_cells(_range_overlay_border_tiles, _range_overlay_border_cells)
+	if _has_legacy_range_overlay_layers():
+		_clear_cells(_range_overlay_fill_tiles, _range_overlay_fill_cells)
+		_clear_cells(_range_overlay_border_tiles, _range_overlay_border_cells)
 
 	_range_overlay_fill_cells = []
 	for cell: Vector2i in fill_cells:
@@ -195,17 +199,24 @@ func set_range_overlay(fill_cells: Array[Vector2i], border_cells: Array[Vector2i
 		if is_cell_in_bounds(cell):
 			_range_overlay_border_cells.append(cell)
 
+	if _has_range_overlay_draw():
+		var fill_rects: Array[Rect2] = _build_overlay_rects(_range_overlay_fill_cells)
+		var border_rects: Array[Rect2] = _build_overlay_rects(_range_overlay_border_cells)
+		_range_overlay_draw.call("set_overlay_rects", fill_rects, border_rects)
+		return
+
 	_apply_cells(_range_overlay_fill_tiles, _range_overlay_fill_cells, range_overlay_source_id, range_overlay_fill_atlas_coords)
 	_apply_cells(_range_overlay_border_tiles, _range_overlay_border_cells, range_overlay_source_id, range_overlay_border_atlas_coords)
 
 
 func clear_range_overlay() -> void:
-	if not _has_range_overlay_layers():
-		return
-	_clear_cells(_range_overlay_fill_tiles, _range_overlay_fill_cells)
-	_clear_cells(_range_overlay_border_tiles, _range_overlay_border_cells)
+	if _has_legacy_range_overlay_layers():
+		_clear_cells(_range_overlay_fill_tiles, _range_overlay_fill_cells)
+		_clear_cells(_range_overlay_border_tiles, _range_overlay_border_cells)
 	_range_overlay_fill_cells.clear()
 	_range_overlay_border_cells.clear()
+	if _has_range_overlay_draw():
+		_range_overlay_draw.call("clear_overlay")
 
 
 func _get_play_area_center_global() -> Vector2:
@@ -362,8 +373,29 @@ func _is_cell_in_core_footprint(cell: Vector2i) -> bool:
 	return cell.x >= min_cell.x and cell.x <= max_cell.x and cell.y >= min_cell.y and cell.y <= max_cell.y
 
 
-func _has_range_overlay_layers() -> bool:
+func _has_legacy_range_overlay_layers() -> bool:
 	return _range_overlay_fill_tiles != null and _range_overlay_border_tiles != null
+
+
+func _has_range_overlay_draw() -> bool:
+	return _range_overlay_draw != null \
+		and _range_overlay_draw.has_method("set_overlay_rects") \
+		and _range_overlay_draw.has_method("clear_overlay")
+
+
+func _build_overlay_rects(cells: Array[Vector2i]) -> Array[Rect2]:
+	var rects: Array[Rect2] = []
+	if _range_overlay_draw == null:
+		return rects
+	var size_value: float = float(get_tile_size_px())
+	var rect_size: Vector2 = Vector2(size_value, size_value)
+	var half_size: Vector2 = rect_size * 0.5
+	for cell: Vector2i in cells:
+		var center_world: Vector2 = cell_to_world_center(cell)
+		var local_center: Vector2 = _range_overlay_draw.to_local(center_world).round()
+		var snapped_pos: Vector2 = (local_center - half_size).round()
+		rects.append(Rect2(snapped_pos, rect_size))
+	return rects
 
 
 func _clear_layer(layer: TileMapLayer) -> void:

@@ -200,8 +200,8 @@ func _redraw_attack_range_overlay(hero: Hero) -> void:
 			var cell: Vector2i = center_cell + Vector2i(x, y)
 			if not _battle_map.is_cell_in_bounds(cell):
 				continue
-			next_fill_cells.append(cell)
-			if abs(x) == radius or abs(y) == radius:
-				next_border_cells.append(cell)
+			if cell != center_cell:
+				next_fill_cells.append(cell)
+			next_border_cells.append(cell)
 
 	_battle_map.set_range_overlay(next_fill_cells, next_border_cells)

@@ -28,6 +28,7 @@ func _ready() -> void:
 	_register_existing_enemies()
 	_connect_world_root_for_enemies()
 	_connect_shop_preview_signals()
+	_connect_range_stat_hover_signal()
 
 
 func _connect_shop_preview_signals() -> void:
@@ -47,6 +48,19 @@ func _on_shop_card_hover_started(slot: int, item: ItemData) -> void:
 func _on_shop_card_hover_ended() -> void:
 	if hero_info_panel != null and hero_info_panel.has_method("clear_stat_preview"):
 		hero_info_panel.call("clear_stat_preview")
+
+
+func _connect_range_stat_hover_signal() -> void:
+	if hero_info_panel == null:
+		return
+	if hero_info_panel.has_signal("range_stat_hover_changed"):
+		hero_info_panel.connect("range_stat_hover_changed", Callable(self, "_on_range_stat_hover_changed"))
+
+
+func _on_range_stat_hover_changed(hovered: bool) -> void:
+	if _selected_hero == null or not is_instance_valid(_selected_hero):
+		return
+	_set_hero_attack_range_preview(_selected_hero, hovered)
 
 
 func set_starting_gold(value: int) -> void:
@@ -230,10 +244,10 @@ func _select_hero(hero: Hero) -> void:
 		_deselect_enemy()
 	_selected_hero = hero
 	_set_hero_selected_visual(_selected_hero, true)
-	_set_hero_attack_range_preview(_selected_hero, true)
 	hero_interface_root.visible = true
 	hero_info_panel.call("bind_hero", hero)
 	shop_panel.call("bind_hero", hero)
+	_sync_selected_hero_range_preview_from_hover_state()
 	hero_selected.emit(hero)
 
 
@@ -334,6 +348,15 @@ func _set_hero_attack_range_preview(hero: Hero, show: bool) -> void:
 	if not hero.has_method("set_attack_range_preview_visible"):
 		return
 	hero.call("set_attack_range_preview_visible", show)
+
+
+func _sync_selected_hero_range_preview_from_hover_state() -> void:
+	if _selected_hero == null or not is_instance_valid(_selected_hero):
+		return
+	var should_show: bool = false
+	if hero_info_panel != null and hero_info_panel.has_method("is_range_stat_hovered"):
+		should_show = bool(hero_info_panel.call("is_range_stat_hovered"))
+	_set_hero_attack_range_preview(_selected_hero, should_show)
 
 
 # -- UI helpers ----------------------------------------------------------------
