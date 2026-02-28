@@ -1,5 +1,7 @@
 extends Node
 
+signal enemy_spawned(enemy: Area2D)
+
 @export_group("라운드 기본 스폰")
 ## 기본으로 스폰할 적 씬입니다.
 @export var enemy_scene: PackedScene
@@ -80,6 +82,8 @@ func _on_spawn_timer_timeout() -> void:
 	if _core != null and enemy.has_method("set_core_target"):
 		enemy.call("set_core_target", _core)
 	_spawned_count += 1
+	if enemy is Area2D:
+		enemy_spawned.emit(enemy as Area2D)
 
 
 func set_round(round_value: int) -> void:

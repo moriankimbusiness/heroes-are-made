@@ -4,6 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://dpvp507feuu68" path="res://assets/sprites/characters/Soldier.png" id="2_soldier"]
 [ext_resource type="Shader" uid="uid://cj2ur78opyjbh" path="res://assets/shaders/outline.gdshader" id="3_outline"]
 [ext_resource type="Script" uid="uid://b6s473jelydno" path="res://scripts/heroes/ui/HeroHealthBar.gd" id="4_hero_health_bar"]
+[ext_resource type="Script" path="res://scripts/heroes/HeroAnimator.gd" id="5_h_animator"]
+[ext_resource type="Script" path="res://scripts/heroes/HeroAttackController.gd" id="6_h_atk_ctrl"]
+[ext_resource type="Script" path="res://scripts/heroes/HeroVisualController.gd" id="7_h_visual"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_outline"]
 resource_local_to_scene = true
@@ -244,3 +247,12 @@ metadata/_edit_use_anchors_ = true
 [node name="AttackTimer" type="Timer" parent="." unique_id=2133531099]
 wait_time = 0.8
 one_shot = true
+
+[node name="HeroAnimator" type="Node" parent="."]
+script = ExtResource("5_h_animator")
+
+[node name="HeroAttackController" type="Node" parent="."]
+script = ExtResource("6_h_atk_ctrl")
+
+[node name="HeroVisualController" type="Node" parent="."]
+script = ExtResource("7_h_visual")

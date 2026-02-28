@@ -16,6 +16,9 @@ signal died(hero: Hero)
 @onready var drag_shape: CollisionShape2D = $DragShape
 @onready var attack_timer: Timer = $AttackTimer
 @onready var status_anchor: Marker2D = $StatusAnchor
+@onready var _animator: Node = $HeroAnimator
+@onready var _visual: Node = $HeroVisualController
+@onready var _attack_ctrl: Node = $HeroAttackController
 
 enum State {
 	IDLE,
@@ -126,24 +129,14 @@ enum HeroClass {
 ]
 
 var state: State = State.IDLE
-var _is_finished: bool = false
 var _is_dead: bool = false
 var _move_order_active: bool = false
 var _move_order_target: Vector2 = Vector2.ZERO
 var _move_path_points: Array[Vector2] = []
 var _move_path_index: int = 0
-var _current_target: Area2D = null
-var _warned_invalid_target_ids: Dictionary = {}
 var _show_attack_range_preview: bool = false
 var _attack01_base_duration_seconds: float = 0.5
-var _pending_attack_target: Area2D = null
-var _pending_attack_damage: float = 0.0
-var _pending_hit_frame_fired: bool = false
 var _warned_missing_walk_animation: bool = false
-var _is_hovering: bool = false
-var _is_selected: bool = false
-var _is_damage_flash_active: bool = false
-var _damage_flash_tween: Tween = null
 var playground: Node2D = null
 var _stats: HeroStats = HeroStats.new()
 var _equipment: EquipmentState = null
@@ -152,29 +145,28 @@ var current_health: float = 100.0
 var _attack_origin_cell: Vector2i = Vector2i.ZERO
 var _attack_origin_cell_initialized: bool = false
 
-const ATTACK_SCAN_INTERVAL_SECONDS: float = 0.2
-
 
 func _ready() -> void:
-	anim.animation_finished.connect(_on_animation_finished)
-	anim.frame_changed.connect(_on_animation_frame_changed)
-	mouse_entered.connect(_on_mouse_entered)
-	mouse_exited.connect(_on_mouse_exited)
-	_set_damage_fill_color(damage_fill_color)
-	_set_damage_fill_strength(0.0)
-	_apply_idle_outline_visual()
+	_animator.configure(anim)
+	_visual.configure(self, anim)
+	_attack_ctrl.configure(self, attack_timer, _animator)
+
+	_animator.non_loop_finished.connect(_on_animator_non_loop_finished)
+	_attack_ctrl.attack_requested.connect(_on_attack_requested)
+
 	set_max_health(base_max_health)
 	_setup_equipment_system()
-	_attack01_base_duration_seconds = _get_animation_base_duration_seconds(&"attack01")
-	_update_attack_origin_cell()
-	if attack_timer != null:
-		attack_timer.one_shot = true
-		attack_timer.timeout.connect(_on_attack_timer_timeout)
+	_attack01_base_duration_seconds = _animator.get_base_duration(&"attack01")
+	update_attack_origin_cell()
 	set_physics_process(false)
-	_play(State.IDLE, true)
+	_play_state(State.IDLE, true)
 	_emit_progression_changed()
 	if attack_enabled:
-		call_deferred("_attempt_auto_attack")
+		call_deferred("_deferred_start_attack")
+
+
+func _deferred_start_attack() -> void:
+	_attack_ctrl.attempt_auto_attack()
 
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
@@ -184,11 +176,13 @@ func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> vo
 	if mb.button_index != MOUSE_BUTTON_LEFT or not mb.pressed:
 		return
 	hero_clicked.emit(self)
-	if not _is_damage_flash_active:
-		_apply_idle_outline_visual()
-	_request_visual_redraw()
+	if not _visual.is_damage_flash_active():
+		_visual.apply_idle_outline()
+	queue_redraw()
 	get_viewport().set_input_as_handled()
 
+
+# -- Movement ------------------------------------------------------------------
 
 func issue_move_command(world_target: Vector2) -> bool:
 	if _is_dead:
@@ -215,20 +209,22 @@ func issue_move_command(world_target: Vector2) -> bool:
 
 	_move_path_index = 0
 	_move_order_target = _move_path_points[_move_path_points.size() - 1]
-	_clear_pending_attack()
-	_current_target = null
-	if attack_timer != null:
-		attack_timer.stop()
+	_attack_ctrl.clear_pending()
+	_attack_ctrl.stop()
 
 	_move_order_active = true
 	set_physics_process(true)
-	_play(State.WALK, true)
-	_request_visual_redraw()
+	_play_state(State.WALK, true)
+	queue_redraw()
 	return true
 
 
 func get_move_order_target() -> Vector2:
 	return _move_order_target
+
+
+func is_move_order_active() -> bool:
+	return _move_order_active
 
 
 func _physics_process(delta: float) -> void:
@@ -271,7 +267,7 @@ func _step_move_order(delta: float) -> void:
 		return
 
 	global_position = next_position
-	_update_attack_origin_cell()
+	update_attack_origin_cell()
 	_update_walk_facing(move_vector)
 	hero_moved.emit(self, global_position)
 
@@ -287,17 +283,19 @@ func _stop_move_order(play_idle: bool) -> void:
 	if _is_dead:
 		return
 	if play_idle:
-		_play(State.IDLE, true)
+		_play_state(State.IDLE, true)
 	if attack_enabled and attack_timer != null and attack_timer.is_stopped():
-		_attempt_auto_attack()
+		_attack_ctrl.attempt_auto_attack()
 
 
 func _update_walk_facing(move: Vector2) -> void:
 	if move.x > attack_flip_deadzone:
-		anim.flip_h = false
+		_animator.set_flip_h(false)
 	elif move.x < -attack_flip_deadzone:
-		anim.flip_h = true
+		_animator.set_flip_h(true)
 
+
+# -- Equipment / Stats ---------------------------------------------------------
 
 func _setup_equipment_system() -> void:
 	_equipment = EquipmentStateRef.new()
@@ -353,43 +351,6 @@ func add_experience(amount: int) -> void:
 		level += 1
 		required_exp = maxi(1, required_exp + 20)
 	_emit_progression_changed()
-
-
-func to_run_state() -> Dictionary:
-	return {
-		"hero_display_name": hero_display_name,
-		"class_id": int(hero_class),
-		"level": level,
-		"current_exp": current_exp,
-		"required_exp": required_exp,
-		"max_health": max_health,
-		"current_health": current_health,
-		"is_dead": _is_dead
-	}
-
-
-func apply_run_state(snapshot: Dictionary) -> void:
-	hero_display_name = String(snapshot.get("hero_display_name", hero_display_name))
-	hero_class = clampi(int(snapshot.get("class_id", int(hero_class))), HeroClass.WARRIOR, HeroClass.ASSASSIN)
-	level = maxi(1, int(snapshot.get("level", level)))
-	required_exp = maxi(1, int(snapshot.get("required_exp", required_exp)))
-	current_exp = clampi(int(snapshot.get("current_exp", current_exp)), 0, required_exp)
-	_emit_progression_changed()
-
-	var snapshot_max_health: float = float(snapshot.get("max_health", max_health))
-	var snapshot_current_health: float = float(snapshot.get("current_health", snapshot_max_health))
-	set_max_health(snapshot_max_health, false)
-	current_health = clampf(snapshot_current_health, 0.0, max_health)
-
-	var should_be_dead: bool = bool(snapshot.get("is_dead", false)) or current_health <= 0.0
-	if should_be_dead:
-		current_health = 0.0
-		_enter_dead_state(false)
-	else:
-		_exit_dead_state()
-	_emit_health_changed()
-	_recalculate_stats()
-	_update_attack_origin_cell()
 
 
 func get_status_anchor_canvas_position() -> Vector2:
@@ -462,10 +423,12 @@ func _recalculate_stats() -> void:
 	attack_damage = maxf(0.1, _stats.physical_attack)
 	attacks_per_second = _stats.attacks_per_second
 	if state == State.ATTACK01:
-		_apply_attack_anim_speed_for_aps()
+		_apply_attack_anim_speed()
 	queue_redraw()
 	hero_stats_changed.emit(self, _stats.duplicate_state())
 
+
+# -- Tile / Range --------------------------------------------------------------
 
 func get_attack_range_tile_span() -> int:
 	return _normalize_tile_span(_get_base_tile_span_for_class())
@@ -531,198 +494,14 @@ func _normalize_tile_span(value: int) -> int:
 	return span
 
 
-func _on_attack_timer_timeout() -> void:
-	_attempt_auto_attack()
-
-
-func _attempt_auto_attack() -> void:
-	if not attack_enabled or _is_dead:
-		return
-	if _move_order_active:
-		return
-	_update_attack_origin_cell()
-
-	var candidates: Array[Area2D] = _collect_attackable_targets()
-	if candidates.is_empty():
-		_current_target = null
-		_schedule_attack_scan()
-		return
-
-	_current_target = _pick_target(candidates)
-	if _current_target == null:
-		return
-	if not _current_target.has_method("apply_damage"):
-		_warn_invalid_target_once(_current_target, "apply_damage")
-		_current_target = null
-		if attack_timer != null and attack_timer.is_stopped():
-			_attempt_auto_attack()
-		return
-
-	_update_attack_facing(_current_target)
-	_queue_pending_attack(_current_target, attack_damage)
-	_play_next_attack_animation()
-	_try_fire_pending_attack_on_current_frame()
-	if attack_timer != null:
-		attack_timer.start(_get_attack_cooldown_seconds())
-
-
-func _schedule_attack_scan() -> void:
-	if attack_timer == null:
-		return
-	if _is_dead or not attack_enabled or _move_order_active:
-		return
-	if not attack_timer.is_stopped():
-		return
-	attack_timer.start(ATTACK_SCAN_INTERVAL_SECONDS)
-
-
-func _collect_attackable_targets() -> Array[Area2D]:
-	var candidates: Array[Area2D] = []
-	for node: Node in get_tree().get_nodes_in_group(&"enemy"):
-		if not is_instance_valid(node):
-			continue
-		var target: Area2D = node as Area2D
-		if target == null:
-			continue
-		if not _is_valid_enemy_target(target):
-			continue
-		if not _is_target_within_tile_attack_range(target):
-			continue
-		candidates.append(target)
-	return candidates
-
-
-func _pick_target(candidates: Array[Area2D]) -> Area2D:
-	match target_priority:
-		TargetPriority.LOWEST_HEALTH:
-			return _pick_target_by_lowest_health(candidates)
-		TargetPriority.NEAREST:
-			return _pick_target_by_nearest(candidates)
-		_:
-			return _pick_target_by_path_progress(candidates)
-
-
-func _pick_target_by_path_progress(candidates: Array[Area2D]) -> Area2D:
-	var best_target: Area2D = null
-	var best_progress: float = -INF
-	var best_distance_sq: float = INF
-	for target: Area2D in candidates:
-		var progress: float = _get_enemy_path_progress(target)
-		var distance_sq: float = global_position.distance_squared_to(target.global_position)
-		if best_target == null:
-			best_target = target
-			best_progress = progress
-			best_distance_sq = distance_sq
-			continue
-		if progress > best_progress:
-			best_target = target
-			best_progress = progress
-			best_distance_sq = distance_sq
-			continue
-		if is_equal_approx(progress, best_progress) and distance_sq < best_distance_sq:
-			best_target = target
-			best_progress = progress
-			best_distance_sq = distance_sq
-	return best_target
-
-
-func _pick_target_by_lowest_health(candidates: Array[Area2D]) -> Area2D:
-	var best_target: Area2D = null
-	var best_health: float = INF
-	var best_progress: float = -INF
-	var best_distance_sq: float = INF
-	for target: Area2D in candidates:
-		var health: float = _get_enemy_current_health(target)
-		var progress: float = _get_enemy_path_progress(target)
-		var distance_sq: float = global_position.distance_squared_to(target.global_position)
-		if best_target == null:
-			best_target = target
-			best_health = health
-			best_progress = progress
-			best_distance_sq = distance_sq
-			continue
-		if health < best_health:
-			best_target = target
-			best_health = health
-			best_progress = progress
-			best_distance_sq = distance_sq
-			continue
-		if is_equal_approx(health, best_health) and progress > best_progress:
-			best_target = target
-			best_health = health
-			best_progress = progress
-			best_distance_sq = distance_sq
-			continue
-		if is_equal_approx(health, best_health) and is_equal_approx(progress, best_progress) and distance_sq < best_distance_sq:
-			best_target = target
-			best_health = health
-			best_progress = progress
-			best_distance_sq = distance_sq
-	return best_target
-
-
-func _pick_target_by_nearest(candidates: Array[Area2D]) -> Area2D:
-	var best_target: Area2D = null
-	var best_distance_sq: float = INF
-	var best_progress: float = -INF
-	for target: Area2D in candidates:
-		var distance_sq: float = global_position.distance_squared_to(target.global_position)
-		var progress: float = _get_enemy_path_progress(target)
-		if best_target == null:
-			best_target = target
-			best_distance_sq = distance_sq
-			best_progress = progress
-			continue
-		if distance_sq < best_distance_sq:
-			best_target = target
-			best_distance_sq = distance_sq
-			best_progress = progress
-			continue
-		if is_equal_approx(distance_sq, best_distance_sq) and progress > best_progress:
-			best_target = target
-			best_distance_sq = distance_sq
-			best_progress = progress
-	return best_target
-
-
-func _get_enemy_current_health(target: Area2D) -> float:
-	if not is_instance_valid(target):
-		return INF
-	if target.has_method("get_current_health"):
-		return float(target.call("get_current_health"))
-	return INF
-
-
-func _get_enemy_path_progress(target: Area2D) -> float:
-	if not is_instance_valid(target):
-		return -INF
-	var parent: Node = target.get_parent()
-	if parent is PathFollow2D:
-		return (parent as PathFollow2D).progress
-	return -1.0
-
-
-func _is_target_within_tile_attack_range(target: Area2D) -> bool:
-	if not _is_valid_enemy_target(target):
-		return false
-	var source_cell: Vector2i = _get_attack_origin_cell()
-	var target_cell: Vector2i = _world_to_cell(target.global_position)
-	var radius: int = get_attack_range_tile_radius()
-	return absi(target_cell.x - source_cell.x) <= radius and absi(target_cell.y - source_cell.y) <= radius
-
-
-func _get_attack_origin_cell() -> Vector2i:
+func get_attack_origin_cell() -> Vector2i:
 	if not _attack_origin_cell_initialized:
-		_update_attack_origin_cell()
+		update_attack_origin_cell()
 	return _attack_origin_cell
 
 
-func get_attack_origin_cell() -> Vector2i:
-	return _get_attack_origin_cell()
-
-
-func _update_attack_origin_cell() -> void:
-	var next_cell: Vector2i = _world_to_cell(global_position)
+func update_attack_origin_cell() -> void:
+	var next_cell: Vector2i = world_to_cell(global_position)
 	if _attack_origin_cell_initialized and next_cell == _attack_origin_cell:
 		return
 	_attack_origin_cell = next_cell
@@ -731,7 +510,7 @@ func _update_attack_origin_cell() -> void:
 		_update_attack_range_overlay()
 
 
-func _world_to_cell(world_pos: Vector2) -> Vector2i:
+func world_to_cell(world_pos: Vector2) -> Vector2i:
 	if playground != null and playground.has_method("world_to_cell"):
 		return Vector2i(playground.call("world_to_cell", world_pos))
 	var tile_size: int = _get_tile_size_px()
@@ -744,246 +523,46 @@ func _get_tile_size_px() -> int:
 	return 32
 
 
-func _play_next_attack_animation() -> void:
-	play_attack01()
+# -- Run state serialization ---------------------------------------------------
+
+func to_run_state() -> Dictionary:
+	return {
+		"hero_display_name": hero_display_name,
+		"class_id": int(hero_class),
+		"level": level,
+		"current_exp": current_exp,
+		"required_exp": required_exp,
+		"max_health": max_health,
+		"current_health": current_health,
+		"is_dead": _is_dead
+	}
 
 
-func _get_attack_cooldown_seconds() -> float:
-	var rate: float = maxf(0.1, attacks_per_second)
-	return 1.0 / rate
+func apply_run_state(snapshot: Dictionary) -> void:
+	hero_display_name = String(snapshot.get("hero_display_name", hero_display_name))
+	hero_class = clampi(int(snapshot.get("class_id", int(hero_class))), HeroClass.WARRIOR, HeroClass.ASSASSIN)
+	level = maxi(1, int(snapshot.get("level", level)))
+	required_exp = maxi(1, int(snapshot.get("required_exp", required_exp)))
+	current_exp = clampi(int(snapshot.get("current_exp", current_exp)), 0, required_exp)
+	_emit_progression_changed()
 
+	var snapshot_max_health: float = float(snapshot.get("max_health", max_health))
+	var snapshot_current_health: float = float(snapshot.get("current_health", snapshot_max_health))
+	set_max_health(snapshot_max_health, false)
+	current_health = clampf(snapshot_current_health, 0.0, max_health)
 
-func _get_animation_base_duration_seconds(anim_name: StringName) -> float:
-	if anim.sprite_frames == null:
-		return 0.5
-	if not anim.sprite_frames.has_animation(anim_name):
-		return 0.5
-	var fps: float = maxf(0.001, anim.sprite_frames.get_animation_speed(anim_name))
-	var frame_count: int = anim.sprite_frames.get_frame_count(anim_name)
-	if frame_count <= 0:
-		return 0.5
-	var total_units: float = 0.0
-	for i: int in frame_count:
-		total_units += anim.sprite_frames.get_frame_duration(anim_name, i)
-	if total_units <= 0.0:
-		return 0.5
-	return total_units / fps
-
-
-func _apply_attack_anim_speed_for_aps() -> void:
-	var cooldown: float = _get_attack_cooldown_seconds()
-	var base_duration: float = maxf(0.001, _attack01_base_duration_seconds)
-	anim.speed_scale = base_duration / maxf(0.001, cooldown)
-
-
-func _queue_pending_attack(target: Area2D, damage: float) -> void:
-	_pending_attack_target = target
-	_pending_attack_damage = damage
-	_pending_hit_frame_fired = false
-
-
-func _clear_pending_attack() -> void:
-	_pending_attack_target = null
-	_pending_attack_damage = 0.0
-	_pending_hit_frame_fired = false
-
-
-func _get_clamped_attack_hit_frame_index() -> int:
-	if anim.sprite_frames == null:
-		return 0
-	if not anim.sprite_frames.has_animation(&"attack01"):
-		return 0
-	var frame_count: int = anim.sprite_frames.get_frame_count(&"attack01")
-	if frame_count <= 0:
-		return 0
-	return clampi(attack_hit_frame_index, 0, frame_count - 1)
-
-
-func _try_fire_pending_attack_on_current_frame() -> void:
-	if state != State.ATTACK01:
-		return
-	if _pending_hit_frame_fired:
-		return
-	if _pending_attack_target == null:
-		return
-	if anim.frame != _get_clamped_attack_hit_frame_index():
-		return
-	_execute_pending_attack()
-
-
-func _execute_pending_attack() -> void:
-	var target: Area2D = _pending_attack_target
-	var damage: float = _pending_attack_damage
-	_pending_hit_frame_fired = true
-	if not _is_valid_enemy_target(target):
-		return
-	if not _is_target_within_tile_attack_range(target):
-		return
-	if not target.has_method("apply_damage"):
-		_warn_invalid_target_once(target, "apply_damage")
-		return
-	target.call("apply_damage", damage)
-
-
-func _update_attack_facing(target: Area2D) -> void:
-	if not is_instance_valid(target):
-		return
-	var dx: float = target.global_position.x - global_position.x
-	if dx > attack_flip_deadzone:
-		anim.flip_h = false
-	elif dx < -attack_flip_deadzone:
-		anim.flip_h = true
-
-
-func _is_valid_enemy_target(target: Area2D) -> bool:
-	if not is_instance_valid(target):
-		return false
-	if not target.is_in_group(&"enemy"):
-		return false
-	if target.has_method("is_dead") and bool(target.call("is_dead")):
-		return false
-	return true
-
-
-func _warn_invalid_target_once(target: Area2D, method_name: String) -> void:
-	if not is_instance_valid(target):
-		return
-	var target_id: int = target.get_instance_id()
-	if _warned_invalid_target_ids.has(target_id):
-		return
-	_warned_invalid_target_ids[target_id] = true
-	push_warning("Hero: target '%s' is missing method '%s'." % [target.name, method_name])
-
-
-func _request_visual_redraw() -> void:
-	queue_redraw()
-
-
-func _update_attack_range_overlay() -> void:
-	if playground == null:
-		return
-	if not playground.has_method("set_hero_attack_range_overlay"):
-		return
-	playground.call("set_hero_attack_range_overlay", self, _show_attack_range_preview)
-
-
-func _set_outline_visual(enabled: bool, color: Color) -> void:
-	if anim.material == null:
-		return
-	anim.material.set_shader_parameter(&"enabled", enabled)
-	if enabled:
-		anim.material.set_shader_parameter(&"outline_color", color)
-
-
-func _set_damage_fill_color(color: Color) -> void:
-	if anim.material == null:
-		return
-	anim.material.set_shader_parameter(&"damage_flash_color", color)
-
-
-func _set_damage_fill_strength(value: float) -> void:
-	if anim.material == null:
-		return
-	anim.material.set_shader_parameter(&"damage_flash", clampf(value, 0.0, 1.0))
-
-
-func _apply_idle_outline_visual() -> void:
-	if _is_selected:
-		_set_outline_visual(true, selected_outline_color)
-		_set_damage_fill_color(selected_fill_color)
-		_set_damage_fill_strength(selected_fill_strength)
-		return
-	_set_damage_fill_strength(0.0)
-	if _is_hovering and not _is_dead:
-		_set_outline_visual(true, hover_outline_color)
+	var should_be_dead: bool = bool(snapshot.get("is_dead", false)) or current_health <= 0.0
+	if should_be_dead:
+		current_health = 0.0
+		_enter_dead_state(false)
 	else:
-		_set_outline_visual(false, hover_outline_color)
+		_exit_dead_state()
+	_emit_health_changed()
+	_recalculate_stats()
+	update_attack_origin_cell()
 
 
-func _cancel_damage_flash() -> void:
-	if _damage_flash_tween != null and is_instance_valid(_damage_flash_tween):
-		_damage_flash_tween.kill()
-	_damage_flash_tween = null
-	_is_damage_flash_active = false
-
-
-func _on_damage_flash_finished() -> void:
-	_damage_flash_tween = null
-	_is_damage_flash_active = false
-	_set_damage_fill_strength(0.0)
-	_apply_idle_outline_visual()
-
-
-func _play_damage_flash() -> void:
-	if anim.material == null:
-		return
-	_cancel_damage_flash()
-	_is_damage_flash_active = true
-	_set_damage_fill_color(damage_fill_color)
-	_set_outline_visual(true, damage_outline_color)
-	_set_damage_fill_strength(1.0)
-	_damage_flash_tween = create_tween()
-	_damage_flash_tween.tween_method(Callable(self, "_set_damage_fill_strength"), 1.0, 0.0, maxf(0.01, damage_flash_duration))
-	_damage_flash_tween.finished.connect(_on_damage_flash_finished)
-
-
-func _on_mouse_entered() -> void:
-	_is_hovering = true
-	if _is_damage_flash_active:
-		return
-	_apply_idle_outline_visual()
-
-
-func _on_mouse_exited() -> void:
-	_is_hovering = false
-	if _is_damage_flash_active:
-		return
-	_apply_idle_outline_visual()
-
-
-func set_selected_visual(selected: bool) -> void:
-	if _is_selected == selected:
-		return
-	_is_selected = selected
-	if _is_damage_flash_active:
-		return
-	_apply_idle_outline_visual()
-
-
-func is_selected_visual() -> bool:
-	return _is_selected
-
-
-func set_attack_range_preview_visible(visible: bool) -> void:
-	if _show_attack_range_preview == visible:
-		return
-	_show_attack_range_preview = visible
-	_update_attack_range_overlay()
-
-
-func play_idle() -> void:
-	_play(State.IDLE, true)
-
-
-func play_walk() -> void:
-	_play(State.WALK, true)
-
-
-func play_attack01() -> void:
-	_play(State.ATTACK01, true)
-
-
-func play_death() -> void:
-	_play(State.DEATH, true)
-
-
-func is_state_finished() -> bool:
-	return _is_finished
-
-
-func is_dead() -> bool:
-	return _is_dead
-
+# -- Health management ---------------------------------------------------------
 
 func set_max_health(value: float, reset_current: bool = true) -> void:
 	max_health = maxf(1.0, value)
@@ -1001,7 +580,7 @@ func apply_damage(amount: float) -> void:
 		return
 	current_health = maxf(0.0, current_health - amount)
 	_emit_health_changed()
-	_play_damage_flash()
+	_visual.play_damage_flash()
 	if current_health <= 0.0:
 		_die()
 
@@ -1020,119 +599,105 @@ func get_health_ratio() -> float:
 	return current_health / max_health
 
 
-func _die() -> void:
-	_enter_dead_state(true)
+func is_dead() -> bool:
+	return _is_dead
 
 
-func _enter_dead_state(emit_signal: bool) -> void:
-	if _is_dead:
+# -- Public animation convenience methods --------------------------------------
+
+func play_idle() -> void:
+	_play_state(State.IDLE, true)
+
+
+func play_walk() -> void:
+	_play_state(State.WALK, true)
+
+
+func play_attack01() -> void:
+	_play_state(State.ATTACK01, true)
+
+
+func play_death() -> void:
+	_play_state(State.DEATH, true)
+
+
+func is_state_finished() -> bool:
+	return _animator.is_animation_finished()
+
+
+# -- Visual delegates ----------------------------------------------------------
+
+func set_selected_visual(selected: bool) -> void:
+	_visual.set_selected(selected)
+
+
+func is_selected_visual() -> bool:
+	return _visual.is_selected()
+
+
+func set_attack_range_preview_visible(visible: bool) -> void:
+	if _show_attack_range_preview == visible:
 		return
-	_is_dead = true
-	_move_order_active = false
-	_move_path_points.clear()
-	_move_path_index = 0
-	_current_target = null
-	_clear_pending_attack()
-	set_physics_process(false)
-	_cancel_damage_flash()
-	_set_damage_fill_strength(0.0)
-	if attack_timer != null:
-		attack_timer.stop()
-	if _show_attack_range_preview:
-		set_attack_range_preview_visible(false)
-	_apply_idle_outline_visual()
-	modulate = Color(1.0, 1.0, 1.0, 0.45)
-	play_death()
-	_request_visual_redraw()
-	if emit_signal:
-		died.emit(self)
+	_show_attack_range_preview = visible
+	_update_attack_range_overlay()
 
 
-func _exit_dead_state() -> void:
-	var was_dead: bool = _is_dead
-	_is_dead = false
-	_move_order_active = false
-	_move_path_points.clear()
-	_move_path_index = 0
-	_current_target = null
-	_clear_pending_attack()
-	set_physics_process(false)
-	if attack_timer != null:
-		attack_timer.stop()
-	modulate = Color.WHITE
-	if was_dead:
-		_play(State.IDLE, true)
-	_request_visual_redraw()
+func _update_attack_range_overlay() -> void:
+	if playground == null:
+		return
+	if not playground.has_method("set_hero_attack_range_overlay"):
+		return
+	playground.call("set_hero_attack_range_overlay", self, _show_attack_range_preview)
 
 
-func _play(new_state: State, force: bool = false) -> void:
+# -- Component signal handlers -------------------------------------------------
+
+func _on_animator_non_loop_finished() -> void:
+	if state == State.DEATH:
+		return
+	_attack_ctrl.clear_pending()
+	if _move_order_active:
+		_play_state(State.WALK, true)
+	else:
+		_play_state(State.IDLE, true)
+
+
+func _on_attack_requested(_target: Area2D) -> void:
+	_play_state(State.ATTACK01, true)
+	_attack_ctrl.try_fire_on_current_frame()
+
+
+# -- Animation state -----------------------------------------------------------
+
+func _play_state(new_state: State, force: bool = false) -> void:
 	if _is_dead and new_state != State.DEATH:
 		return
 	var same_state: bool = new_state == state
 	if not force and same_state:
 		return
 	state = new_state
-	_is_finished = false
 
 	var anim_name: StringName = _anim_name_from_state(state)
-	if state == State.WALK and (anim.sprite_frames == null or not anim.sprite_frames.has_animation(anim_name)):
+	if state == State.WALK and not _animator.has_animation(anim_name):
 		if not _warned_missing_walk_animation:
 			_warned_missing_walk_animation = true
 			push_warning("Hero: walk animation is missing. Falling back to idle.")
 		anim_name = &"idle"
 
-	if anim.sprite_frames == null or not anim.sprite_frames.has_animation(anim_name):
+	if not _animator.has_animation(anim_name):
 		push_warning("Missing animation for state: %s" % [anim_name])
 		return
 	if state == State.ATTACK01:
-		_apply_attack_anim_speed_for_aps()
+		_apply_attack_anim_speed()
 	else:
-		anim.speed_scale = 1.0
-	if force and same_state:
-		anim.stop()
-	anim.play(anim_name)
+		_animator.reset_speed()
+	_animator.play(anim_name, force)
 
 
-func _on_animation_finished() -> void:
-	if anim.sprite_frames == null:
-		return
-
-	var anim_name: StringName = _anim_name_from_state(state)
-	if state == State.WALK and not anim.sprite_frames.has_animation(anim_name):
-		anim_name = &"idle"
-	if not anim.sprite_frames.has_animation(anim_name):
-		return
-	if anim.sprite_frames.get_animation_loop(anim_name):
-		return
-	if _is_finished:
-		return
-	_is_finished = true
-	_on_non_loop_finished()
-
-
-func _on_animation_frame_changed() -> void:
-	_try_fire_pending_attack_on_current_frame()
-
-
-func _on_non_loop_finished() -> void:
-	if state == State.DEATH:
-		return
-	_clear_pending_attack()
-	if _move_order_active:
-		_play(State.WALK, true)
-	else:
-		_play(State.IDLE, true)
-
-
-func _emit_health_changed() -> void:
-	health_changed.emit(self, current_health, max_health, get_health_ratio())
-
-
-func _emit_progression_changed() -> void:
-	level = maxi(1, level)
-	required_exp = maxi(1, required_exp)
-	current_exp = clampi(current_exp, 0, required_exp)
-	progression_changed.emit(self, level, current_exp, required_exp)
+func _apply_attack_anim_speed() -> void:
+	var cooldown: float = 1.0 / maxf(0.1, attacks_per_second)
+	var base_duration: float = maxf(0.001, _attack01_base_duration_seconds)
+	_animator.set_speed_scale(base_duration / maxf(0.001, cooldown))
 
 
 func _anim_name_from_state(target_state: State) -> StringName:
@@ -1146,3 +711,56 @@ func _anim_name_from_state(target_state: State) -> StringName:
 		State.DEATH:
 			return &"death"
 	return &"idle"
+
+
+# -- Death / lifecycle ---------------------------------------------------------
+
+func _die() -> void:
+	_enter_dead_state(true)
+
+
+func _enter_dead_state(emit_signal: bool) -> void:
+	if _is_dead:
+		return
+	_is_dead = true
+	_move_order_active = false
+	_move_path_points.clear()
+	_move_path_index = 0
+	set_physics_process(false)
+	_attack_ctrl.stop()
+	_visual.cancel_damage_flash()
+	if _show_attack_range_preview:
+		set_attack_range_preview_visible(false)
+	_visual.apply_idle_outline()
+	modulate = Color(1.0, 1.0, 1.0, 0.45)
+	play_death()
+	queue_redraw()
+	if emit_signal:
+		died.emit(self)
+
+
+func _exit_dead_state() -> void:
+	var was_dead: bool = _is_dead
+	_is_dead = false
+	_move_order_active = false
+	_move_path_points.clear()
+	_move_path_index = 0
+	set_physics_process(false)
+	_attack_ctrl.stop()
+	modulate = Color.WHITE
+	if was_dead:
+		_play_state(State.IDLE, true)
+	queue_redraw()
+
+
+# -- Signal emission -----------------------------------------------------------
+
+func _emit_health_changed() -> void:
+	health_changed.emit(self, current_health, max_health, get_health_ratio())
+
+
+func _emit_progression_changed() -> void:
+	level = maxi(1, level)
+	required_exp = maxi(1, required_exp)
+	current_exp = clampi(current_exp, 0, required_exp)
+	progression_changed.emit(self, level, current_exp, required_exp)

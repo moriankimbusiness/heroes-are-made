@@ -37,6 +37,8 @@ func configure_dependencies(enemy_spawn_controller: Node, spawn_timer: Timer) ->
 	_enemy_spawn_controller = enemy_spawn_controller
 	_spawn_timer = spawn_timer
 	_dependencies_configured = _enemy_spawn_controller != null and _spawn_timer != null
+	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_signal("enemy_spawned"):
+		_enemy_spawn_controller.connect("enemy_spawned", _on_enemy_spawned)
 
 
 func _ready() -> void:
@@ -50,6 +52,7 @@ func _ready() -> void:
 	else:
 		state = State.WAVE_ACTIVE
 
+	alive_enemy_count = _count_alive_enemies_once()
 	set_round(current_round)
 	if auto_begin_wave_on_ready and state == State.PREPARE:
 		call_deferred("begin_wave")
@@ -58,7 +61,6 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	alive_enemy_count = _count_alive_enemies()
 	if state == State.FAILED or state == State.CLEARED:
 		return
 
@@ -115,6 +117,37 @@ func request_next_round() -> void:
 	_advance_to_next_round()
 
 
+func _on_enemy_spawned(enemy: Area2D) -> void:
+	if not is_instance_valid(enemy):
+		return
+	alive_enemy_count += 1
+	if enemy.has_signal("died"):
+		enemy.connect("died", _on_enemy_died, CONNECT_ONE_SHOT)
+	enemy.tree_exiting.connect(_on_enemy_tree_exiting.bind(enemy), CONNECT_ONE_SHOT)
+
+
+func _on_enemy_died(_enemy: Area2D) -> void:
+	alive_enemy_count = maxi(0, alive_enemy_count - 1)
+	_check_advance_conditions()
+
+
+func _on_enemy_tree_exiting(enemy: Area2D) -> void:
+	if not is_instance_valid(enemy):
+		return
+	if enemy.has_method("is_dead") and bool(enemy.call("is_dead")):
+		return
+	alive_enemy_count = maxi(0, alive_enemy_count - 1)
+	_check_advance_conditions()
+
+
+func _check_advance_conditions() -> void:
+	if state != State.WAVE_ACTIVE:
+		return
+	var should_show_next_round: bool = _can_advance_next_round_early()
+	if should_show_next_round != is_next_round_available:
+		_set_next_round_available(should_show_next_round)
+
+
 func _advance_to_next_round() -> void:
 	if _is_final_round():
 		state = State.CLEARED
@@ -136,7 +169,7 @@ func _stop_wave() -> void:
 		_spawn_timer.stop()
 
 
-func _count_alive_enemies() -> int:
+func _count_alive_enemies_once() -> int:
 	var count: int = 0
 	for node: Node in get_tree().get_nodes_in_group(enemy_group_name):
 		if not is_instance_valid(node):

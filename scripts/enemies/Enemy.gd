@@ -13,6 +13,9 @@ signal damage_taken(amount: float)
 @onready var attack_range: Area2D = $AttackRange
 @onready var attack_range_shape: CollisionShape2D = $AttackRange/CollisionShape2D
 @onready var attack_timer: Timer = $AttackTimer
+@onready var _animator: Node = $EnemyAnimator
+@onready var _target_selector: Node = $EnemyTargetSelector
+@onready var _attack_controller: Node = $EnemyAttackController
 
 enum State {
 	WALK,
@@ -53,7 +56,6 @@ enum State {
 @export var core_path: NodePath
 
 var state: State = State.WALK
-var _is_finished: bool = false
 var _prev_global_x: float = 0.0
 var _prev_global_position: Vector2 = Vector2.ZERO
 var _is_dead: bool = false
@@ -61,9 +63,6 @@ var _death_fade_started: bool = false
 var max_health: float = 100.0
 var current_health: float = 100.0
 var _core_target: Node2D = null
-var _detected_targets: Array[Area2D] = []
-var _attack_targets: Array[Area2D] = []
-var _chase_target: Area2D = null
 var _current_target: Area2D = null
 var _is_attacking_core: bool = false
 
@@ -74,20 +73,24 @@ func _ready() -> void:
 	set_max_health(base_max_health)
 	_prev_global_x = global_position.x
 	_prev_global_position = global_position
-	anim.animation_finished.connect(_on_animation_finished)
+
+	_animator.configure(anim)
+	_target_selector.configure(hero_detect_area, attack_range)
+	_attack_controller.configure(attack_timer)
+
+	_animator.non_loop_finished.connect(_on_animator_non_loop_finished)
+	_attack_controller.cooldown_expired.connect(_on_attack_cooldown_expired)
+	_target_selector.detect_target_exited.connect(_on_detect_target_exited)
+	_target_selector.attack_target_exited.connect(_on_attack_target_exited)
+
 	_apply_range_settings()
-	if hero_detect_area != null:
-		hero_detect_area.area_entered.connect(_on_hero_detect_area_entered)
-		hero_detect_area.area_exited.connect(_on_hero_detect_area_exited)
-	if attack_range != null:
-		attack_range.area_entered.connect(_on_attack_range_area_entered)
-		attack_range.area_exited.connect(_on_attack_range_area_exited)
-	if attack_timer != null:
-		attack_timer.one_shot = true
-		attack_timer.timeout.connect(_on_attack_timer_timeout)
 	_resolve_core_target()
-	call_deferred("_sync_targets_from_overlaps")
-	_play(State.WALK, true)
+	call_deferred("_deferred_sync_targets")
+	_play_state(State.WALK, true)
+
+
+func _deferred_sync_targets() -> void:
+	_target_selector.sync_from_overlaps()
 
 
 func _input_event(_viewport: Viewport, event: InputEvent, _shape_idx: int) -> void:
@@ -112,16 +115,17 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_is_attacking_core = false
-	_cleanup_targets()
-	_refresh_chase_target()
+	_target_selector.cleanup()
+	_target_selector.update_chase_target()
 
-	if _chase_target != null:
-		if _is_target_attackable(_chase_target):
-			_current_target = _chase_target
+	var chase: Area2D = _target_selector.get_chase_target()
+	if chase != null:
+		if _target_selector.is_target_attackable(chase):
+			_current_target = chase
 			_handle_attack_state()
 			return
 		_current_target = null
-		_move_toward_target(_chase_target.global_position, delta)
+		_move_toward_target(chase.global_position, delta)
 		return
 
 	if _current_target != null:
@@ -136,29 +140,33 @@ func _physics_process(delta: float) -> void:
 	_move_toward_core(delta)
 
 
+# -- Public animation convenience methods --------------------------------------
+
 func play_walk() -> void:
-	_play(State.WALK, true)
+	_play_state(State.WALK, true)
 
 
 func play_attack() -> void:
-	_play(State.ATTACK, true)
+	_play_state(State.ATTACK, true)
 
 
 func play_hurt() -> void:
-	_play(State.HURT, true)
+	_play_state(State.HURT, true)
 
 
 func play_death() -> void:
-	_play(State.DEATH, true)
+	_play_state(State.DEATH, true)
 
 
 func is_state_finished() -> bool:
-	return _is_finished
+	return _animator.is_animation_finished()
 
 
 func is_dead() -> bool:
 	return _is_dead
 
+
+# -- Health management ---------------------------------------------------------
 
 func set_max_health(value: float, reset_current: bool = true) -> void:
 	max_health = maxf(1.0, value)
@@ -203,6 +211,8 @@ func get_health_ratio() -> float:
 	return current_health / max_health
 
 
+# -- Status helpers ------------------------------------------------------------
+
 func get_status_anchor_canvas_position() -> Vector2:
 	if status_anchor != null:
 		return status_anchor.get_global_transform_with_canvas().origin
@@ -228,43 +238,42 @@ func set_core_target(target: Node2D) -> void:
 	_core_target = target
 
 
+# -- Attack orchestration ------------------------------------------------------
+
 func _handle_attack_state() -> void:
-	if not _is_target_attackable(_current_target):
+	if not _target_selector.is_target_attackable(_current_target):
 		_current_target = null
-		_play(State.WALK)
+		_play_state(State.WALK)
 		return
 
 	_face_toward(_current_target.global_position)
-	if attack_timer != null and not attack_timer.is_stopped():
+	if _attack_controller.is_on_cooldown():
 		if state != State.ATTACK:
-			_play(State.ATTACK)
+			_play_state(State.ATTACK)
 		return
 	_perform_attack()
 
 
 func _handle_core_attack_state() -> void:
 	if not _is_core_attackable():
-		_play(State.WALK)
+		_play_state(State.WALK)
 		return
 
 	_face_toward(_get_core_attack_focus_position())
-	if attack_timer != null and not attack_timer.is_stopped():
+	if _attack_controller.is_on_cooldown():
 		if state != State.ATTACK:
-			_play(State.ATTACK)
+			_play_state(State.ATTACK)
 		return
 	_perform_core_attack()
 
 
 func _perform_attack() -> void:
-	if not _is_target_attackable(_current_target):
+	if not _target_selector.is_target_attackable(_current_target):
 		return
 
 	# Explicit attack trigger always restarts the animation.
 	play_attack()
-	if _current_target.has_method("apply_damage"):
-		_current_target.call("apply_damage", attack_damage)
-	if attack_timer != null:
-		attack_timer.start(_get_attack_cooldown_seconds())
+	_attack_controller.perform_attack(_current_target, attack_damage, attacks_per_second)
 
 
 func _perform_core_attack() -> void:
@@ -274,11 +283,57 @@ func _perform_core_attack() -> void:
 		return
 
 	play_attack()
-	if _core_target.has_method("apply_damage"):
-		_core_target.call("apply_damage", attack_damage)
-	if attack_timer != null:
-		attack_timer.start(_get_attack_cooldown_seconds())
+	_attack_controller.perform_core_attack(_core_target, attack_damage, attacks_per_second)
 
+
+# -- Component signal handlers -------------------------------------------------
+
+func _on_animator_non_loop_finished() -> void:
+	if state == State.DEATH:
+		if auto_free_on_death_end:
+			_start_death_fade_and_free()
+		return
+
+	if state == State.HURT:
+		if _current_target != null:
+			_play_state(State.ATTACK)
+		else:
+			_play_state(State.WALK, true)
+		return
+
+
+func _on_attack_cooldown_expired() -> void:
+	_target_selector.cleanup()
+	_target_selector.update_chase_target()
+	var chase: Area2D = _target_selector.get_chase_target()
+	if chase != null:
+		if _target_selector.is_target_attackable(chase):
+			_current_target = chase
+			_perform_attack()
+		else:
+			_current_target = null
+			_play_state(State.WALK)
+		return
+	_current_target = null
+	if _is_core_attackable():
+		_perform_core_attack()
+		return
+	_play_state(State.WALK)
+
+
+func _on_detect_target_exited(target: Area2D) -> void:
+	if _current_target == target and not _target_selector.is_target_attackable(target):
+		_current_target = null
+		_play_state(State.WALK)
+
+
+func _on_attack_target_exited(target: Area2D) -> void:
+	if _current_target == target and not _target_selector.is_target_attackable(target):
+		_current_target = null
+		_play_state(State.WALK)
+
+
+# -- Movement ------------------------------------------------------------------
 
 func _move_toward_core(delta: float) -> void:
 	if _core_target == null or not is_instance_valid(_core_target):
@@ -289,7 +344,7 @@ func _move_toward_core(delta: float) -> void:
 	var core_position: Vector2 = _get_core_approach_position(global_position)
 	if global_position.distance_to(core_position) <= core_reach_distance:
 		if state != State.WALK:
-			_play(State.WALK)
+			_play_state(State.WALK)
 		return
 
 	var next_position: Vector2 = core_position
@@ -310,7 +365,7 @@ func _move_toward_core(delta: float) -> void:
 
 	global_position += direction.normalized() * move_speed * delta
 	if state != State.WALK:
-		_play(State.WALK)
+		_play_state(State.WALK)
 
 
 func _move_toward_target(target_position: Vector2, delta: float) -> void:
@@ -329,14 +384,16 @@ func _move_toward_target(target_position: Vector2, delta: float) -> void:
 		direction = target_position - global_position
 	if direction.length_squared() <= 0.0001:
 		if state != State.WALK:
-			_play(State.WALK)
+			_play_state(State.WALK)
 		return
 
 	_face_toward(target_position)
 	global_position += direction.normalized() * move_speed * delta
 	if state != State.WALK:
-		_play(State.WALK)
+		_play_state(State.WALK)
 
+
+# -- Core approach / detection -------------------------------------------------
 
 func _get_core_approach_position(from_position: Vector2) -> Vector2:
 	if _core_target == null:
@@ -372,104 +429,6 @@ func _get_core_approach_position(from_position: Vector2) -> Vector2:
 	return core_center + boundary
 
 
-func _on_hero_detect_area_entered(area: Area2D) -> void:
-	if not _is_valid_hero_target(area):
-		return
-	if not _detected_targets.has(area):
-		_detected_targets.append(area)
-	_refresh_chase_target()
-
-
-func _on_hero_detect_area_exited(area: Area2D) -> void:
-	_detected_targets.erase(area)
-	if _chase_target == area:
-		_chase_target = null
-	_refresh_chase_target()
-	if _current_target == area and not _is_target_attackable(area):
-		_current_target = null
-		_play(State.WALK)
-
-
-func _on_attack_range_area_entered(area: Area2D) -> void:
-	if not _is_valid_hero_target(area):
-		return
-	if not _attack_targets.has(area):
-		_attack_targets.append(area)
-
-
-func _on_attack_range_area_exited(area: Area2D) -> void:
-	_attack_targets.erase(area)
-	if _current_target == area and not _is_target_attackable(area):
-		_current_target = null
-		_play(State.WALK)
-
-
-func _on_attack_timer_timeout() -> void:
-	_cleanup_targets()
-	_refresh_chase_target()
-	if _chase_target != null:
-		if _is_target_attackable(_chase_target):
-			_current_target = _chase_target
-			_perform_attack()
-		else:
-			_current_target = null
-			_play(State.WALK)
-		return
-	_current_target = null
-	if _is_core_attackable():
-		_perform_core_attack()
-		return
-	_play(State.WALK)
-
-
-func _cleanup_targets() -> void:
-	for i: int in range(_detected_targets.size() - 1, -1, -1):
-		var target: Area2D = _detected_targets[i]
-		if not _is_valid_hero_target(target):
-			_detected_targets.remove_at(i)
-	for i: int in range(_attack_targets.size() - 1, -1, -1):
-		var target: Area2D = _attack_targets[i]
-		if not _is_valid_hero_target(target):
-			_attack_targets.remove_at(i)
-	if _chase_target != null and not _is_target_detected(_chase_target):
-		_chase_target = null
-	if _current_target != null and not _is_target_attackable(_current_target):
-		_current_target = null
-
-
-func _pick_chase_target() -> Area2D:
-	var best_target: Area2D = null
-	var best_distance_sq: float = INF
-	for target: Area2D in _detected_targets:
-		if not _is_target_detected(target):
-			continue
-		var distance_sq: float = global_position.distance_squared_to(target.global_position)
-		if best_target == null or distance_sq < best_distance_sq:
-			best_target = target
-			best_distance_sq = distance_sq
-	return best_target
-
-
-func _refresh_chase_target() -> void:
-	_chase_target = _pick_chase_target()
-
-
-func _sync_targets_from_overlaps() -> void:
-	if hero_detect_area != null:
-		for area: Area2D in hero_detect_area.get_overlapping_areas():
-			if not _is_valid_hero_target(area):
-				continue
-			if not _detected_targets.has(area):
-				_detected_targets.append(area)
-	if attack_range != null:
-		for area: Area2D in attack_range.get_overlapping_areas():
-			if not _is_valid_hero_target(area):
-				continue
-			if not _attack_targets.has(area):
-				_attack_targets.append(area)
-	_refresh_chase_target()
-
-
 func _resolve_core_target() -> void:
 	if core_path != NodePath():
 		var node_from_path: Node2D = get_node_or_null(core_path) as Node2D
@@ -480,181 +439,6 @@ func _resolve_core_target() -> void:
 	var node: Node = get_tree().get_first_node_in_group(&"core")
 	if node is Node2D:
 		_core_target = node as Node2D
-
-
-func _update_facing() -> void:
-	if _current_target != null and _is_target_attackable(_current_target):
-		_face_toward(_current_target.global_position)
-		_prev_global_x = global_position.x
-		return
-	if _chase_target != null and _is_target_detected(_chase_target):
-		_face_toward(_chase_target.global_position)
-		_prev_global_x = global_position.x
-		return
-	if _is_attacking_core and _core_target != null and is_instance_valid(_core_target):
-		_face_toward(_get_core_attack_focus_position())
-		_prev_global_x = global_position.x
-		return
-
-	var dx: float = global_position.x - _prev_global_x
-	if dx > horizontal_flip_deadzone:
-		anim.flip_h = false
-	elif dx < -horizontal_flip_deadzone:
-		anim.flip_h = true
-	_prev_global_x = global_position.x
-
-
-func _face_toward(target_position: Vector2) -> void:
-	var dx: float = target_position.x - global_position.x
-	if dx > horizontal_flip_deadzone:
-		anim.flip_h = false
-	elif dx < -horizontal_flip_deadzone:
-		anim.flip_h = true
-
-
-func _play(new_state: State, force: bool = false) -> void:
-	if _is_dead and new_state != State.DEATH:
-		return
-	var same_state: bool = new_state == state
-	if not force and same_state:
-		return
-	state = new_state
-	_is_finished = false
-
-	var anim_name: StringName = _anim_name_from_state(state)
-	if anim.sprite_frames == null or not anim.sprite_frames.has_animation(anim_name):
-		if state == State.ATTACK and anim.sprite_frames != null and anim.sprite_frames.has_animation(&"walk"):
-			anim_name = &"walk"
-		else:
-			push_warning("Missing animation for state: %s" % [anim_name])
-			return
-	if force and same_state:
-		anim.stop()
-	anim.play(anim_name)
-
-
-func _on_animation_finished() -> void:
-	if anim.sprite_frames == null:
-		return
-
-	var anim_name: StringName = _anim_name_from_state(state)
-	if not anim.sprite_frames.has_animation(anim_name):
-		return
-	if anim.sprite_frames.get_animation_loop(anim_name):
-		return
-	if _is_finished:
-		return
-	_is_finished = true
-	_on_non_loop_finished()
-
-
-func _on_non_loop_finished() -> void:
-	if state == State.DEATH:
-		if auto_free_on_death_end:
-			_start_death_fade_and_free()
-		return
-
-	if state == State.HURT:
-		if _current_target != null:
-			_play(State.ATTACK)
-		else:
-			_play(State.WALK, true)
-		return
-
-
-func _die() -> void:
-	if _is_dead:
-		return
-	_is_dead = true
-	_is_attacking_core = false
-	_detach_from_path_agent()
-	current_health = 0.0
-	_emit_health_changed()
-	_current_target = null
-	_chase_target = null
-	_detected_targets.clear()
-	_attack_targets.clear()
-	if attack_timer != null:
-		attack_timer.stop()
-	set_attack_range_preview_visible(false)
-	play_death()
-	if auto_free_on_death_end:
-		_start_death_fade_and_free()
-	died.emit(self)
-
-
-func _detach_from_path_agent() -> void:
-	var path_agent: Node = get_parent()
-	if not (path_agent is PathFollow2D):
-		return
-
-	var world_parent: Node = get_tree().current_scene
-	if world_parent == null:
-		return
-
-	reparent(world_parent, true)
-	_prev_global_x = global_position.x
-	_prev_global_position = global_position
-	if is_instance_valid(path_agent):
-		path_agent.queue_free()
-
-
-func _start_death_fade_and_free() -> void:
-	if _death_fade_started:
-		return
-	_death_fade_started = true
-
-	if death_fade_duration <= 0.0:
-		queue_free()
-		return
-
-	var tween: Tween = create_tween()
-	tween.tween_property(self, "modulate:a", 0.0, death_fade_duration)
-	tween.finished.connect(queue_free)
-
-
-func _emit_health_changed() -> void:
-	health_changed.emit(current_health, max_health, get_health_ratio())
-
-
-func _emit_moved_if_needed() -> void:
-	if global_position.is_equal_approx(_prev_global_position):
-		return
-	_prev_global_position = global_position
-	enemy_moved.emit(self, global_position)
-
-
-func _get_attack_cooldown_seconds() -> float:
-	var rate: float = maxf(0.1, attacks_per_second)
-	return 1.0 / rate
-
-
-func _is_valid_hero_target(target: Area2D) -> bool:
-	if not is_instance_valid(target):
-		return false
-	if not target.is_in_group(&"hero"):
-		return false
-	if target.has_method("is_dead") and bool(target.call("is_dead")):
-		return false
-	return true
-
-
-func _is_target_attackable(target: Area2D) -> bool:
-	if not _is_valid_hero_target(target):
-		return false
-	if not _detected_targets.has(target):
-		return false
-	if not _attack_targets.has(target):
-		return false
-	return true
-
-
-func _is_target_detected(target: Area2D) -> bool:
-	if not _is_valid_hero_target(target):
-		return false
-	if not _detected_targets.has(target):
-		return false
-	return true
 
 
 func _is_core_attackable() -> bool:
@@ -707,6 +491,136 @@ func _get_core_attack_focus_position() -> Vector2:
 	return _core_target.global_position
 
 
+# -- Facing / visual -----------------------------------------------------------
+
+func _update_facing() -> void:
+	if _current_target != null and _target_selector.is_target_attackable(_current_target):
+		_face_toward(_current_target.global_position)
+		_prev_global_x = global_position.x
+		return
+	var chase: Area2D = _target_selector.get_chase_target()
+	if chase != null and _target_selector.is_target_detected(chase):
+		_face_toward(chase.global_position)
+		_prev_global_x = global_position.x
+		return
+	if _is_attacking_core and _core_target != null and is_instance_valid(_core_target):
+		_face_toward(_get_core_attack_focus_position())
+		_prev_global_x = global_position.x
+		return
+
+	var dx: float = global_position.x - _prev_global_x
+	if dx > horizontal_flip_deadzone:
+		_animator.set_flip_h(false)
+	elif dx < -horizontal_flip_deadzone:
+		_animator.set_flip_h(true)
+	_prev_global_x = global_position.x
+
+
+func _face_toward(target_position: Vector2) -> void:
+	var dx: float = target_position.x - global_position.x
+	if dx > horizontal_flip_deadzone:
+		_animator.set_flip_h(false)
+	elif dx < -horizontal_flip_deadzone:
+		_animator.set_flip_h(true)
+
+
+# -- Animation state -----------------------------------------------------------
+
+func _play_state(new_state: State, force: bool = false) -> void:
+	if _is_dead and new_state != State.DEATH:
+		return
+	var same_state: bool = new_state == state
+	if not force and same_state:
+		return
+	state = new_state
+	var anim_name: StringName = _anim_name_from_state(state)
+	if not _animator.has_animation(anim_name):
+		if state == State.ATTACK and _animator.has_animation(&"walk"):
+			anim_name = &"walk"
+		else:
+			push_warning("Missing animation for state: %s" % [anim_name])
+			return
+	_animator.play(anim_name, force)
+
+
+func _anim_name_from_state(target_state: State) -> StringName:
+	match target_state:
+		State.WALK:
+			return &"walk"
+		State.ATTACK:
+			return &"attack"
+		State.HURT:
+			return &"hurt"
+		State.DEATH:
+			return &"death"
+	return &"walk"
+
+
+# -- Death / lifecycle ---------------------------------------------------------
+
+func _die() -> void:
+	if _is_dead:
+		return
+	_is_dead = true
+	_is_attacking_core = false
+	_detach_from_path_agent()
+	current_health = 0.0
+	_emit_health_changed()
+	_current_target = null
+	_target_selector.clear_all()
+	_attack_controller.stop()
+	set_attack_range_preview_visible(false)
+	play_death()
+	if auto_free_on_death_end:
+		_start_death_fade_and_free()
+	died.emit(self)
+
+
+func _detach_from_path_agent() -> void:
+	var path_agent: Node = get_parent()
+	if not (path_agent is PathFollow2D):
+		return
+
+	var world_parent: Node = get_tree().current_scene
+	if world_parent == null:
+		return
+
+	reparent(world_parent, true)
+	_prev_global_x = global_position.x
+	_prev_global_position = global_position
+	if is_instance_valid(path_agent):
+		path_agent.queue_free()
+
+
+func _start_death_fade_and_free() -> void:
+	if _death_fade_started:
+		return
+	_death_fade_started = true
+
+	if death_fade_duration <= 0.0:
+		queue_free()
+		return
+
+	var tween: Tween = create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, death_fade_duration)
+	tween.finished.connect(queue_free)
+
+
+# -- Signal emission -----------------------------------------------------------
+
+func _emit_health_changed() -> void:
+	health_changed.emit(current_health, max_health, get_health_ratio())
+
+
+func _emit_moved_if_needed() -> void:
+	if global_position.is_equal_approx(_prev_global_position):
+		return
+	_prev_global_position = global_position
+	enemy_moved.emit(self, global_position)
+
+
+# -- Range / area helpers ------------------------------------------------------
+
 func _apply_range_settings() -> void:
 	if hero_detect_area != null and hero_detect_area.has_method("apply_range"):
 		hero_detect_area.call("apply_range")
@@ -723,6 +637,8 @@ func _get_area_final_range(range_area: Area2D) -> float:
 		return float(range_area.call("get_final_range"))
 	return 0.0
 
+
+# -- Draw ----------------------------------------------------------------------
 
 func _draw_attack_range_preview() -> void:
 	if attack_range_shape == null:
@@ -742,16 +658,3 @@ func _draw() -> void:
 	if not show_attack_range_on_select:
 		return
 	_draw_attack_range_preview()
-
-
-func _anim_name_from_state(target_state: State) -> StringName:
-	match target_state:
-		State.WALK:
-			return &"walk"
-		State.ATTACK:
-			return &"attack"
-		State.HURT:
-			return &"hurt"
-		State.DEATH:
-			return &"death"
-	return &"walk"

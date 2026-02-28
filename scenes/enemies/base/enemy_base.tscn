@@ -5,6 +5,9 @@
 [ext_resource type="Script" uid="uid://vftdq5d1a6d0" path="res://scripts/enemies/ui/EnemyHealthBar.gd" id="3_t4rps"]
 [ext_resource type="Script" uid="uid://ci4oui5wkwxv3" path="res://scripts/enemies/ui/EnemyDamageText.gd" id="4_y7q5v"]
 [ext_resource type="Script" uid="uid://dfsys36ts118h" path="res://scripts/enemies/range/EnemyRangeArea.gd" id="5_enemy_range_area"]
+[ext_resource type="Script" path="res://scripts/enemies/EnemyAnimator.gd" id="6_animator"]
+[ext_resource type="Script" path="res://scripts/enemies/EnemyTargetSelector.gd" id="7_target_selector"]
+[ext_resource type="Script" path="res://scripts/enemies/EnemyAttackController.gd" id="8_atk_ctrl"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7angr"]
 atlas = ExtResource("2_4ra3w")
@@ -255,3 +258,12 @@ script = ExtResource("4_y7q5v")
 damage_font_size = 15
 show_debug_preview_in_editor = true
 debug_preview_amount = 423.0
+
+[node name="EnemyAnimator" type="Node" parent="."]
+script = ExtResource("6_animator")
+
+[node name="EnemyTargetSelector" type="Node" parent="."]
+script = ExtResource("7_target_selector")
+
+[node name="EnemyAttackController" type="Node" parent="."]
+script = ExtResource("8_atk_ctrl")
