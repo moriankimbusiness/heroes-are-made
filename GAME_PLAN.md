@@ -151,7 +151,8 @@
 - 저장 포맷은 `save_version=3` 기반 `user://run_state_v3.json`을 사용한다.
 - 노드 선택 확정 시 저장, 노드 해소 확정 시 저장.
 - 전투 노드는 기존 `scenes/levels/level_01.tscn`을 재사용한다.
-- `RoundManager.all_rounds_cleared`, 코어 `destroyed`, `PlayGround.all_heroes_dead` 신호는 `BattleScreenHost`를 통해 `battle_finished`/`run_failed` 흐름으로 연결한다.
+- `RoundManager.all_rounds_cleared`, 코어 `destroyed`, `Hero.died` 기반 전멸 판정(`BattleSummaryCollector.are_all_heroes_dead`)은 `BattleScreenHost`를 통해 `battle_finished`/`run_failed` 흐름으로 연결한다.
+- `EnemySpawnController`가 스폰한 적 노드는 레벨 루트(전투 인스턴스 하위)에 귀속해 전투 종료(`BattleScreenHost.hide_screen`) 시 함께 해제되도록 유지한다.
 - 기존 `alive_enemy_threshold` 기반 패배는 제거하고, 전투 패배는 `코어 파괴` 또는 `영웅 전멸`로 고정한다.
 - 설정 시스템은 `scripts/core/AppSettings.gd` 오토로드로 관리하고, `MainMenuScreen -> SettingsScreen` 진입/복귀 흐름을 추가했다.
 

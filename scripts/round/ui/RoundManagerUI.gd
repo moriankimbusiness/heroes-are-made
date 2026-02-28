@@ -44,8 +44,6 @@ func _ready() -> void:
 		_round_manager.connect("round_started", _on_round_started)
 	if _round_manager.has_signal("round_cleared"):
 		_round_manager.connect("round_cleared", _on_round_cleared)
-	if _round_manager.has_signal("game_failed"):
-		_round_manager.connect("game_failed", _on_game_failed)
 	if _round_manager.has_signal("all_rounds_cleared"):
 		_round_manager.connect("all_rounds_cleared", _on_all_rounds_cleared)
 
@@ -67,10 +65,6 @@ func _on_round_started(_round: int) -> void:
 func _on_round_cleared(_round: int) -> void:
 	_update_round_label()
 	_update_status_label()
-
-
-func _on_game_failed(alive_enemy_count: int, threshold: int) -> void:
-	_status_label.text = "Status: FAILED (%d/%d)" % [alive_enemy_count, threshold]
 
 
 func _on_all_rounds_cleared() -> void:

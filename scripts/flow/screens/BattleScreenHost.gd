@@ -37,8 +37,6 @@ func show_screen(payload: Dictionary = {}) -> void:
 	if round_manager != null:
 		if round_manager.has_signal("all_rounds_cleared"):
 			round_manager.connect("all_rounds_cleared", _on_rounds_cleared)
-		if round_manager.has_signal("game_failed"):
-			round_manager.connect("game_failed", _on_round_failed)
 
 	var core_node: Node = _battle_instance.get_node_or_null("CoreRoot")
 	if core_node != null and core_node.has_signal("destroyed"):
@@ -146,10 +144,6 @@ func _pick_variant_index(seed_value: int, node_id: int, variant_count: int) -> i
 
 func _on_rounds_cleared() -> void:
 	_emit_once(true, {"reason": "all_rounds_cleared"})
-
-
-func _on_round_failed(_alive_enemy_count: int, _threshold: int) -> void:
-	_emit_once(false, {"reason": "game_failed"})
 
 
 func _on_core_destroyed(_core: Area2D) -> void:

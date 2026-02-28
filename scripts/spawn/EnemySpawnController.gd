@@ -29,6 +29,8 @@ signal enemy_spawned(enemy: Area2D)
 @export var core_path: NodePath
 ## 적 스폰 타이머 노드 경로입니다.
 @export var spawn_timer_path: NodePath
+## 적 스폰 부모 노드 경로입니다.
+@export var spawn_parent_path: NodePath = NodePath("..")
 @export_group("런타임 제어")
 ## 현재 라운드 최대 스폰 수입니다.
 @export var max_spawn_count: int = 10
@@ -40,6 +42,7 @@ var _spawned_count: int = 0
 @onready var _portal: Node2D = get_node_or_null(portal_path) as Node2D
 @onready var _core: Node2D = get_node_or_null(core_path) as Node2D
 @onready var _spawn_timer: Timer = get_node_or_null(spawn_timer_path) as Timer
+@onready var _spawn_parent: Node = get_node_or_null(spawn_parent_path)
 
 
 func _ready() -> void:
@@ -51,6 +54,9 @@ func _ready() -> void:
 		return
 	if _spawn_timer == null:
 		push_error("EnemySpawnController: spawn_timer_path is invalid.")
+		return
+	if _spawn_parent == null:
+		push_error("EnemySpawnController: spawn_parent_path is invalid.")
 		return
 
 	if _core == null:
@@ -76,7 +82,12 @@ func _on_spawn_timer_timeout() -> void:
 		push_error("EnemySpawnController: selected enemy scene root must inherit Node2D.")
 		return
 
-	get_tree().current_scene.add_child(enemy)
+	var spawn_parent: Node = _get_spawn_parent()
+	if spawn_parent == null:
+		push_error("EnemySpawnController: spawn_parent_path is invalid at runtime.")
+		_spawn_timer.stop()
+		return
+	spawn_parent.add_child(enemy)
 	_apply_round_health_multiplier(enemy)
 	enemy.global_position = _portal.global_position
 	if _core != null and enemy.has_method("set_core_target"):
@@ -191,3 +202,16 @@ func _get_formula_health_multiplier_for_current_round() -> float:
 		softcap_factor = 1.0
 
 	return maxf(1.0, base_multiplier * growth_factor / softcap_factor)
+
+
+func _get_spawn_parent() -> Node:
+	if _spawn_parent != null and is_instance_valid(_spawn_parent):
+		return _spawn_parent
+	if spawn_parent_path != NodePath():
+		_spawn_parent = get_node_or_null(spawn_parent_path)
+		if _spawn_parent != null and is_instance_valid(_spawn_parent):
+			return _spawn_parent
+	var fallback_parent: Node = get_parent()
+	if fallback_parent != null and is_instance_valid(fallback_parent):
+		return fallback_parent
+	return null

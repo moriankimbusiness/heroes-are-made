@@ -17,6 +17,9 @@
 - [x] 프로젝트 스킬 추가: `skills/task-research-md`, `skills/task-plan-md` 생성 (`docs/tasks/<task>/research.md`, `plan.md` 워크플로우)
 - [x] `task-research-md` 강화: 리서치 깊이/세부사항/근거 검증 기준(Research Depth Standard) 규칙 추가
 - [x] `task-plan-md` 강화: 계획 깊이/세부 태스크/검증 체크포인트 기준(Planning Depth Standard) 규칙 추가
+- [x] 전투 리소스 소유권 교정: `EnemySpawnController` 적 스폰 부모를 레벨 루트로 전환해 전투 종료 시 적 노드가 함께 해제되도록 보장
+- [x] 전투 UI 등록 경로 보강: `HeroHUD` 적 등록 훅을 `SceneTree.node_added` 기반으로 전환해 부모 구조 변경과 무관하게 동작하도록 수정
+- [x] 전투 종료 경로 정합성 반영: `BattleScreenHost`의 미사용 `game_failed` 연결 제거 및 `GAME_PLAN.md` 종료 판정 근거 문구 동기화
 
 ## 다음 작업
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계

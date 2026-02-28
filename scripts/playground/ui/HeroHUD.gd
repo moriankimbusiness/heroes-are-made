@@ -26,7 +26,7 @@ func _ready() -> void:
 	_register_existing_heroes()
 	_connect_hero_container()
 	_register_existing_enemies()
-	_connect_world_root_for_enemies()
+	_connect_scene_tree_for_enemies()
 	_connect_shop_preview_signals()
 	_connect_range_stat_hover_signal()
 
@@ -104,11 +104,14 @@ func _register_existing_enemies() -> void:
 		_register_enemy(node)
 
 
-func _connect_world_root_for_enemies() -> void:
-	var world_root: Node = get_tree().current_scene
-	if world_root == null:
+func _connect_scene_tree_for_enemies() -> void:
+	var scene_tree: SceneTree = get_tree()
+	if scene_tree == null:
 		return
-	world_root.child_entered_tree.connect(_on_world_child_entered_tree)
+	var on_node_added: Callable = Callable(self, "_on_scene_tree_node_added")
+	if scene_tree.is_connected("node_added", on_node_added):
+		return
+	scene_tree.connect("node_added", on_node_added)
 
 
 func _register_enemy(node: Node) -> void:
@@ -132,7 +135,7 @@ func _on_hero_container_child_entered_tree(node: Node) -> void:
 	_register_hero(node)
 
 
-func _on_world_child_entered_tree(node: Node) -> void:
+func _on_scene_tree_node_added(node: Node) -> void:
 	_register_enemy(node)
 
 
@@ -316,6 +319,15 @@ func _on_enemy_tree_exited(enemy_id: int) -> void:
 	if _selected_enemy.get_instance_id() != enemy_id:
 		return
 	_deselect_enemy()
+
+
+func _exit_tree() -> void:
+	var scene_tree: SceneTree = get_tree()
+	if scene_tree == null:
+		return
+	var on_node_added: Callable = Callable(self, "_on_scene_tree_node_added")
+	if scene_tree.is_connected("node_added", on_node_added):
+		scene_tree.disconnect("node_added", on_node_added)
 
 
 # -- Visual helpers ------------------------------------------------------------

@@ -44,6 +44,7 @@ round_enemy_health_multipliers = Array[float]([1.0, 1.06, 1.13, 1.2, 1.28, 1.36,
 portal_path = NodePath("../Portal")
 core_path = NodePath("../CoreRoot")
 spawn_timer_path = NodePath("../SpawnTimer")
+spawn_parent_path = NodePath("..")
 
 [node name="RoundSystem" parent="." unique_id=1945532616 instance=ExtResource("5_scmn0")]
 enemy_spawn_controller_path = NodePath("../EnemySpawnController")

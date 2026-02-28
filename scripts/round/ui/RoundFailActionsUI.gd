@@ -39,18 +39,12 @@ func set_round_manager(manager: Node) -> void:
 		_set_auto_visible(false)
 		return
 
-	if _round_manager.has_signal("game_failed"):
-		_round_manager.connect("game_failed", _on_game_failed)
 	if _round_manager.has_signal("all_rounds_cleared"):
 		_round_manager.connect("all_rounds_cleared", _on_all_rounds_cleared)
 	if _round_manager.has_signal("round_started"):
 		_round_manager.connect("round_started", _on_round_started)
 
 	_set_auto_visible(false)
-
-
-func _on_game_failed(_alive_enemy_count: int, _threshold: int) -> void:
-	_set_auto_visible(true)
 
 
 func _on_all_rounds_cleared() -> void:

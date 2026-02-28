@@ -2,7 +2,6 @@ extends Node
 
 signal round_started(round: int)
 signal round_cleared(round: int)
-signal game_failed(alive_enemy_count: int, threshold: int)
 signal all_rounds_cleared()
 signal round_timer_updated(remaining_seconds: float)
 signal next_round_available_changed(is_available: bool)
