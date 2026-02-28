@@ -7,6 +7,13 @@
 - [x] 사거리 채움 규칙 보정: 히어로가 점유한 중심 타일은 채움(`fill`)에서 제외
 - [x] 문서 동기화: `GAME_PLAN.md`, `docs/planning/game_plan_domains/05_hero_design.md`를 hover 기반 사거리 규칙으로 갱신
 - [x] TODO 정리: 2026-02-27 완료/검증 섹션을 `docs/todo/2026-02-4w/2026-02-27.md`로 이관
+- [x] `AGENTS.md` 운영 규칙 리서치: 파일 길이/구성 적정성, 공식 가이드 비교, 중복/충돌 리스크 진단
+- [x] `docs/tasks` 워크플로우 도입: `agents-md-governance-review-2026-02-28`에 `research.md`, `plan.md` 생성 및 리서치 결과 저장
+- [x] `docs/tasks` 문서 한글화: `README.md`, `research.md`, `plan.md` 내용을 한국어로 정리
+- [x] `plan.md` 상세화: 리서치 기반으로 단계/산출물/검증 체크리스트/리스크 대응까지 포함한 실행 계획으로 확장
+- [x] `AGENTS.md` 통합 정리 실행: 규칙군 단일 정본(R1~R7)으로 재구성, 길이 `238 -> 145` 축약
+- [x] 운영 참고 분리: `docs/reference/godot_cli_validation.md` 생성 후 `AGENTS.md`에서 링크 참조
+- [x] 실행 산출물 기록: `docs/tasks/agents-md-governance-review-2026-02-28/result.md`에 인벤토리/회귀/체크리스트 결과 정리
 
 ## 다음 작업
 - [ ] 챕터 확장 2차: 최종보스 클리어 후 다음 챕터 월드맵 연계
