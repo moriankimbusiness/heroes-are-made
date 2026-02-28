@@ -10,6 +10,7 @@ signal hero_stats_changed(hero: Hero, stats: HeroStats)
 signal equipment_changed(hero: Hero, slot: int, item: ItemData)
 signal health_changed(hero: Hero, current: float, max_value: float, ratio: float)
 signal progression_changed(hero: Hero, level: int, current_exp: int, required_exp: int)
+signal died(hero: Hero)
 
 @onready var anim: AnimatedSprite2D = $AnimatedSprite2D
 @onready var drag_shape: CollisionShape2D = $DragShape
@@ -327,6 +328,10 @@ func get_hero_class_name() -> String:
 	return "전사"
 
 
+func get_hero_class_id() -> int:
+	return int(hero_class)
+
+
 func get_level() -> int:
 	return level
 
@@ -348,6 +353,43 @@ func add_experience(amount: int) -> void:
 		level += 1
 		required_exp = maxi(1, required_exp + 20)
 	_emit_progression_changed()
+
+
+func to_run_state() -> Dictionary:
+	return {
+		"hero_display_name": hero_display_name,
+		"class_id": int(hero_class),
+		"level": level,
+		"current_exp": current_exp,
+		"required_exp": required_exp,
+		"max_health": max_health,
+		"current_health": current_health,
+		"is_dead": _is_dead
+	}
+
+
+func apply_run_state(snapshot: Dictionary) -> void:
+	hero_display_name = String(snapshot.get("hero_display_name", hero_display_name))
+	hero_class = clampi(int(snapshot.get("class_id", int(hero_class))), HeroClass.WARRIOR, HeroClass.ASSASSIN)
+	level = maxi(1, int(snapshot.get("level", level)))
+	required_exp = maxi(1, int(snapshot.get("required_exp", required_exp)))
+	current_exp = clampi(int(snapshot.get("current_exp", current_exp)), 0, required_exp)
+	_emit_progression_changed()
+
+	var snapshot_max_health: float = float(snapshot.get("max_health", max_health))
+	var snapshot_current_health: float = float(snapshot.get("current_health", snapshot_max_health))
+	set_max_health(snapshot_max_health, false)
+	current_health = clampf(snapshot_current_health, 0.0, max_health)
+
+	var should_be_dead: bool = bool(snapshot.get("is_dead", false)) or current_health <= 0.0
+	if should_be_dead:
+		current_health = 0.0
+		_enter_dead_state(false)
+	else:
+		_exit_dead_state()
+	_emit_health_changed()
+	_recalculate_stats()
+	_update_attack_origin_cell()
 
 
 func get_status_anchor_canvas_position() -> Vector2:
@@ -979,6 +1021,10 @@ func get_health_ratio() -> float:
 
 
 func _die() -> void:
+	_enter_dead_state(true)
+
+
+func _enter_dead_state(emit_signal: bool) -> void:
 	if _is_dead:
 		return
 	_is_dead = true
@@ -997,6 +1043,25 @@ func _die() -> void:
 	_apply_idle_outline_visual()
 	modulate = Color(1.0, 1.0, 1.0, 0.45)
 	play_death()
+	_request_visual_redraw()
+	if emit_signal:
+		died.emit(self)
+
+
+func _exit_dead_state() -> void:
+	var was_dead: bool = _is_dead
+	_is_dead = false
+	_move_order_active = false
+	_move_path_points.clear()
+	_move_path_index = 0
+	_current_target = null
+	_clear_pending_attack()
+	set_physics_process(false)
+	if attack_timer != null:
+		attack_timer.stop()
+	modulate = Color.WHITE
+	if was_dead:
+		_play(State.IDLE, true)
 	_request_visual_redraw()
 
 

@@ -20,9 +20,20 @@ func set_max_health(value: float, reset_current: bool = true) -> void:
 	max_health = maxf(1.0, value)
 	if reset_current:
 		current_health = max_health
+		_is_destroyed = false
 	else:
 		current_health = clampf(current_health, 0.0, max_health)
+		_is_destroyed = current_health <= 0.0
 	_emit_health_changed()
+
+
+func set_current_health(value: float, emit_destroyed_signal: bool = false) -> void:
+	current_health = clampf(value, 0.0, max_health)
+	var was_destroyed: bool = _is_destroyed
+	_is_destroyed = current_health <= 0.0
+	_emit_health_changed()
+	if emit_destroyed_signal and _is_destroyed and not was_destroyed:
+		destroyed.emit(self)
 
 
 func apply_damage(amount: float) -> void:

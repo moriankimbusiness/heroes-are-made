@@ -11,18 +11,26 @@ signal run_cleared(run_id: String)
 
 const WorldMapGeneratorRef := preload("res://scripts/flow/WorldMapGenerator.gd")
 
-const SAVE_PATH := "user://run_state_v2.json"
-const SAVE_VERSION := 2
+const SAVE_PATH := "user://run_state_v3.json"
+const SAVE_VERSION := 3
 
 const NODE_TYPE_NORMAL_BATTLE := "normal_battle"
 const NODE_TYPE_MID_BOSS := "mid_boss"
 const NODE_TYPE_FINAL_BOSS := "final_boss"
+
+const DEFAULT_PARTY_SIZE := 3
+const DEFAULT_PARTY_MAX := 4
+const DEFAULT_HERO_MAX_HEALTH := 100.0
+const DEFAULT_HERO_REQUIRED_EXP := 60
+const DEFAULT_CORE_MAX_HEALTH := 300.0
+const DEFAULT_HERO_CLASS_ORDER: Array[int] = [0, 1, 2, 3]
 
 @onready var _battle_screen_host: Node = $BattleScreenHost
 @onready var _main_menu_screen: Control = $UI/MainMenuScreen
 @onready var _chapter_prep_screen: Control = $UI/ChapterPrepScreen
 @onready var _world_map_screen: Control = $UI/WorldMapScreen
 @onready var _node_resolve_screen: Control = $UI/NodeResolveScreen
+@onready var _battle_reward_screen: Control = $UI/BattleRewardScreen
 @onready var _node_result_screen: Control = $UI/NodeResultScreen
 @onready var _run_result_screen: Control = $UI/RunResultScreen
 @onready var _settings_screen: Control = $UI/SettingsScreen
@@ -34,6 +42,7 @@ var _rng := RandomNumberGenerator.new()
 var _run_state: Dictionary = {}
 var _chapter_state: Dictionary = {}
 var _selected_node_id: int = -1
+var _pending_battle_summary: Dictionary = {}
 
 
 func _ready() -> void:
@@ -44,6 +53,7 @@ func _ready() -> void:
 		_chapter_prep_screen,
 		_world_map_screen,
 		_node_resolve_screen,
+		_battle_reward_screen,
 		_node_result_screen,
 		_run_result_screen
 	]
@@ -77,6 +87,9 @@ func _connect_screen_signals() -> void:
 	if _node_resolve_screen.has_signal("node_resolved"):
 		_node_resolve_screen.connect("node_resolved", _on_node_resolved)
 
+	if _battle_reward_screen.has_signal("reward_selected"):
+		_battle_reward_screen.connect("reward_selected", _on_battle_reward_selected)
+
 	if _node_result_screen.has_signal("continue_requested"):
 		_node_result_screen.connect("continue_requested", _on_node_result_continue_requested)
 
@@ -103,6 +116,7 @@ func _show_screen(screen: Node, payload: Dictionary = {}) -> void:
 
 func _show_main_menu() -> void:
 	_battle_screen_host.call("hide_screen")
+	_pending_battle_summary.clear()
 	_show_screen(_main_menu_screen, {"has_save": FileAccess.file_exists(SAVE_PATH)})
 
 
@@ -110,10 +124,14 @@ func _show_chapter_prep() -> void:
 	if _run_state.is_empty() or _chapter_state.is_empty():
 		return
 	var party_state: Dictionary = _run_state.get("party_state", {}) as Dictionary
+	var hero_snapshots: Array[Dictionary] = _snapshot_array(party_state.get("heroes", []))
+	var selected_count: int = int(party_state.get("selected_count", hero_snapshots.size()))
+	if selected_count <= 0:
+		selected_count = maxi(1, hero_snapshots.size())
 	_show_screen(_chapter_prep_screen, {
 		"chapter_index": int(_run_state.get("chapter_index", 1)),
-		"selected_count": int(party_state.get("selected_count", 3)),
-		"max_count": int(party_state.get("max_count", 4))
+		"selected_count": selected_count,
+		"max_count": int(party_state.get("max_count", DEFAULT_PARTY_MAX))
 	})
 
 
@@ -172,6 +190,7 @@ func _on_start_expedition_requested() -> void:
 
 func _on_back_to_menu_requested() -> void:
 	_battle_screen_host.call("hide_screen")
+	_pending_battle_summary.clear()
 	_show_main_menu()
 
 
@@ -187,13 +206,19 @@ func _on_abandon_run_requested() -> void:
 func _start_new_run() -> void:
 	var unix_time: int = int(Time.get_unix_time_from_system())
 	var run_seed: int = _rng.randi()
+	var initial_party_snapshots: Array[Dictionary] = _build_default_party_snapshots(DEFAULT_PARTY_SIZE)
 	_run_state = {
 		"run_id": "run_%d" % unix_time,
 		"chapter_index": 1,
 		"gold": 100,
 		"party_state": {
-			"selected_count": 3,
-			"max_count": 4
+			"selected_count": initial_party_snapshots.size(),
+			"max_count": DEFAULT_PARTY_MAX,
+			"heroes": initial_party_snapshots
+		},
+		"core_state": {
+			"max_health": DEFAULT_CORE_MAX_HEALTH,
+			"current_health": DEFAULT_CORE_MAX_HEALTH
 		},
 		"inventory_state": {
 			"items": []
@@ -249,14 +274,22 @@ func _is_combat_node(node_type: String) -> bool:
 
 func _start_battle_for_node(node: Dictionary) -> void:
 	_hide_all_screens()
+	if _has_no_living_heroes():
+		_fail_run("all_heroes_dead")
+		return
 	var node_id: int = int(node.get("node_id", -1))
 	var encounter_id: String = "chapter_%d_node_%d" % [int(_run_state.get("chapter_index", 1)), node_id]
 	emit_signal("battle_started", node_id, encounter_id)
 
-	var party_state: Dictionary = _run_state.get("party_state", {}) as Dictionary
+	var party_snapshots: Array[Dictionary] = _get_party_snapshots_for_battle()
 	_battle_screen_host.call("show_screen", {
-		"party_count": int(party_state.get("selected_count", 3)),
-		"gold": int(_run_state.get("gold", 0))
+		"party_count": party_snapshots.size(),
+		"party_snapshots": party_snapshots,
+		"core_state": _sanitize_core_state(_run_state.get("core_state", {}) as Dictionary),
+		"gold": int(_run_state.get("gold", 0)),
+		"seed": int(_run_state.get("seed", 1)),
+		"node_id": node_id,
+		"encounter_id": encounter_id
 	})
 
 
@@ -268,10 +301,34 @@ func _on_battle_host_finished(victory: bool, summary: Dictionary) -> void:
 		_fail_run(String(summary.get("reason", "battle_failed")))
 		return
 
-	_resolve_battle_reward()
+	_pending_battle_summary = summary.duplicate(true)
+	_apply_battle_summary_to_run_state(_pending_battle_summary)
+
+	if _has_no_living_heroes():
+		_fail_run("all_heroes_dead")
+		return
+
+	_show_battle_reward()
 
 
-func _resolve_battle_reward() -> void:
+func _show_battle_reward() -> void:
+	var graph: Dictionary = _chapter_state.get("world_graph", {}) as Dictionary
+	var node: Dictionary = _world_generator.find_node(graph, _selected_node_id)
+	var node_type: String = String(node.get("node_type", NODE_TYPE_NORMAL_BATTLE))
+	_show_screen(_battle_reward_screen, {
+		"node_id": _selected_node_id,
+		"node_type": node_type,
+		"current_gold": int(_run_state.get("gold", 0)),
+		"rng_seed": _rng.randi(),
+		"battle_summary": _pending_battle_summary
+	})
+
+
+func _on_battle_reward_selected(result: Dictionary) -> void:
+	_resolve_battle_reward(result)
+
+
+func _resolve_battle_reward(reward_result: Dictionary = {}) -> void:
 	var graph: Dictionary = _chapter_state.get("world_graph", {}) as Dictionary
 	var node: Dictionary = _world_generator.find_node(graph, _selected_node_id)
 	var node_type: String = String(node.get("node_type", NODE_TYPE_NORMAL_BATTLE))
@@ -283,21 +340,30 @@ func _resolve_battle_reward() -> void:
 		gold_gain = 100
 
 	var granted_rewards: Array[String] = []
+	for reward_var in reward_result.get("granted_rewards", []):
+		granted_rewards.append(String(reward_var))
+
 	if node_type == NODE_TYPE_MID_BOSS:
 		granted_rewards.append("중간보스 전리품")
 	elif node_type == NODE_TYPE_FINAL_BOSS:
 		granted_rewards.append("최종보스 전리품")
 
+	var reward_note: String = String(reward_result.get("note", "전투 보상 선택 완료"))
+	var reward_gold_delta: int = int(reward_result.get("gold_delta", 0))
+	var total_gold_delta: int = gold_gain + reward_gold_delta
+
 	_complete_node_resolution({
 		"node_id": _selected_node_id,
 		"result_type": "success",
-		"gold_delta": gold_gain,
+		"gold_delta": total_gold_delta,
 		"hp_delta": 0,
 		"granted_rewards": granted_rewards,
 		"consumed_resources": [],
 		"next_state": "world",
-		"note": "전투 승리 보상 획득"
+		"note": "%s / 전투 승리 보상 획득" % reward_note,
+		"battle_summary": _pending_battle_summary
 	})
+	_pending_battle_summary.clear()
 
 
 func _on_node_resolved(result: Dictionary) -> void:
@@ -309,6 +375,10 @@ func _complete_node_resolution(result: Dictionary) -> void:
 	var graph: Dictionary = _chapter_state.get("world_graph", {}) as Dictionary
 	var node: Dictionary = _world_generator.find_node(graph, node_id)
 	var node_type: String = String(node.get("node_type", ""))
+
+	var battle_summary: Dictionary = result.get("battle_summary", {}) as Dictionary
+	if not battle_summary.is_empty():
+		_apply_battle_summary_to_run_state(battle_summary)
 
 	var gold_delta: int = int(result.get("gold_delta", 0))
 	if gold_delta != 0:
@@ -380,6 +450,7 @@ func _on_chapter_cleared() -> void:
 
 func _fail_run(reason: String) -> void:
 	_battle_screen_host.call("hide_screen")
+	_pending_battle_summary.clear()
 	var chapter_id: int = int(_chapter_state.get("chapter_id", 1))
 	var node_id: int = _selected_node_id
 	emit_signal("run_failed", reason, chapter_id, node_id)
@@ -460,6 +531,7 @@ func _load_run_state() -> bool:
 
 	_run_state = loaded_run_state
 	_chapter_state = loaded_chapter_state
+	_ensure_run_state_defaults()
 
 	var ui_state: Dictionary = payload.get("ui_state", {}) as Dictionary
 	_selected_node_id = int(ui_state.get("selected_node_id", int(_chapter_state.get("selected_node_id", -1))))
@@ -482,3 +554,104 @@ func _clear_save_file() -> void:
 		return
 	var absolute_path: String = ProjectSettings.globalize_path(SAVE_PATH)
 	DirAccess.remove_absolute(absolute_path)
+
+
+func _build_default_party_snapshots(count: int) -> Array[Dictionary]:
+	var snapshots: Array[Dictionary] = []
+	var resolved_count: int = maxi(1, count)
+	for i in range(resolved_count):
+		var class_id: int = DEFAULT_HERO_CLASS_ORDER[i % DEFAULT_HERO_CLASS_ORDER.size()]
+		snapshots.append({
+			"hero_display_name": "용사 %d" % (i + 1),
+			"class_id": class_id,
+			"level": 1,
+			"current_exp": 0,
+			"required_exp": DEFAULT_HERO_REQUIRED_EXP,
+			"max_health": DEFAULT_HERO_MAX_HEALTH,
+			"current_health": DEFAULT_HERO_MAX_HEALTH,
+			"is_dead": false
+		})
+	return snapshots
+
+
+func _snapshot_array(snapshot_var: Variant) -> Array[Dictionary]:
+	var snapshots: Array[Dictionary] = []
+	if not (snapshot_var is Array):
+		return snapshots
+	for row in snapshot_var:
+		if row is Dictionary:
+			snapshots.append((row as Dictionary).duplicate(true))
+	return snapshots
+
+
+func _get_party_snapshots_for_battle() -> Array[Dictionary]:
+	var party_state: Dictionary = _run_state.get("party_state", {}) as Dictionary
+	var hero_snapshots: Array[Dictionary] = _snapshot_array(party_state.get("heroes", []))
+	if hero_snapshots.is_empty():
+		var selected_count: int = int(party_state.get("selected_count", DEFAULT_PARTY_SIZE))
+		hero_snapshots = _build_default_party_snapshots(selected_count)
+		_set_party_snapshots(hero_snapshots)
+	return hero_snapshots
+
+
+func _set_party_snapshots(snapshots: Array[Dictionary]) -> void:
+	var party_state: Dictionary = _run_state.get("party_state", {}) as Dictionary
+	party_state["heroes"] = snapshots.duplicate(true)
+	party_state["selected_count"] = snapshots.size()
+	party_state["max_count"] = int(party_state.get("max_count", DEFAULT_PARTY_MAX))
+	_run_state["party_state"] = party_state
+
+
+func _sanitize_core_state(core_state: Dictionary) -> Dictionary:
+	var max_health: float = maxf(1.0, float(core_state.get("max_health", DEFAULT_CORE_MAX_HEALTH)))
+	var current_health: float = clampf(float(core_state.get("current_health", max_health)), 0.0, max_health)
+	return {
+		"max_health": max_health,
+		"current_health": current_health
+	}
+
+
+func _apply_battle_summary_to_run_state(summary: Dictionary) -> void:
+	if summary.has("gold_end"):
+		var gold_end: int = int(summary.get("gold_end", -1))
+		if gold_end >= 0:
+			_run_state["gold"] = maxi(0, gold_end)
+
+	var party_snapshots: Array[Dictionary] = _snapshot_array(summary.get("party_snapshots", []))
+	if not party_snapshots.is_empty():
+		_set_party_snapshots(party_snapshots)
+
+	var summary_core: Dictionary = summary.get("core_state", {}) as Dictionary
+	if not summary_core.is_empty():
+		_run_state["core_state"] = _sanitize_core_state(summary_core)
+
+
+func _has_no_living_heroes() -> bool:
+	var party_state: Dictionary = _run_state.get("party_state", {}) as Dictionary
+	var snapshots: Array[Dictionary] = _snapshot_array(party_state.get("heroes", []))
+	if snapshots.is_empty():
+		return true
+	for snapshot in snapshots:
+		var is_dead: bool = bool(snapshot.get("is_dead", false))
+		var current_health: float = float(snapshot.get("current_health", 0.0))
+		if not is_dead and current_health > 0.0:
+			return false
+	return true
+
+
+func _ensure_run_state_defaults() -> void:
+	if _run_state.is_empty():
+		return
+
+	var party_state: Dictionary = _run_state.get("party_state", {}) as Dictionary
+	var selected_count: int = int(party_state.get("selected_count", DEFAULT_PARTY_SIZE))
+	selected_count = maxi(1, selected_count)
+	var snapshots: Array[Dictionary] = _snapshot_array(party_state.get("heroes", []))
+	if snapshots.is_empty():
+		snapshots = _build_default_party_snapshots(selected_count)
+	party_state["heroes"] = snapshots
+	party_state["selected_count"] = snapshots.size()
+	party_state["max_count"] = int(party_state.get("max_count", DEFAULT_PARTY_MAX))
+	_run_state["party_state"] = party_state
+
+	_run_state["core_state"] = _sanitize_core_state(_run_state.get("core_state", {}) as Dictionary)
