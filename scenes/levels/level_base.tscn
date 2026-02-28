@@ -8,8 +8,13 @@
 [ext_resource type="PackedScene" uid="uid://dyskcnci6tlwd" path="res://scenes/playground/playground.tscn" id="6_playground"]
 [ext_resource type="Script" uid="uid://d2fdwyd03ff2y" path="res://scripts/camera/LevelCameraController.gd" id="7_level_camera"]
 [ext_resource type="PackedScene" uid="uid://bqjtq5n4vls2j" path="res://scenes/core/core_base.tscn" id="8_core_base"]
+[ext_resource type="PackedScene" uid="uid://b4q0tby6xk7p5" path="res://scenes/maps/variants/battle_map_01.tscn" id="9_battle_map_01"]
 
 [node name="Level" type="Node2D" unique_id=867026977]
+
+[node name="BattleMapSlot" type="Node2D" parent="."]
+
+[node name="BattleMap" parent="BattleMapSlot" instance=ExtResource("9_battle_map_01")]
 
 [node name="CoreRoot" parent="." unique_id=838351356 instance=ExtResource("8_core_base")]
 position = Vector2(635, 357)

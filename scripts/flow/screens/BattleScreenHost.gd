@@ -3,6 +3,16 @@ extends Node
 signal battle_finished(victory: bool, summary: Dictionary)
 
 const LEVEL_SCENE := preload("res://scenes/levels/level_01.tscn")
+const DEFAULT_BATTLE_MAP_VARIANTS: Array[PackedScene] = [
+	preload("res://scenes/maps/variants/battle_map_01.tscn"),
+	preload("res://scenes/maps/variants/battle_map_02.tscn")
+]
+
+@export_group("전투 맵 변형")
+## 전투 진입 시 선택할 맵 변형 목록입니다.
+@export var battle_map_variants: Array[PackedScene] = DEFAULT_BATTLE_MAP_VARIANTS
+## payload에 seed가 없을 때 사용할 기본 시드 값입니다.
+@export var fallback_map_seed: int = 0
 
 @onready var _battle_root: Node = $BattleRoot
 
@@ -40,6 +50,7 @@ func hide_screen() -> void:
 func _configure_battle_scene(battle_scene: Node, payload: Dictionary) -> void:
 	var party_count: int = int(payload.get("party_count", 3))
 	var current_gold: int = int(payload.get("gold", 0))
+	_apply_map_variant(battle_scene, payload)
 	var playground: Node = battle_scene.get_node_or_null("PlayGround")
 	if playground != null and playground.has_method("summon_hero"):
 		for _i in range(maxi(1, party_count)):
@@ -47,6 +58,50 @@ func _configure_battle_scene(battle_scene: Node, payload: Dictionary) -> void:
 	var hero_ui: CanvasLayer = battle_scene.get_node_or_null("PlayGround/HeroHUD") as CanvasLayer
 	if hero_ui != null and hero_ui.has_method("set_starting_gold"):
 		hero_ui.call("set_starting_gold", current_gold)
+
+
+func _apply_map_variant(battle_scene: Node, payload: Dictionary) -> void:
+	var variants: Array[PackedScene] = _resolve_map_variants()
+	if variants.is_empty():
+		return
+
+	var seed_value: int = int(payload.get("seed", fallback_map_seed))
+	var node_id: int = int(payload.get("node_id", 0))
+	var variant_index: int = _pick_variant_index(seed_value, node_id, variants.size())
+	var selected_variant: PackedScene = variants[variant_index]
+
+	var battle_map_slot: Node = battle_scene.get_node_or_null("BattleMapSlot")
+	if battle_map_slot == null:
+		push_warning("BattleScreenHost: BattleMapSlot not found, map variant apply skipped.")
+		return
+
+	for child: Node in battle_map_slot.get_children():
+		child.queue_free()
+
+	var battle_map_instance: Node = selected_variant.instantiate()
+	battle_map_instance.name = "BattleMap"
+	battle_map_slot.add_child(battle_map_instance)
+
+	var playground: Node = battle_scene.get_node_or_null("PlayGround")
+	if playground != null and playground.has_method("set_battle_map"):
+		playground.call("set_battle_map", battle_map_instance)
+
+
+func _resolve_map_variants() -> Array[PackedScene]:
+	var resolved: Array[PackedScene] = []
+	for scene: PackedScene in battle_map_variants:
+		if scene != null:
+			resolved.append(scene)
+	return resolved
+
+
+func _pick_variant_index(seed_value: int, node_id: int, variant_count: int) -> int:
+	if variant_count <= 1:
+		return 0
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	var mixed_seed: int = seed_value * 1103515245 + node_id * 12345 + variant_count * 265443576
+	rng.seed = int(absi(mixed_seed))
+	return int(rng.randi() % variant_count)
 
 
 func _on_rounds_cleared() -> void:

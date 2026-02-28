@@ -4,6 +4,6 @@
 
 [node name="Level" unique_id=905476141 instance=ExtResource("1_b2j3x")]
 
-[node name="EnemySpawnController" parent="." index="4" unique_id=1623964248]
+[node name="EnemySpawnController" parent="." unique_id=1623964248]
 round_spawn_counts = Array[int]([12, 14, 16, 18, 20, 22, 24, 26, 30, 34, 38, 42])
 level_hp_scale = 2.0

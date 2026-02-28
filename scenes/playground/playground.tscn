@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://mb6qpk3jg4p" path="res://scripts/playground/PlayGround.gd" id="1_playground"]
 [ext_resource type="PackedScene" uid="uid://6d25jelm06ao" path="res://scenes/heroes/base/hero_base.tscn" id="3_hero"]
-[ext_resource type="TileSet" path="res://assets/tilesets/battle_tileset.tres" id="4_battle_tileset"]
 [ext_resource type="NavigationPolygon" uid="uid://c4vx6cdbsqt3q" path="res://assets/navigation/playground_navpolygon.tres" id="5_nav_polygon"]
 [ext_resource type="Script" uid="uid://c0mo3u67brrlv" path="res://scripts/playground/ui/MoveCommandMarker.gd" id="6_move_marker"]
 [ext_resource type="PackedScene" uid="uid://bhq7xf3k2ypvn" path="res://scenes/playground/ui/hero_hud.tscn" id="7_hero_hud"]
@@ -12,34 +11,7 @@ script = ExtResource("1_playground")
 hero_scene = ExtResource("3_hero")
 core_path = NodePath("../CoreRoot")
 move_command_marker_path = NodePath("MoveCommandMarker")
-ground_tiles_path = NodePath("GroundTiles")
-blocked_tiles_path = NodePath("BlockedTiles")
-range_overlay_fill_path = NodePath("RangeOverlayFill")
-range_overlay_border_path = NodePath("RangeOverlayBorder")
-walkable_source_id = 0
-walkable_atlas_coords = Vector2i(0, 0)
-range_overlay_source_id = 0
-range_overlay_fill_atlas_coords = Vector2i(0, 0)
-range_overlay_border_atlas_coords = Vector2i(1, 0)
-
-[node name="GroundTiles" type="TileMapLayer" parent="." unique_id=1299124473]
-z_index = -100
-tile_set = ExtResource("4_battle_tileset")
-
-[node name="BlockedTiles" type="TileMapLayer" parent="." unique_id=144401721]
-z_index = -90
-tile_set = ExtResource("4_battle_tileset")
-modulate = Color(1, 0.35, 0.35, 0.65)
-
-[node name="RangeOverlayFill" type="TileMapLayer" parent="." unique_id=879321145]
-z_index = -80
-tile_set = ExtResource("4_battle_tileset")
-modulate = Color(0.2, 0.85, 1, 0.38)
-
-[node name="RangeOverlayBorder" type="TileMapLayer" parent="." unique_id=1743529219]
-z_index = -79
-tile_set = ExtResource("4_battle_tileset")
-modulate = Color(0.2, 0.95, 1, 0.78)
+battle_map_path = NodePath("../BattleMapSlot/BattleMap")
 
 [node name="HeroNavRegion" type="NavigationRegion2D" parent="." unique_id=582702591]
 navigation_polygon = ExtResource("5_nav_polygon")

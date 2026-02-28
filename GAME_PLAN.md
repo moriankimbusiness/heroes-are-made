@@ -1,4 +1,4 @@
-# GAME PLAN (업데이트: 2026-02-27 v42)
+# GAME PLAN (업데이트: 2026-02-28 v44)
 
 ---
 
@@ -240,6 +240,18 @@
 ## 이동 및 범위
 
 - 전투 맵은 `32x32` 타일맵(`GroundTiles`, `BlockedTiles`) 기반으로 구성한다.
+- 전투 배경 렌더는 `level_base.tscn`의 공통 `BattleGroundTiles` 레이어를 사용한다.
+- `BattleGroundTiles`는 공통 타일셋(`assets/tilesets/battle_tileset.tres`)을 공유하고, 레벨 변형 씬(`level_01`, `level_02` 등)에서 타일 배치만 다르게 편집한다.
+- 전투 장식은 공통 레이어(`BattleShadowTiles`, `BattlePlantTiles`, `BattlePropsTiles`)에 분리해 편집한다.
+- 공통 타일셋은 `Grass + Plant + Props + Shadow + Shadow Plant` 아틀라스 소스를 함께 제공한다.
+- 전투 맵 데이터의 단일 소스는 `BattleMap` 씬으로 고정한다(`Ground/Blocked/Deco/RangeOverlay` 포함).
+- `PlayGround`는 타일 데이터를 소유하지 않고, `BattleMap` API를 통해 경로/좌표/오버레이를 사용한다.
+- `level_base`는 `BattleMapSlot`으로 맵 변형 씬을 주입받는 구조를 사용한다.
+- `BattleScreenHost`는 전투 진입 시 맵 변형 배열에서 1개를 선택해 `BattleMapSlot`에 인스턴스한다(랜덤 인카운트 확장 준비).
+- 맵 변형 기본 아트 규칙:
+- `battle_map_01`: 중앙 3타일 폭 stone lane + 상/하 식생/바위/그림자 분포.
+- `battle_map_02`: 완만한 굴곡 stone lane + 맵01과 다른 식생/바위 분포.
+- 장식 충돌 규칙은 `바위/큰 나무만 차단`을 기본으로 유지한다.
 - 이동 가능 영역은 `GroundTiles` 기준이며, `BlockedTiles`와 코어 3x3 점유 타일은 이동 불가로 처리한다.
 - 조작은 `좌클릭 선택 + 우클릭 이동 명령`을 사용한다.
 - 우클릭 이동 명령은 현재 선택된 히어로 1명에게만 적용한다.

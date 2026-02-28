@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://c6am7v0lfv5f6"]
+
+[ext_resource type="Script" path="res://scripts/maps/BattleMap.gd" id="1_battle_map_script"]
+[ext_resource type="TileSet" uid="uid://cyaw780441nb" path="res://assets/tilesets/battle_tileset.tres" id="2_battle_tileset"]
+
+[node name="BattleMap" type="Node2D"]
+script = ExtResource("1_battle_map_script")
+
+[node name="GroundTiles" type="TileMapLayer" parent="."]
+z_index = -110
+tile_set = ExtResource("2_battle_tileset")
+
+[node name="BlockedTiles" type="TileMapLayer" parent="."]
+z_index = -90
+tile_set = ExtResource("2_battle_tileset")
+modulate = Color(1, 0.35, 0.35, 0.65)
+
+[node name="DecoShadowTiles" type="TileMapLayer" parent="."]
+z_index = -109
+tile_set = ExtResource("2_battle_tileset")
+modulate = Color(1, 1, 1, 0.75)
+
+[node name="DecoPlantTiles" type="TileMapLayer" parent="."]
+z_index = -108
+tile_set = ExtResource("2_battle_tileset")
+
+[node name="DecoPropsTiles" type="TileMapLayer" parent="."]
+z_index = -107
+tile_set = ExtResource("2_battle_tileset")
+
+[node name="RangeOverlayFill" type="TileMapLayer" parent="."]
+z_index = -80
+tile_set = ExtResource("2_battle_tileset")
+modulate = Color(0.2, 0.85, 1, 0.38)
+
+[node name="RangeOverlayBorder" type="TileMapLayer" parent="."]
+z_index = -79
+tile_set = ExtResource("2_battle_tileset")
+modulate = Color(0.2, 0.95, 1, 0.78)
