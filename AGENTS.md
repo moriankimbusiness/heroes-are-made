@@ -95,6 +95,42 @@ Before implementing any new feature, confirm these design constraints first.
 - Regression check points are documented.
 - Godot CLI validation is executed and result is recorded in the response **only when the task includes Godot development changes** (scene/script/resource/project files).
 
+## OOP & Optimization Principles (Mandatory)
+
+### OOP 원칙 준수
+
+모든 스크립트/시스템 설계 시 다음 OOP 원칙을 반드시 적용한다.
+
+- **단일 책임(SRP)**: 클래스/노드 하나는 하나의 책임만 가진다.
+  - 예: `Enemy.gd`는 전투 도메인 로직만 담당, UI 렌더링은 별도 노드가 담당.
+- **캡슐화(Encapsulation)**: 내부 상태는 외부에 직접 노출하지 않는다.
+  - 상태 변경은 명시적 메서드(`take_damage()`, `heal()` 등)를 통해서만 허용.
+  - 외부에서 직접 멤버 변수를 쓰는 코드(예: `enemy.hp -= 10`)는 금지.
+- **상속 vs 컴포지션**: 공통 행동은 베이스 씬/스크립트로 올리고, 변형은 오버라이드로 처리.
+  - 불필요한 다중 상속 대신 컴포지션(노드 조합, 신호 기반 협력)을 우선 고려.
+- **신호(Signal) 기반 의존 역전**: 하위 노드가 상위 노드를 직접 참조하는 대신 신호로 통보.
+  - 도메인 엔티티(Entity)는 상태 변화를 신호로 방출하고, UI/시스템이 구독.
+
+### 최적화 원칙 준수
+
+모든 구현 시 다음 최적화 지침을 반드시 고려한다.
+
+- **핫패스(Hot Path) 비용 최소화**:
+  - `_process` / `_physics_process` 내부에서 `get_node*`, 동적 할당, 대형 배열 재생성, 문자열 포맷 반복 금지.
+  - 캐싱 패턴 사용: 노드 참조는 `_ready()`에서 한 번만 취득 후 멤버 변수에 저장.
+- **이벤트/신호 우선**:
+  - 상태 변화 감지는 폴링(per-frame 비교) 대신 신호/이벤트로 처리.
+- **불필요한 재계산 방지**:
+  - 변하지 않는 값은 상수(`const`) 또는 `_ready()` 초기화로 한 번만 계산.
+  - 동일 프레임 내 중복 연산은 로컬 변수에 캐싱.
+- **메모리/오브젝트 수명 관리**:
+  - 임시 노드/오브젝트는 사용 후 즉시 해제(`queue_free()`).
+  - 오브젝트 풀(Object Pool)이 필요한 반복 생성 시 풀 패턴 검토.
+- **구현 전 최적화 검토 질문**:
+  1. 이 로직이 매 프레임 실행되어야 하는가? → 아니라면 이벤트 기반으로 전환.
+  2. 반복 호출되는 함수에서 불필요한 할당/해제가 발생하는가?
+  3. 데이터 구조가 접근 패턴에 적합한가? (Dictionary vs Array 등)
+
 ## Godot Performance & Architecture Review Gate (Mandatory)
 
 For every gameplay/UI/script change, run a lightweight performance/architecture review before completion.
