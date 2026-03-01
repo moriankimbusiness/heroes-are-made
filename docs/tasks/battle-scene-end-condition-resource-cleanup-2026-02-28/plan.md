@@ -2,8 +2,8 @@
 
 날짜: 2026-02-28
 연결 리서치: `docs/tasks/battle-scene-end-condition-resource-cleanup-2026-02-28/research.md`
-계획 상태 (2026-02-28): 진행 중 (구현 반영 완료, 수동 시나리오 검증 대기)
-완료 상태 (2026-02-28): 미완료
+계획 상태 (2026-03-01): 완료 (수동 시나리오 검증/회귀 점검 포함)
+완료 상태 (2026-03-01): 완료
 
 ## 1) 목표
 - 전투 종료 조건을 코드/문서 기준으로 일치시킨다.
@@ -52,7 +52,7 @@
 - [x] `scripts/playground/ui/HeroHUD.gd`의 적 등록 훅을 전투 트리 구조 변화에도 동작하도록 보강
 - [x] `scripts/flow/screens/BattleScreenHost.gd` `hide_screen()`에 방어적 정리(잔존 적 스캔/정리) 필요 여부 결정 및 반영
 - [x] 정리 범위는 "현재 전투 소유 적"으로 한정되도록 식별 기준(ancestor/meta 등) 적용
-- [ ] 다음 전투 진입 시 `RoundManager` 초기 `alive_enemy_count`가 0 기준으로 시작되는지 확인
+- [x] 다음 전투 진입 시 `RoundManager` 초기 `alive_enemy_count`가 0 기준으로 시작되는지 확인
 산출물:
 - [x] 수정 파일: `scripts/playground/ui/HeroHUD.gd`, `scripts/flow/screens/BattleScreenHost.gd` (필요 시)
 완료 기준:
@@ -71,26 +71,26 @@
 
 ### Phase 4. 검증 및 마감
 목표: 기능/회귀/도구 검증 완료 후 종료
-- [ ] 시나리오 검증 1: 라운드 전부 클리어 시 승리 종료 + 보상 화면 진입
+- [x] 시나리오 검증 1: 라운드 전부 클리어 시 승리 종료 + 보상 화면 진입
 - [x] 시나리오 검증 2: 코어 파괴 시 패배 종료
 - [x] 시나리오 검증 3: 히어로 전멸 시 패배 종료
-- [ ] 각 시나리오 종료 직후 `enemy` 그룹 잔존 노드 0 확인
+- [x] 각 시나리오 종료 직후 `enemy` 그룹 잔존 노드 0 확인
 - [x] Godot CLI 검증 실행 (R5): `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
 - [x] WSL 실패 시 PowerShell fallback 실행/기록 (N/A: WSL 기본 명령 pass)
-- [ ] 최종 변경 요약과 회귀 체크 결과를 사용자 응답에 명시
+- [x] 최종 변경 요약과 회귀 체크 결과를 사용자 응답에 명시
 산출물:
-- [ ] 검증 로그 요약(응답 본문), 필요 시 `docs/tasks/.../result.md`
+- [x] 검증 로그 요약(응답 본문), `docs/tasks/battle-scene-end-condition-resource-cleanup-2026-02-28/result.md`
 완료 기준:
-- [ ] 검증 체크리스트 전 항목 통과
-- [ ] 계획 상태를 `완료`로 갱신
+- [x] 검증 체크리스트 전 항목 통과
+- [x] 계획 상태를 `완료`로 갱신
 
 ## 4) 검증 체크리스트
-- [ ] 종료 조건이 `all_rounds_cleared / core_destroyed / all_heroes_dead`로만 동작한다.
-- [ ] 전투 종료 후 적 잔존 노드가 0이다.
-- [ ] 다음 전투 시작 시 `alive_enemy_count` 초기치가 잔존 적 영향 없이 시작된다.
-- [ ] 전투 중 적 클릭/선택 UI가 정상 동작한다.
-- [ ] 승리 시 `battle_reward_screen` 흐름이 유지된다.
-- [ ] 패배 시 `run_result_screen` 흐름이 유지된다.
+- [x] 종료 조건이 `all_rounds_cleared / core_destroyed / all_heroes_dead`로만 동작한다.
+- [x] 전투 종료 후 적 잔존 노드가 0이다.
+- [x] 다음 전투 시작 시 `alive_enemy_count` 초기치가 잔존 적 영향 없이 시작된다.
+- [x] 전투 중 적 클릭/선택 UI가 정상 동작한다.
+- [x] 승리 시 `battle_reward_screen` 흐름이 유지된다.
+- [x] 패배 시 `run_result_screen` 흐름이 유지된다.
 - [x] `GAME_PLAN.md`와 구현이 일치한다.
 - [x] Godot CLI 검증 결과가 pass이거나, blocked 사유가 정책 형식으로 보고된다.
 
@@ -119,8 +119,8 @@
 - `BattleScreenHost.hide_screen()`의 추가 전역 정리는 적용하지 않음(소유권 교정으로 해제 보장)
 
 ## 7) 완료 선언 조건
-- [ ] Phase 0~4 체크 항목 전부 `[x]` 처리
-- [ ] 산출물 파일 경로가 응답에 명시됨
-- [ ] 검증 결과(pass/fail/blocked, 사용 명령, 핵심 에러 라인)가 보고됨
-- [ ] `TODO.md`와 `GAME_PLAN.md` 동기화 완료
-- [ ] 계획 상태 라인이 `계획 상태 (YYYY-MM-DD): 완료`로 갱신됨
+- [x] Phase 0~4 체크 항목 전부 `[x]` 처리
+- [x] 산출물 파일 경로가 응답에 명시됨
+- [x] 검증 결과(pass/fail/blocked, 사용 명령, 핵심 에러 라인)가 보고됨
+- [x] `TODO.md`와 `GAME_PLAN.md` 동기화 완료
+- [x] 계획 상태 라인이 `계획 상태 (YYYY-MM-DD): 완료`로 갱신됨
