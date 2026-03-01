@@ -1,4 +1,4 @@
-# GAME PLAN (업데이트: 2026-02-28 v45)
+# GAME PLAN (업데이트: 2026-03-01 v46)
 
 ---
 
@@ -153,6 +153,12 @@
 - 전투 노드는 기존 `scenes/levels/level_01.tscn`을 재사용한다.
 - `RoundManager.all_rounds_cleared`, 코어 `destroyed`, `Hero.died` 기반 전멸 판정(`BattleSummaryCollector.are_all_heroes_dead`)은 `BattleScreenHost`를 통해 `battle_finished`/`run_failed` 흐름으로 연결한다.
 - `EnemySpawnController`가 스폰한 적 노드는 레벨 루트(전투 인스턴스 하위)에 귀속해 전투 종료(`BattleScreenHost.hide_screen`) 시 함께 해제되도록 유지한다.
+- 전투 승리 최종 라운드는 `RoundSystem.final_round` Inspector 값으로 설정하며, `RoundManager`는 데이터 테이블 길이가 아니라 해당 값을 authoritative source로 사용한다.
+- `EnemySpawnController` 스폰 데이터 소스는 레벨 JSON(`assets/data/round/round_table_level_*.json`)으로 고정한다.
+- JSON 스키마는 `enemies`(필수) + `spawn_plan`(선택)이며, `spawn_plan`이 없으면 `enemies[].weight` 가중치 랜덤을 사용한다.
+- `health_multiplier`와 공식 배율 파라미터는 제거하고, 적 체력은 enemy scene(`base_max_health`/`max_health`) 설정값을 그대로 사용한다.
+- `BattleScreenHost`는 payload `seed` + `node_id`를 `EnemySpawnController`에 전달해 가중치 랜덤 결과를 재현 가능하게 유지한다.
+- 레벨 파생 씬(`level_01`, `level_02`)의 라운드 관련 override는 제거하고 `level_base` 기준값으로 테스트를 진행한다.
 - 기존 `alive_enemy_threshold` 기반 패배는 제거하고, 전투 패배는 `코어 파괴` 또는 `영웅 전멸`로 고정한다.
 - 설정 시스템은 `scripts/core/AppSettings.gd` 오토로드로 관리하고, `MainMenuScreen -> SettingsScreen` 진입/복귀 흐름을 추가했다.
 
