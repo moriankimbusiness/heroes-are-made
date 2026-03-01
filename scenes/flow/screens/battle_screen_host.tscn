@@ -1,8 +1,10 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://d1qm482dtfv4p"]
 
-[ext_resource type="Script" path="res://scripts/flow/screens/BattleScreenHost.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://cibmjutm1qqll" path="res://scripts/flow/screens/BattleScreenHost.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://et8qnyway2cf" path="res://scenes/levels/level_02.tscn" id="2_l2h20"]
 
-[node name="BattleScreenHost" type="Node"]
+[node name="BattleScreenHost" type="Node" unique_id=188392544]
 script = ExtResource("1_script")
+debug_level_scene_override = ExtResource("2_l2h20")
 
-[node name="BattleRoot" type="Node" parent="."]
+[node name="BattleRoot" type="Node" parent="." unique_id=184791634]

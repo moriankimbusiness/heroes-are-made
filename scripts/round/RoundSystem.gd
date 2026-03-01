@@ -6,6 +6,9 @@ extends Node
 @export var enemy_spawn_controller_path: NodePath
 ## 적 스폰 타이머 노드 경로입니다.
 @export var spawn_timer_path: NodePath
+@export_group("라운드 승리 조건")
+## 전투 승리로 판정할 최종 라운드 번호입니다.
+@export_range(1, 999, 1) var final_round: int = 30
 
 
 func _enter_tree() -> void:
@@ -24,8 +27,11 @@ func _enter_tree() -> void:
 		push_error("RoundSystem: spawn_timer_path is invalid.")
 		return
 
+	if enemy_spawn_controller.has_method("set_final_round_limit"):
+		enemy_spawn_controller.call("set_final_round_limit", final_round)
+
 	if not round_manager.has_method("configure_dependencies"):
 		push_error("RoundSystem: RoundManager missing configure_dependencies().")
 		return
 
-	round_manager.call("configure_dependencies", enemy_spawn_controller, spawn_timer)
+	round_manager.call("configure_dependencies", enemy_spawn_controller, spawn_timer, final_round)

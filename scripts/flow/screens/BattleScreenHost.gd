@@ -2,7 +2,7 @@ extends Node
 
 signal battle_finished(victory: bool, summary: Dictionary)
 
-const LEVEL_SCENE := preload("res://scenes/levels/level_01.tscn")
+const DEFAULT_LEVEL_SCENE := preload("res://scenes/levels/level_01.tscn")
 const DEFAULT_BATTLE_MAP_VARIANTS: Array[PackedScene] = [
 	preload("res://scenes/maps/variants/battle_map_01.tscn"),
 	preload("res://scenes/maps/variants/battle_map_02.tscn")
@@ -10,6 +10,14 @@ const DEFAULT_BATTLE_MAP_VARIANTS: Array[PackedScene] = [
 const PLAYGROUND_NODE_CANDIDATE_PATHS: Array[NodePath] = [NodePath("Playground"), NodePath("PlayGround")]
 const HERO_HUD_CHILD_PATH: NodePath = NodePath("HeroHUD")
 
+@export_group("전투 레벨")
+## 기본 전투 레벨 씬입니다.
+@export var default_level_scene: PackedScene = DEFAULT_LEVEL_SCENE
+@export_group("디버그 레벨 선택")
+## Inspector 지정 레벨 씬을 강제로 사용할지 여부입니다.
+@export var debug_use_level_scene_override: bool = false
+## 디버그 강제 전투 레벨 씬입니다.
+@export var debug_level_scene_override: PackedScene
 @export_group("전투 맵 변형")
 ## 전투 진입 시 선택할 맵 변형 목록입니다.
 @export var battle_map_variants: Array[PackedScene] = DEFAULT_BATTLE_MAP_VARIANTS
@@ -29,7 +37,11 @@ func show_screen(payload: Dictionary = {}) -> void:
 	_battle_completed = false
 	_battle_started_msec = Time.get_ticks_msec()
 
-	_battle_instance = LEVEL_SCENE.instantiate()
+	var selected_level_scene: PackedScene = _resolve_level_scene()
+	if selected_level_scene == null:
+		push_error("BattleScreenHost: level scene is not assigned.")
+		return
+	_battle_instance = selected_level_scene.instantiate()
 	_battle_root.add_child(_battle_instance)
 	_configure_battle_scene(_battle_instance, payload)
 
@@ -48,6 +60,12 @@ func show_screen(payload: Dictionary = {}) -> void:
 	call_deferred("_check_all_heroes_dead_after_setup")
 
 
+func _resolve_level_scene() -> PackedScene:
+	if debug_use_level_scene_override and debug_level_scene_override != null:
+		return debug_level_scene_override
+	return default_level_scene
+
+
 func hide_screen() -> void:
 	if _battle_instance != null and is_instance_valid(_battle_instance):
 		_battle_instance.queue_free()
@@ -61,7 +79,10 @@ func _configure_battle_scene(battle_scene: Node, payload: Dictionary) -> void:
 	var party_count: int = int(payload.get("party_count", 3))
 	var current_gold: int = int(payload.get("gold", 0))
 	var party_snapshots: Array = payload.get("party_snapshots", [])
+	var seed_value: int = int(payload.get("seed", fallback_map_seed))
+	var node_id: int = int(payload.get("node_id", 0))
 	_apply_map_variant(battle_scene, payload)
+	_apply_spawn_random_context(battle_scene, seed_value, node_id)
 	var playground: Node = _find_playground_node(battle_scene)
 	if playground is CanvasItem:
 		(playground as CanvasItem).visible = true
@@ -83,6 +104,16 @@ func _configure_battle_scene(battle_scene: Node, payload: Dictionary) -> void:
 	if hero_ui != null and hero_ui.has_method("set_starting_gold"):
 		hero_ui.call("set_starting_gold", current_gold)
 	_apply_core_state(payload)
+
+
+func _apply_spawn_random_context(battle_scene: Node, seed_value: int, node_id: int) -> void:
+	if battle_scene == null:
+		return
+	var enemy_spawn_controller: Node = battle_scene.get_node_or_null("EnemySpawnController")
+	if enemy_spawn_controller == null:
+		return
+	if enemy_spawn_controller.has_method("configure_random_context"):
+		enemy_spawn_controller.call("configure_random_context", seed_value, node_id)
 
 
 func _apply_core_state(payload: Dictionary) -> void:

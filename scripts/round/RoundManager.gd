@@ -26,15 +26,17 @@ var current_round: int = 1
 var alive_enemy_count: int = 0
 var remaining_round_seconds: float = 0.0
 var is_next_round_available: bool = false
+var final_round: int = 1
 
 var _enemy_spawn_controller: Node
 var _spawn_timer: Timer
 var _dependencies_configured: bool = false
 
 
-func configure_dependencies(enemy_spawn_controller: Node, spawn_timer: Timer) -> void:
+func configure_dependencies(enemy_spawn_controller: Node, spawn_timer: Timer, final_round_value: int = 1) -> void:
 	_enemy_spawn_controller = enemy_spawn_controller
 	_spawn_timer = spawn_timer
+	final_round = maxi(1, final_round_value)
 	_dependencies_configured = _enemy_spawn_controller != null and _spawn_timer != null
 	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_signal("enemy_spawned"):
 		_enemy_spawn_controller.connect("enemy_spawned", _on_enemy_spawned)
@@ -192,17 +194,11 @@ func _can_advance_next_round_early() -> bool:
 
 
 func _is_final_round() -> bool:
-	return current_round >= _get_total_round_count()
+	return current_round >= final_round
 
 
 func get_total_round_count() -> int:
-	return _get_total_round_count()
-
-
-func _get_total_round_count() -> int:
-	if _enemy_spawn_controller != null and _enemy_spawn_controller.has_method("get_configured_round_count"):
-		return maxi(1, int(_enemy_spawn_controller.call("get_configured_round_count")))
-	return maxi(1, current_round)
+	return maxi(1, final_round)
 
 
 func _set_next_round_available(value: bool) -> void:

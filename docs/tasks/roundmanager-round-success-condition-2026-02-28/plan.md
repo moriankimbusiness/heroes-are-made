@@ -2,8 +2,8 @@
 
 날짜: 2026-02-28
 연결 리서치: `docs/tasks/roundmanager-round-success-condition-2026-02-28/research.md`
-계획 상태 (2026-02-28): 진행 중 (핵심 결정 확정 완료, 구현 대기)
-완료 상태 (2026-02-28): 미완료
+계획 상태 (2026-03-01): 완료
+완료 상태 (2026-03-01): 완료
 우선순위: 높음
 
 ## 1) 목표
@@ -114,7 +114,7 @@
 
 ## 4) 단계별 작업 (Phase)
 ### Phase 0. 설계 고정 및 계약 정의
-- [ ] 기존 승리 계산 경로(`get_configured_round_count`) 사용 지점 전수 확인
+- [x] 기존 승리 계산 경로(`get_configured_round_count`) 사용 지점 전수 확인
 - [x] 최종 라운드 계약 정의: `final_round >= 1`
 - [x] JSON 스키마 계약 정의: `enemies[]` + 선택 `spawn_plan[]`
 - [x] 마이그레이션 정책 확정: legacy fallback 비허용(JSON 필수)
@@ -126,91 +126,114 @@
 - [x] JSON 샘플 스키마 초안 문서화
 
 완료 기준:
-- [ ] 구현 전 단일 스폰 전략이 고정됨
+- [x] 구현 전 단일 스폰 전략이 고정됨
 
 ### Phase 1. 최종 라운드 Editor 설정 경로 구축 (Editor-first)
-- [ ] `RoundSystem`에 `final_round` export 추가 및 Inspector 설정 포인트 생성
-- [ ] `level_base.tscn`에 `final_round` 값 명시
-- [ ] `RoundSystem -> RoundManager` 주입 연결
-- [ ] `RoundManager` 승리 판정에서 `EnemySpawnController.get_configured_round_count()` 의존 제거
-- [ ] `level_01.tscn`, `level_02.tscn` 라운드 관련 override 제거
+- [x] `RoundSystem`에 `final_round` export 추가 및 Inspector 설정 포인트 생성
+- [x] `level_base.tscn`에 `final_round` 값 명시
+- [x] `RoundSystem -> RoundManager` 주입 연결
+- [x] `RoundManager` 승리 판정에서 `EnemySpawnController.get_configured_round_count()` 의존 제거
+- [x] `level_01.tscn`, `level_02.tscn` 라운드 관련 override 제거
 
 산출물:
-- [ ] 수정: `scripts/round/RoundSystem.gd`
-- [ ] 수정: `scripts/round/RoundManager.gd`
-- [ ] 수정: `scenes/round/round_system.tscn`
-- [ ] 수정: `scenes/levels/level_base.tscn`, `scenes/levels/level_01.tscn`, `scenes/levels/level_02.tscn`
+- [x] 수정: `scripts/round/RoundSystem.gd`
+- [x] 수정: `scripts/round/RoundManager.gd`
+- [x] 수정: `scenes/round/round_system.tscn`
+- [x] 수정: `scenes/levels/level_base.tscn`, `scenes/levels/level_01.tscn`, `scenes/levels/level_02.tscn`
 
 완료 기준:
-- [ ] Inspector 값 변경만으로 승리 라운드가 바뀐다.
+- [x] Inspector 값 변경만으로 승리 라운드가 바뀐다.
 
 ### Phase 2. Enemy JSON 로더 도입 (Script-second)
-- [ ] `EnemySpawnController`에 레벨별 JSON 경로 export 추가 (`@export_file("*.json")`)
-- [ ] JSON 로드/파싱 로직 추가 (`enemies` 구조 기준)
-- [ ] `scene_path` 로드 검증 + `spawn_count` 검증 추가
-- [ ] `weight` 파싱/검증 추가
-- [ ] 로드 실패 시 fail-fast 처리
-- [ ] payload `seed` + `node_id` 기반 RNG 초기화 추가
-- [ ] `use_formula_after_table`, `formula_*`, `round_enemy_health_multipliers` 관련 로직 제거
-- [ ] `round_spawn_counts` 의존 로직 제거
+- [x] `EnemySpawnController`에 레벨별 JSON 경로 export 추가 (`@export_file("*.json")`)
+- [x] JSON 로드/파싱 로직 추가 (`enemies` 구조 기준)
+- [x] `scene_path` 로드 검증 + `spawn_count` 검증 추가
+- [x] `weight` 파싱/검증 추가
+- [x] 로드 실패 시 fail-fast 처리
+- [x] payload `seed` + `node_id` 기반 RNG 초기화 추가
+- [x] `use_formula_after_table`, `formula_*`, `round_enemy_health_multipliers` 관련 로직 제거
+- [x] `round_spawn_counts` 의존 로직 제거
 
 산출물:
-- [ ] 수정: `scripts/spawn/EnemySpawnController.gd`
-- [ ] 신규: `assets/data/round/round_table_level_01.json`
-- [ ] 신규: `assets/data/round/round_table_level_02.json`
+- [x] 수정: `scripts/spawn/EnemySpawnController.gd`
+- [x] 신규: `assets/data/round/round_table_level_01.json`
+- [x] 신규: `assets/data/round/round_table_level_02.json`
 
 완료 기준:
-- [ ] 스폰 구성은 JSON 편집만으로 반영된다.
-- [ ] 체력은 enemy scene 설정값으로만 반영된다.
+- [x] 스폰 구성은 JSON 편집만으로 반영된다.
+- [x] 체력은 enemy scene 설정값으로만 반영된다.
 
 ### Phase 3. 스폰 전략 구현 및 정합성 보강
-- [ ] 확정된 스폰 전략(하이브리드+가중치 랜덤) 구현
-- [ ] 잘못된 `scene_path`에 라인/인덱스 포함 에러 메시지 보강
-- [ ] `round_enemy_scenes` 경로 비사용 처리(제거 또는 명시 deprecate)
+- [x] 확정된 스폰 전략(하이브리드+가중치 랜덤) 구현
+- [x] 잘못된 `scene_path`에 라인/인덱스 포함 에러 메시지 보강
+- [x] `round_enemy_scenes` 경로 비사용 처리(제거 또는 명시 deprecate)
 
 산출물:
-- [ ] 수정: `scripts/spawn/EnemySpawnController.gd`
-- [ ] 필요 시 수정: `docs/balance/enemy_health_round_table.md` (삭제/대체 안내)
+- [x] 수정: `scripts/spawn/EnemySpawnController.gd`
+- [x] 필요 시 수정: `docs/balance/enemy_health_round_table.md` (이번 변경에서는 추가 수정 불필요)
 
 완료 기준:
-- [ ] 스폰 정책이 문서와 코드에서 일치한다.
+- [x] 스폰 정책이 문서와 코드에서 일치한다.
 
 ### Phase 4. 에디터 데이터 이관 및 씬 반영
-- [ ] `level_base` 기존 배열(`round_spawn_counts`, `round_enemy_health_multipliers`) 비우기
-- [ ] `level_01`, `level_02` override 제거 반영
-- [ ] 레벨별 JSON 경로 연결
-- [ ] 레벨별 테스트 중 수치 변경이 JSON에서만 이루어지는지 확인
+- [x] `level_base` 기존 배열(`round_spawn_counts`, `round_enemy_health_multipliers`) 비우기
+- [x] `level_01`, `level_02` override 제거 반영
+- [x] 레벨별 JSON 경로 연결 (`level_base` 연결 + `BattleScreenHost` Inspector 디버그 override 경로 확보)
+- [x] 레벨별 테스트 중 수치 변경이 JSON에서만 이루어지는지 확인
 
 산출물:
-- [ ] 수정: `scenes/levels/level_base.tscn`
-- [ ] 수정: `scenes/levels/level_01.tscn`
-- [ ] 수정: `scenes/levels/level_02.tscn`
+- [x] 수정: `scenes/levels/level_base.tscn`
+- [x] 수정: `scenes/levels/level_01.tscn`
+- [x] 수정: `scenes/levels/level_02.tscn`
 
 완료 기준:
-- [ ] 씬 Inspector 기준 데이터 소스 혼선이 없다.
+- [x] 씬 Inspector 기준 데이터 소스 혼선이 없다.
 
 ### Phase 5. 검증 및 문서 동기화
-- [ ] 시나리오 검증 1: 최종 라운드 직전 승리 emit 없음
-- [ ] 시나리오 검증 2: 최종 라운드 전이 시 `all_rounds_cleared` 1회 emit
-- [ ] 시나리오 검증 3: `final_round` 변경 시 의도 라운드에서 승리
-- [ ] 시나리오 검증 4: JSON 경로/타입 오류 시 fail-fast
-- [ ] Godot CLI 검증 실행 (R5)
-- [ ] `GAME_PLAN.md`, `TODO.md` 동기화
+- [x] 시나리오 검증 1: 최종 라운드 직전 승리 emit 없음
+- [x] 시나리오 검증 2: 최종 라운드 전이 시 `all_rounds_cleared` 1회 emit
+- [x] 시나리오 검증 3: `final_round` 변경 시 의도 라운드에서 승리
+- [x] 시나리오 검증 4: JSON 경로/타입 오류 시 fail-fast
+- [x] Godot CLI 검증 실행 (R5)
+- [x] `GAME_PLAN.md`, `TODO.md` 동기화
 
 검증 명령:
-- [ ] `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
-- [ ] WSL 소켓 오류 시 PowerShell fallback 재실행
+- [x] `/mnt/c/Godot_v4.6.1/Godot_v4.6.1-stable_win64_console.exe --headless --path . --quit`
+- [x] WSL 소켓 오류 시 PowerShell fallback 재실행
 
 ## 5) 검증 체크리스트
-- [ ] 승리 조건은 `final_round` Inspector 값만으로 결정된다.
-- [ ] 라운드 스폰 데이터는 JSON `enemies`가 단일 소스다.
-- [ ] 랜덤 스폰 시 `enemies[].weight`가 정상 반영된다.
-- [ ] 동일 `seed`/`node_id` 입력에서 스폰 결과가 재현된다.
-- [ ] `health_multiplier` 없이 enemy scene 체력값만 사용한다.
-- [ ] JSON 스키마 오류(누락 키/타입 오류/경로 오류) 시 즉시 에러가 발생한다.
-- [ ] `BattleScreenHost` 승리 종료(`all_rounds_cleared`) 회귀가 없다.
-- [ ] 기존 패배 종료(`core_destroyed`, `all_heroes_dead`) 회귀가 없다.
-- [ ] Godot CLI 결과가 pass이거나 blocked 사유가 정책 형식으로 보고된다.
+- [x] 승리 조건은 `final_round` Inspector 값만으로 결정된다.
+- [x] 라운드 스폰 데이터는 JSON `enemies`가 단일 소스다.
+- [x] 랜덤 스폰 시 `enemies[].weight`가 정상 반영된다.
+- [x] 동일 `seed`/`node_id` 입력에서 스폰 결과가 재현된다. (사용자 요청으로 완료 처리, 추후 디버그 시 재확인 가능)
+- [x] `health_multiplier` 없이 enemy scene 체력값만 사용한다.
+- [x] JSON 스키마 오류(누락 키/타입 오류/경로 오류) 시 즉시 에러가 발생한다.
+- [x] `BattleScreenHost` 승리 종료(`all_rounds_cleared`) 회귀가 없다.
+- [x] 기존 패배 종료(`core_destroyed`, `all_heroes_dead`) 회귀가 없다.
+- [x] Godot CLI 결과가 pass이거나 blocked 사유가 정책 형식으로 보고된다.
+
+## 5-1) 사용자 수동 확인 항목 (상세)
+- [x] 1. `final_round` 승리 판정 확인
+- `level_base.tscn`의 `RoundSystem.final_round`를 예: `3`으로 낮춘 뒤 전투 실행.
+- 기대 결과: 1,2라운드에서는 `all_rounds_cleared` emit이 없어야 하고, 3라운드 전이 시점에만 1회 emit.
+- 확인 포인트: UI에서 다음 라운드 버튼/타이머 동작이 기존과 동일하고, 승리 타이밍만 `final_round`에 맞는지.
+- [x] 2. 가중치 랜덤 동작 확인(`spawn_plan` 미사용 라운드)
+- JSON에서 `enemies[].weight`를 큰 차이(예: `10`, `2`)로 설정하고 2~3회 반복 실행.
+- 기대 결과: 높은 weight 적이 더 자주 먼저/많이 스폰되는 경향.
+- 확인 포인트: 총 스폰량은 `spawn_count` 합산 기준, 구성은 weight에 따라 분포가 달라지는지.
+- [x] 3. RNG 재현성 확인(seed + node_id)
+- 같은 노드(`node_id`)를 같은 run seed로 2회 실행.
+- 기대 결과: 스폰 순서/구성이 동일.
+- 그다음 seed 또는 node_id만 바꿔 1회 실행.
+- 기대 결과: 스폰 순서/구성이 달라짐.
+- [x] 4. JSON fail-fast 확인
+- `scene_path` 오타 또는 `spawn_count: 0` 같은 의도적 오류를 넣고 실행.
+- 기대 결과: 즉시 `EnemySpawnController` 에러 로그 출력, 정상 스폰 진행 불가.
+- 확인 후 원본 JSON으로 되돌릴 것.
+- [x] 5. 종료 경로 회귀 확인
+- 승리 케이스: 최종 라운드 클리어 시 `battle_finished(victory=true)` 1회.
+- 패배 케이스: 코어 파괴/영웅 전멸 시 `battle_finished(victory=false)` 1회.
+- 기대 결과: 승리/패배가 중복 emit되지 않고 먼저 발생한 종료 원인만 반영.
 
 ## 6) 리스크/대응
 - 리스크: `final_round`와 스폰 전략이 분리되면서 난이도 곡선이 의도와 다를 수 있다.
@@ -232,9 +255,9 @@
 - [x] `spawn_count` 의미 확정: 라운드당 수량
 
 ## 8) 완료 선언 조건
-- [ ] Phase 0~5 체크 항목이 모두 `[x]`로 갱신됨
-- [ ] 최종 라운드 변경이 Inspector 조작만으로 동작함
-- [ ] 스폰 데이터가 JSON `enemies`로만 관리됨
-- [ ] 검증 결과(pass/fail/blocked, 사용 명령, 핵심 에러 라인)가 보고됨
-- [ ] `GAME_PLAN.md`, `TODO.md` 동기화 완료
-- [ ] 본 문서 상태 라인이 `계획 상태 (YYYY-MM-DD): 완료`로 갱신됨
+- [x] Phase 0~5 체크 항목이 모두 `[x]`로 갱신됨
+- [x] 최종 라운드 변경이 Inspector 조작만으로 동작함
+- [x] 스폰 데이터가 JSON `enemies`로만 관리됨
+- [x] 검증 결과(pass/fail/blocked, 사용 명령, 핵심 에러 라인)가 보고됨
+- [x] `GAME_PLAN.md`, `TODO.md` 동기화 완료
+- [x] 본 문서 상태 라인이 `계획 상태 (YYYY-MM-DD): 완료`로 갱신됨

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "enemies": [
+	{
+	  "id": "orc",
+	  "scene_path": "res://scenes/enemies/variants/enemy_orc.tscn",
+	  "spawn_count": 12,
+	  "weight": 10
+	},
+	{
+	  "id": "orc2",
+	  "scene_path": "res://scenes/enemies/variants/enemy_orc2.tscn",
+	  "spawn_count": 8,
+	  "weight": 5
+	}
+  ], 
+  "spawn_plan": [
+	{ "round": 1, "enemy_id": "orc", "count": 3 },
+	{ "round": 1, "enemy_id": "orc2", "count": 2 }
+  ]
+}

@@ -9,6 +9,7 @@
 
 [node name="RoundSystem" type="Node" unique_id=1945532616]
 script = ExtResource("1_4mb6e")
+final_round = 30
 
 [node name="RoundManager" type="Node" parent="." unique_id=960498918]
 script = ExtResource("1_a0jg5")
